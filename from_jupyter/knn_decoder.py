@@ -10,7 +10,7 @@ from cebra import CEBRA
 import sys
 import pandas as pd
 import joblib as jl
-from matplotlib.collections import LineCollection
+from matplotlib.collections import LineCollections
 
 def decoding_CSUS5(emb_train, emb_test, label_train, label_test, n_neighbors=10):
     CSUS_decoder = KNeighborsClassifier(n_neighbors, metric = 'cosine')

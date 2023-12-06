@@ -8,8 +8,10 @@ import random
 import cebra
 from cebra import CEBRA
 import matplotlib.pyplot as plt
-
-
+import sys
+import pandas as pd
+import joblib as jl
+from matplotlib.collections import LineCollection
 
 SEED = 42
 np.random.seed(SEED)
@@ -19,9 +21,9 @@ random.seed(SEED)
 
 ########################
 
-eyeblink_train = pos22[0:5500,:]
-cell_train = trace22_all[0:5500,:]
-cell_test = trace22_all[5500:,:]
+eyeblink_train = pos22[0:8000,:]
+cell_train = trace22_all[0:8000,:]
+cell_test = trace22_all[8000:,:]
 
 
 output_dimension = 3 #here, we set as a variable for hypothesis testing below.
