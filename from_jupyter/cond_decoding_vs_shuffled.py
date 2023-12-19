@@ -17,7 +17,26 @@ import joblib as jl
 from matplotlib.collections import LineCollection
 
 
-
+def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink):
+    output_dimension = 2 #here, we set as a variable for hypothesis testing below.
+    cebra_loc_model = CEBRA(model_architecture='offset10-model',
+                            batch_size=512,
+                            #learning_rate= 8.6e-2,
+                            learning_rate= 8.6e-4,
+                            temperature_mode = 'auto',
+                            min_temperature = .2,
+                            #temperature = .2,
+                            output_dimension=output_dimension,
+                            max_iterations=15000, #<--------------1-20000
+                            #max_iterations=15000, #<--------------1-20000
+                            distance='cosine',
+                            conditional='time_delta', #added, keep
+                            device='cuda_if_available',
+                            num_hidden_units = 32,
+                            time_offsets = 1,
+                            verbose=True)
+'''
+%first
 output_dimension = 2 #here, we set as a variable for hypothesis testing below.
 cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
@@ -35,7 +54,7 @@ cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         num_hidden_units = 32,
                         time_offsets = 1,
                         verbose=True)
-'''
+
 65
 cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,

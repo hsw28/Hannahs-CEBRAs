@@ -31,8 +31,8 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
                             min_temperature = .2, #<---------------.3
                             #temperature = .5,
                             output_dimension=output_dimension,
-                            #max_iterations=15000, #<--------------1-20000
-                            max_iterations=150, #<--------------1-20000
+                            max_iterations=15000, #<--------------1-20000
+                            #max_iterations=150, #<--------------1-20000
                             #distance='euclidean',
                             distance='cosine',
                             conditional='time_delta', #added, keep
@@ -49,7 +49,7 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
     fract_test_all = []
 
     # Loop to run the batch of code 50 times
-    for i in range(3):
+    for i in range(1):
 
           #test control environment
 
