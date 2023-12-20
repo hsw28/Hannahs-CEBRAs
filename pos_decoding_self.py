@@ -18,7 +18,7 @@ from pos_score import pos_score
 
 #decodes own position using held out data and compares to shuffled
 
-def pos_decoding_self(cell_trace, pos, percent_to_train)
+def pos_decoding_self(cell_trace, pos, percent_to_train):
 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
@@ -62,26 +62,37 @@ def pos_decoding_self(cell_trace, pos, percent_to_train)
     cell_train, cell_test = hold_out(cell_trace, percent_to_train)
     pos_train, pos_test = hold_out(pos, percent_to_train)
 
-    cebra_loc_model.fit(cell_train, pos_train)
-    cebra_loc_train = cebra_loc_model.transform(cell_train)
-    cebra_loc_test = cebra_loc_model.transform(cell_test)
+    err_all = []
+    err_all_shuff = []
+    for i in range(1):
+        cebra_loc_model.fit(cell_train, pos_train)
+        cebra_loc_train = cebra_loc_model.transform(cell_train)
+        cebra_loc_test = cebra_loc_model.transform(cell_test)
 
-    test_score, pos_test_err, pos_test_score, dis_mean, dis_median = pos_score(cebra_loc_train, cebra_loc_test, pos_train, pos_test)
-    #want pos_test_err
+        test_score, pos_test_err, pos_test_score, dis_mean, dis_median = pos_score(cebra_loc_train, cebra_loc_test, pos_train, pos_test)
+        #want pos_test_err
 
 
-    ########################
-    #SHUFFLED
+        ########################
+        #SHUFFLED
 
-    # Create a new array to hold the shuffled data
-    pos_train_shuff = pos_train.copy()
-    # Shuffle each column independently
-    for column in range(pos_train_shuff.shape[1]):
-        np.random.shuffle(pos_train_shuff[:, column])
+        # Create a new array to hold the shuffled data
+        pos_train_shuff = pos_train.copy()
+        # Shuffle each column independently
+        for column in range(pos_train_shuff.shape[1]):
+            np.random.shuffle(pos_train_shuff[:, column])
 
-    # Fit the model with the shuffled data
-    cebra_loc_model.fit(cell_train, pos_train_shuff)
-    cebra_loc_train_shuff = cebra_loc_model.transform(cell_train)
-    cebra_loc_test_shuff = cebra_loc_model.transform(cell_test)
+        # Fit the model with the shuffled data
+        cebra_loc_model.fit(cell_train, pos_train_shuff)
+        cebra_loc_train_shuff = cebra_loc_model.transform(cell_train)
+        cebra_loc_test_shuff = cebra_loc_model.transform(cell_test)
 
-    test_score_shuff, pos_test_err_shuff, pos_test_score_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train, pos_test)
+        test_score_shuff, pos_test_err_shuff, pos_test_score_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train, pos_test)
+
+        err_all.append(pos_test_err)
+        err_all_shuff.append(pos_test_err_shuff)
+
+    print(np.mean(err_all))
+    print(np.mean(err_all_shuff))
+
+    return err_all, err_all_shuff
