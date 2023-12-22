@@ -29,11 +29,11 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=9000,
+                            max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 32,
+                            num_hidden_units = 10,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
@@ -46,11 +46,11 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=9000,
+                            max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 32,
+                            num_hidden_units = 10,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
