@@ -16,21 +16,35 @@ from matplotlib.collections import LineCollection
 
 
 #scores closeness of position decoding
+import sklearn.metrics
 
-def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=32):
+# Define decoding function with kNN decoder. For a simple demo, we will use the fixed number of neighbors 36.
+
+def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36):
     pos_decoder = KNeighborsRegressor(n_neighbors, metric = 'cosine')
+
     pos_decoder.fit(emb_train, label_train)
     pos_pred = pos_decoder.predict(emb_test)
     prediction = pos_pred
-    test_score = r2_score(label_test, prediction)
+
+
+    print(label_test.shape)
+    print(prediction.shape)
+
+    pos_test_score = sklearn.metrics.r2_score(label_test, prediction)
     pos_test_err = np.median(abs(prediction - label_test))
-    pos_test_score = r2_score(label_test, prediction)
+
     # Compute the squared differences for each dimension
     squared_diffs = (prediction - label_test) ** 2
     # Sum the squared differences across columns (axis=1) and take the square root
     distances = np.sqrt(np.sum(squared_diffs, axis=1))
+
     dis_mean = (np.mean(distances))
     dis_median = (np.median(distances))
 
+    print(pos_test_score)
+    print(pos_test_err)
+    print(dis_mean)
+    print(dis_median)
 
-    return test_score, pos_test_err, pos_test_score, dis_mean, dis_median
+    return pos_test_score, pos_test_err, dis_mean, dis_median

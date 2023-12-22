@@ -33,7 +33,7 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 10,
+                            num_hidden_units = 32,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
@@ -50,7 +50,7 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 10,
+                            num_hidden_units = 32,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
@@ -62,14 +62,20 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
     cell_train, cell_test = hold_out(cell_trace, percent_to_train)
     pos_train, pos_test = hold_out(pos, percent_to_train)
 
+    print(cell_train.shape)
+    print(cell_test.shape)
+    print(pos_train.shape)
+    print(pos_test.shape)
+
     err_all = []
     err_all_shuff = []
     for i in range(1):
         cebra_loc_model.fit(cell_train, pos_train)
+        cebra_loc_model.save("cebra_loc_model.pt")
         cebra_loc_train = cebra_loc_model.transform(cell_train)
         cebra_loc_test = cebra_loc_model.transform(cell_test)
 
-        test_score, pos_test_err, pos_test_score, dis_mean, dis_median = pos_score(cebra_loc_train, cebra_loc_test, pos_train, pos_test)
+        pos_test_score, pos_test_err, dis_mean, dis_median = pos_score(cebra_loc_train, cebra_loc_test, pos_train, pos_test)
         #want pos_test_err
 
 
@@ -83,16 +89,17 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
             np.random.shuffle(pos_train_shuff[:, column])
 
         # Fit the model with the shuffled data
-        cebra_loc_model.fit(cell_train, pos_train_shuff)
-        cebra_loc_train_shuff = cebra_loc_model.transform(cell_train)
-        cebra_loc_test_shuff = cebra_loc_model.transform(cell_test)
+        shuff_model.fit(cell_train, pos_train_shuff)
+        shuff_model.save("shuff_model.pt")
+        cebra_loc_train_shuff = shuff_model.transform(cell_train)
+        cebra_loc_test_shuff = shuff_model.transform(cell_test)
 
-        test_score_shuff, pos_test_err_shuff, pos_test_score_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train, pos_test)
+        pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train, pos_test)
 
-        err_all.append(pos_test_err)
-        err_all_shuff.append(pos_test_err_shuff)
+        err_all.append(dis_median)
+        err_all_shuff.append(dis_median_shuff)
 
-    print(np.mean(err_all))
-    print(np.mean(err_all_shuff))
+    #print(np.mean(err_all))
+    #print(np.mean(err_all_shuff))
 
     return err_all, err_all_shuff
