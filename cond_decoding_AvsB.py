@@ -14,6 +14,8 @@ import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
 from CSUS_score import CSUS_score
+from hold_out import hold_out
+
 
 
 #decodes conditioning in envB using envA.
@@ -31,8 +33,8 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
                             min_temperature = .2, #<---------------.3
                             #temperature = .5,
                             output_dimension=output_dimension,
-                            max_iterations=13000, #<--------------1-20000
-                            #max_iterations=150, #<--------------1-20000
+                            #max_iterations=13000, #<--------------1-20000
+                            max_iterations=130, #<--------------1-20000
                             #distance='euclidean',
                             distance='cosine',
                             conditional='time_delta', #added, keep
@@ -55,10 +57,8 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
 
 
           ######### use this to test in own environment
-          eyeblink_train_control = envA_eyeblink[:350]
-          eyeblink_test_control = envA_eyeblink[350:]
-          cell_train_control = envA_cell_train[:350,:]
-          cell_test_control = envA_cell_train[350:,:]
+          eyeblink_train_control, eyeblink_test_control = hold_out(envA_eyeblink, .70)
+          cell_train_control, cell_test_control  = hold_out(envA_cell_train,.70)
 
           #run the model
           cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
@@ -67,32 +67,26 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
           cebra_loc_train22 = cebra_loc_model.transform(cell_train_control)
 
 
-
-
           #find fraction correct
-          fract_control = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+          fract_controlA = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
 
           #test with using A to decode B
-          eyeblink_train = envA_eyeblink
-          eyeblink_test = envB_eyeblink
           cell_train = envA_cell_train
           cell_test = envB_cell_train
 
-          #run the model
-          cebra_loc_model.fit(cell_train, eyeblink_train)
           #determine model fit
           cebra_loc_test22 = cebra_loc_model.transform(cell_test)
           cebra_loc_train22 = cebra_loc_model.transform(cell_train)
           #find fraction correct
-          fract_test = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train, eyeblink_test)
+          fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, cell_train, cell_test)
 
 
-          fract_control_all.append(fract_control)
-          fract_test_all.append(fract_test)
+          fract_control_all.append(fract_controlA)
+          fract_test_all.append(fract_testB)
 
     print(np.mean(fract_control_all))
-    print(np.mean(fract_test))
+    print(np.mean(fract_test_all))
 
     return fract_control_all, fract_test_all

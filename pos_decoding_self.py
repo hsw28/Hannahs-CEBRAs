@@ -98,4 +98,4 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
     #print(np.mean(err_all))
     #print(np.mean(err_all_shuff))
 
-    return err_all, err_all_shuff
+    return os_test_score, pos_test_err, dis_mean, dis_median, pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff
