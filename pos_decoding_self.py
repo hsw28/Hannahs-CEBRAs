@@ -62,10 +62,6 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
     cell_train, cell_test = hold_out(cell_trace, percent_to_train)
     pos_train, pos_test = hold_out(pos, percent_to_train)
 
-    print(cell_train.shape)
-    print(cell_test.shape)
-    print(pos_train.shape)
-    print(pos_test.shape)
 
     err_all = []
     err_all_shuff = []
