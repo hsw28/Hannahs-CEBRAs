@@ -31,7 +31,7 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
                             min_temperature = .2, #<---------------.3
                             #temperature = .5,
                             output_dimension=output_dimension,
-                            max_iterations=10000, #<--------------1-20000
+                            max_iterations=13000, #<--------------1-20000
                             #max_iterations=150, #<--------------1-20000
                             #distance='euclidean',
                             distance='cosine',
