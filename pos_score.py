@@ -28,9 +28,6 @@ def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36):
     prediction = pos_pred
 
 
-    print(label_test.shape)
-    print(prediction.shape)
-
     pos_test_score = sklearn.metrics.r2_score(label_test, prediction)
     pos_test_err = np.median(abs(prediction - label_test))
 
@@ -42,9 +39,5 @@ def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36):
     dis_mean = (np.mean(distances))
     dis_median = (np.median(distances))
 
-    print(pos_test_score)
-    print(pos_test_err)
-    print(dis_mean)
-    print(dis_median)
 
     return pos_test_score, pos_test_err, dis_mean, dis_median

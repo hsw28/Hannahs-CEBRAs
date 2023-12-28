@@ -29,7 +29,8 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=8000,
+                            max_iterations=80,
+                            #max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -46,7 +47,8 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=8000,
+                            max_iterations=80,
+                            #max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -68,10 +70,10 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
     err_allB_usingB = [] * 4
 
     for i in range(1):
-        cell_trainA, cell_testA = hold_out(cell_traceA, percent_to_trainA)
-        pos_trainA, pos_testA = hold_out(posA, percent_to_trainA)
+        cell_trainA, cell_testA = hold_out(cell_traceA, percent_to_train)
+        pos_trainA, pos_testA = hold_out(posA, percent_to_train)
 
-        cebra_loc_modelA.fit(cell_trainA, pos_trainA)
+        cebra_loc_modelA = cebra_loc_model.fit(cell_trainA, pos_trainA)
         cebra_loc_trainA = cebra_loc_modelA.transform(cell_trainA)
         cebra_loc_testA = cebra_loc_modelA.transform(cell_testA)
 
@@ -93,8 +95,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
             np.random.shuffle(pos_train_shuffA[:, column])
 
         # Fit the model with the shuffled data
-        shuff_modelAfit(cell_trainA, pos_train_shuffA)
-        shuff_modelA.save("shuff_model.pt")
+        shuff_modelA = cebra_loc_model.fit(cell_trainA, pos_train_shuffA)
         cebra_loc_train_shuffA = shuff_modelA.transform(cell_trainA)
         cebra_loc_test_shuffA = shuff_modelA.transform(cell_testA)
 
@@ -107,21 +108,16 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
 
         #then sanity check use B to decode B
 
-        cell_trainB, cell_testB = hold_out(cell_traceB, percent_to_trainB)
-        pos_trainB, pos_testB = hold_out(posB, percent_to_trainB)
+        cell_trainB, cell_testB = hold_out(cell_traceB, percent_to_train)
+        pos_trainB, pos_testB = hold_out(posB, percent_to_train)
 
-        cebra_loc_modelB.fit(cell_trainB, pos_trainB)
-        cebra_loc_trainB = cebra_loc_modelA.transform(cell_trainB)
-        cebra_loc_testB = cebra_loc_modelA.transform(cell_testB)
+        cebra_loc_modelB = cebra_loc_model.fit(cell_trainB, pos_trainB)
+        cebra_loc_trainB = cebra_loc_modelB.transform(cell_trainB)
+        cebra_loc_testB = cebra_loc_modelB.transform(cell_testB)
 
 
         pos_test_scoreB, pos_test_errB, dis_meanB, dis_medianB = pos_score(cebra_loc_trainB, cebra_loc_testB, pos_trainB, pos_testB)
         #want pos_test_err
-
-
-        err_all.append(dis_median)
-        err_all_shuff.append(dis_median_shuff)
-
 
 
         err_allA = pos_test_scoreA, pos_test_errA, dis_meanA, dis_medianA

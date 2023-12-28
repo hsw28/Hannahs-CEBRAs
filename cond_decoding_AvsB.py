@@ -34,7 +34,8 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
                             #temperature = .5,
                             output_dimension=output_dimension,
                             #max_iterations=13000, #<--------------1-20000
-                            max_iterations=130, #<--------------1-20000
+                            #max_iterations=8000, #<--------------1-20000
+                            max_iterations=80, #<--------------1-20000
                             #distance='euclidean',
                             distance='cosine',
                             conditional='time_delta', #added, keep
@@ -61,10 +62,10 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
           cell_train_control, cell_test_control  = hold_out(envA_cell_train,.70)
 
           #run the model
-          cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
+          cebra_loc_modelpos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
           #determine model fit
-          cebra_loc_test22 = cebra_loc_model.transform(cell_test_control)
-          cebra_loc_train22 = cebra_loc_model.transform(cell_train_control)
+          cebra_loc_train22 = cebra_loc_modelpos.transform(cell_train_control)
+          cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test_control)
 
 
           #find fraction correct
@@ -73,20 +74,19 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
 
 
           #test with using A to decode B
-          cell_train = envA_cell_train
           cell_test = envB_cell_train
+          eyeblink_test_control = envB_eyeblink
 
           #determine model fit
-          cebra_loc_test22 = cebra_loc_model.transform(cell_test)
-          cebra_loc_train22 = cebra_loc_model.transform(cell_train)
+          cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
           #find fraction correct
-          fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, cell_train, cell_test)
+          fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
           fract_control_all.append(fract_controlA)
           fract_test_all.append(fract_testB)
 
-    print(np.mean(fract_control_all))
-    print(np.mean(fract_test_all))
+    print((fract_control_all))
+    print((fract_test_all))
 
     return fract_control_all, fract_test_all
