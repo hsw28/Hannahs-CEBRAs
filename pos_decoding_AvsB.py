@@ -183,7 +183,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
     print(np.mean(pos_test_scoreB))
 
     del cebra_loc_modelA, cebra_loc_trainA, cebra_loc_testA
-    del cebra_loc_testB, cebra_loc_test22, shuff_modelA
+    del cebra_loc_testB, shuff_modelA
     del cebra_loc_train_shuffA, cebra_loc_test_shuffA, cebra_loc_test_shuffB
     del cebra_loc_modelB, cebra_loc_trainB, cebra_loc_testB
 

@@ -89,7 +89,7 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
 
 
     del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
-    gc.collect() 
+    gc.collect()
 
     print((fract_control_all))
     print((fract_test_all))
