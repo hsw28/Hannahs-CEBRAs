@@ -29,8 +29,8 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=80,
-                            #max_iterations=8000,
+                            #max_iterations=80,
+                            max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -102,6 +102,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
         pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffA, pos_trainA, pos_testA)
 
 
+
         cebra_loc_test_shuffB = shuff_modelA.transform(cell_traceB)
         pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffB, pos_trainA, posB)
 
@@ -119,12 +120,58 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
         pos_test_scoreB, pos_test_errB, dis_meanB, dis_medianB = pos_score(cebra_loc_trainB, cebra_loc_testB, pos_trainB, pos_testB)
         #want pos_test_err
 
-
+        '''
         err_allA = pos_test_scoreA, pos_test_errA, dis_meanA, dis_medianA
         err_allB_usingA = pos_test_scoreBwA, pos_test_errBwA, dis_meanBwA, dis_medianBwA
         err_all_shuffA = pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA
         err_all_shuffB_usingA = pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB
         err_allB_usingB = pos_test_scoreB, pos_test_errB, dis_meanB, dis_medianB
+        '''
+
+        # For err_allA
+        pos_test_scoreA_val = pos_test_scoreA[0] if isinstance(pos_test_scoreA, (list, tuple)) else pos_test_scoreA
+        pos_test_errA_val = pos_test_errA[0] if isinstance(pos_test_errA, (list, tuple)) else pos_test_errA
+        dis_meanA_val = dis_meanA[0] if isinstance(dis_meanA, (list, tuple)) else dis_meanA
+        dis_medianA_val = dis_medianA[0] if isinstance(dis_medianA, (list, tuple)) else dis_medianA
+
+        # Create the tuple
+        err_allA = pos_test_scoreA_val, pos_test_errA_val, dis_meanA_val, dis_medianA_val
+
+        # For err_allB_usingA
+        pos_test_scoreBwA_val = pos_test_scoreBwA[0] if isinstance(pos_test_scoreBwA, (list, tuple)) else pos_test_scoreBwA
+        pos_test_errBwA_val = pos_test_errBwA[0] if isinstance(pos_test_errBwA, (list, tuple)) else pos_test_errBwA
+        dis_meanBwA_val = dis_meanBwA[0] if isinstance(dis_meanBwA, (list, tuple)) else dis_meanBwA
+        dis_medianBwA_val = dis_medianBwA[0] if isinstance(dis_medianBwA, (list, tuple)) else dis_medianBwA
+
+        # Create the tuple
+        err_allB_usingA = pos_test_scoreBwA_val, pos_test_errBwA_val, dis_meanBwA_val, dis_medianBwA_val
+
+        # For err_all_shuffA
+        pos_test_score_shuffA_val = pos_test_score_shuffA[0] if isinstance(pos_test_score_shuffA, (list, tuple)) else pos_test_score_shuffA
+        pos_test_err_shuffA_val = pos_test_err_shuffA[0] if isinstance(pos_test_err_shuffA, (list, tuple)) else pos_test_err_shuffA
+        dis_mean_shuffA_val = dis_mean_shuffA[0] if isinstance(dis_mean_shuffA, (list, tuple)) else dis_mean_shuffA
+        dis_median_shuffA_val = dis_median_shuffA[0] if isinstance(dis_median_shuffA, (list, tuple)) else dis_median_shuffA
+
+        # Create the tuple
+        err_all_shuffA = pos_test_score_shuffA_val, pos_test_err_shuffA_val, dis_mean_shuffA_val, dis_median_shuffA_val
+
+        # For err_all_shuffB_usingA
+        pos_test_score_shuffB_val = pos_test_score_shuffB[0] if isinstance(pos_test_score_shuffB, (list, tuple)) else pos_test_score_shuffB
+        pos_test_err_shuffB_val = pos_test_err_shuffB[0] if isinstance(pos_test_err_shuffB, (list, tuple)) else pos_test_err_shuffB
+        dis_mean_shuffB_val = dis_mean_shuffB[0] if isinstance(dis_mean_shuffB, (list, tuple)) else dis_mean_shuffB
+        dis_median_shuffB_val = dis_median_shuffB[0] if isinstance(dis_median_shuffB, (list, tuple)) else dis_median_shuffB
+
+        # Create the tuple
+        err_all_shuffB_usingA = pos_test_score_shuffB_val, pos_test_err_shuffB_val, dis_mean_shuffB_val, dis_median_shuffB_val
+
+        # For err_allB_usingB
+        pos_test_scoreB_val = pos_test_scoreB[0] if isinstance(pos_test_scoreB, (list, tuple)) else pos_test_scoreB
+        pos_test_errB_val = pos_test_errB[0] if isinstance(pos_test_errB, (list, tuple)) else pos_test_errB
+        dis_meanB_val = dis_meanB[0] if isinstance(dis_meanB, (list, tuple)) else dis_meanB
+        dis_medianB_val = dis_medianB[0] if isinstance(dis_medianB, (list, tuple)) else dis_medianB
+
+        # Create the tuple
+        err_allB_usingB = pos_test_scoreB_val, pos_test_errB_val, dis_meanB_val, dis_medianB_val
 
 
     print(np.mean(pos_test_scoreA))
