@@ -15,6 +15,8 @@ import joblib as jl
 from matplotlib.collections import LineCollection
 from CSUS_score import CSUS_score
 from hold_out import hold_out
+import gc
+
 
 
 
@@ -84,6 +86,10 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
 
           fract_control_all.append(fract_controlA)
           fract_test_all.append(fract_testB)
+
+
+    del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
+    gc.collect() 
 
     print((fract_control_all))
     print((fract_test_all))

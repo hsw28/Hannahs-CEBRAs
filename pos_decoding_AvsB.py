@@ -15,6 +15,8 @@ import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
 from pos_score import pos_score
+import gc
+
 
 #decodes own position using trace and pos from A, then uses it to decide pos from B, compares both to shuffled
 
@@ -179,5 +181,13 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
     print(np.mean(pos_test_score_shuffA))
     print(np.mean(pos_test_score_shuffB))
     print(np.mean(pos_test_scoreB))
+
+    del cebra_loc_modelA, cebra_loc_trainA, cebra_loc_testA
+    del cebra_loc_testB, cebra_loc_test22, shuff_modelA
+    del cebra_loc_train_shuffA, cebra_loc_test_shuffA, cebra_loc_test_shuffB
+    del cebra_loc_modelB, cebra_loc_trainB, cebra_loc_testB
+
+    # Call garbage collector
+    gc.collect()
 
     return err_allA, err_allB_usingA, err_all_shuffA, err_all_shuffB_usingA, err_allB_usingB
