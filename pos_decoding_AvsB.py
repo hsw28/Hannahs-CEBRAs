@@ -39,7 +39,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             num_hidden_units = 10,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
-                            verbose=True)
+                            verbose=False)
 
     shuff_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
@@ -57,7 +57,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             num_hidden_units = 10,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
-                            verbose=True)
+                            verbose=False)
 
     ########################
     #TEST
