@@ -26,6 +26,8 @@ import gc
 
 
 def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink):
+    print("starting model 1")
+
     output_dimension = 2 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,

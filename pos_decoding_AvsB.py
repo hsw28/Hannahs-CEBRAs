@@ -63,7 +63,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
     #TEST
 
 
-
+    print("starting model 2")
 
 
     err_allA = [] * 4
