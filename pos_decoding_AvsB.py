@@ -31,8 +31,8 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            #max_iterations=80,
                             max_iterations=8000,
+                            #max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -49,7 +49,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             temperature_mode = 'auto',
                             #min_temperature = .74,
                             output_dimension=output_dimension,
-                            max_iterations=80,
+                            max_iterations=8000,
                             #max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
