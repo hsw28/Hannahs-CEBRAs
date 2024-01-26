@@ -63,8 +63,6 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
     #TEST
 
 
-    print("starting model 2")
-
 
     err_allA = [] * 4
     err_allB_usingA = [] * 4
@@ -75,15 +73,15 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
         cell_trainA, cell_testA = hold_out(cell_traceA, percent_to_train)
         pos_trainA, pos_testA = hold_out(posA, percent_to_train)
 
-        cebra_loc_modelA = cebra_loc_model.fit(cell_trainA, pos_trainA)
-        cebra_loc_trainA = cebra_loc_modelA.transform(cell_trainA)
-        cebra_loc_testA = cebra_loc_modelA.transform(cell_testA)
+        cebra_loc_modelA = cebra_loc_model.fit(cell_trainA, pos_trainA) #training on A
+        cebra_loc_trainA = cebra_loc_modelA.transform(cell_trainA) #training on A
+        cebra_loc_testA = cebra_loc_modelA.transform(cell_testA) #testing on A
 
 
         pos_test_scoreA, pos_test_errA, dis_meanA, dis_medianA = pos_score(cebra_loc_trainA, cebra_loc_testA, pos_trainA, pos_testA)
         #want pos_test_err
 
-        cebra_loc_testB = cebra_loc_modelA.transform(cell_traceB)
+        cebra_loc_testB = cebra_loc_modelA.transform(cell_traceB) #training on A, testing on A
         pos_test_scoreBwA, pos_test_errBwA, dis_meanBwA, dis_medianBwA = pos_score(cebra_loc_trainA, cebra_loc_testB, pos_trainA, posB)
 
 
@@ -97,15 +95,15 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
             np.random.shuffle(pos_train_shuffA[:, column])
 
         # Fit the model with the shuffled data
-        shuff_modelA = cebra_loc_model.fit(cell_trainA, pos_train_shuffA)
-        cebra_loc_train_shuffA = shuff_modelA.transform(cell_trainA)
-        cebra_loc_test_shuffA = shuff_modelA.transform(cell_testA)
+        shuff_modelA = cebra_loc_model.fit(cell_trainA, pos_train_shuffA) #training on shuffled A
+        cebra_loc_train_shuffA = shuff_modelA.transform(cell_trainA) #training on A
+        cebra_loc_test_shuffA = shuff_modelA.transform(cell_testA) #testing on A
 
         pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffA, pos_trainA, pos_testA)
 
 
 
-        cebra_loc_test_shuffB = shuff_modelA.transform(cell_traceB)
+        cebra_loc_test_shuffB = shuff_modelA.transform(cell_traceB) #testing on A
         pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffB, pos_trainA, posB)
 
 
@@ -122,13 +120,6 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
         pos_test_scoreB, pos_test_errB, dis_meanB, dis_medianB = pos_score(cebra_loc_trainB, cebra_loc_testB, pos_trainB, pos_testB)
         #want pos_test_err
 
-        '''
-        err_allA = pos_test_scoreA, pos_test_errA, dis_meanA, dis_medianA
-        err_allB_usingA = pos_test_scoreBwA, pos_test_errBwA, dis_meanBwA, dis_medianBwA
-        err_all_shuffA = pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA
-        err_all_shuffB_usingA = pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB
-        err_allB_usingB = pos_test_scoreB, pos_test_errB, dis_meanB, dis_medianB
-        '''
 
         # For err_allA
         pos_test_scoreA_val = pos_test_scoreA[0] if isinstance(pos_test_scoreA, (list, tuple)) else pos_test_scoreA
