@@ -72,17 +72,19 @@ if how_many_divisions == 2:
     trainingB[trainingB > 5] = 2
     trainingB[trainingB == -1] = 0
 elif how_many_divisions == 5:
-    trainingA[trainingA <= 2] = 1
+    trainingA[(trainingA > 0) & (trainingA <= 2)]  = 1
     trainingA[(trainingA > 2) & (trainingA <= 4)] = 2
     trainingA[(trainingA > 4) & (trainingA <= 6)] = 3
     trainingA[(trainingA > 6) & (trainingA <= 8)] = 4
     trainingA[trainingA > 8] = 5
+    trainingA[trainingA == -1] = 0
 
-    trainingB[trainingB <= 2] = 1
+    trainingA[(trainingB > 0) & (trainingB <= 2)]  = 1
     trainingB[(trainingB > 2) & (trainingB <= 4)] = 2
     trainingB[(trainingB > 4) & (trainingB <= 6)] = 3
     trainingB[(trainingB > 6) & (trainingB <= 8)] = 4
     trainingB[trainingB > 8] = 5
+    trainingB[trainingB == -1] = 0
 
 # Running the conditional decoding function
 fract_control_all, fract_test_all = cond_decoding_AvsB(traceA, trainingA, traceB, trainingB)
