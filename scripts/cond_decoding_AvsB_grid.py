@@ -122,12 +122,13 @@ def main():
         args.max_iterations
     )
 
-    print("Grid search results:", results)
+    print(results)
+
 
 def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink, learning_rates, min_temperatures, max_iterations_list):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
-        print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
+        #print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
         # Setup the CEBRA model with the current set of parameters
         cebra_loc_model = CEBRA(
             learning_rate=lr,
@@ -180,6 +181,8 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               #find fraction correct
               fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
+              fract_controlA = round(fract_controlA,3)
+              fract_testB = round(fract_testB,3)
 
               fract_control_all.append(fract_controlA)
               fract_test_all.append(fract_testB)
@@ -191,7 +194,14 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               #print((fract_control_all))
               #print((fract_test_all))
 
-              results.append({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter, 'fract_control_all': fract_control_all, 'fract_test_all': fract_test_all})
+
+        mean_control = np.mean(fract_control_all)
+        mean_test = np.mean(fract_testB)
+
+        mean_control = round(mean_control,3)
+        mean_test = round(mean_test,3)
+
+        results.append({'learn_rate': lr, 'min_temp': temp, 'max_it': max_iter, 'fract_control': fract_control_all, 'fract_test': fract_test_all, 'mean_control': mean_control, 'mean_test': mean_test})
 
     return results
 
