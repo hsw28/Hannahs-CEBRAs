@@ -127,6 +127,7 @@ def main():
 def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink, learning_rates, min_temperatures, max_iterations_list):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
+        print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
         # Setup the CEBRA model with the current set of parameters
         cebra_loc_model = CEBRA(
             learning_rate=lr,
@@ -148,9 +149,9 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
         fract_test_all = []
 
         # Loop to run the batch of code 50 times
-        for i in range(1):
+        for i in range(5):
 
-              print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
+
 
               #test control environment
 
@@ -187,8 +188,8 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
               gc.collect()
 
-              print((fract_control_all))
-              print((fract_test_all))
+              #print((fract_control_all))
+              #print((fract_test_all))
 
               results.append({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter, 'fract_control_all': fract_control_all, 'fract_test_all': fract_test_all})
 

@@ -26,47 +26,21 @@ import gc
 
 
 def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink):
-    '''
+
     output_dimension = 2 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
-                            #learning_rate= 5e-6,
                             learning_rate= 8.6e-4,
                             temperature_mode = 'auto',
-                            min_temperature = .2, #<---------------.3
-                            #temperature = .5,
+                            min_temperature = .2,
                             output_dimension=output_dimension,
-                            #max_iterations=13000, #<--------------1-20000
                             max_iterations=8000, #<--------------1-20000
-                            #distance='euclidean',
                             distance='cosine',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
                             num_hidden_units = 32,
                             time_offsets = 1,
                             verbose=False)
-    '''
-
-    output_dimension = 2 #here, we set as a variable for hypothesis testing below.
-    cebra_loc_model = CEBRA(model_architecture='offset10-model',
-                            batch_size=512,
-                            #learning_rate= 5e-6,
-                            learning_rate= 8.6e-4,
-                            temperature_mode = 'auto',
-                            #min_temperature = .1, #<---------------.3
-                            #temperature = .5,
-                            output_dimension=output_dimension,
-                            max_iterations=20000, #<--------------1-20000
-                            #distance='euclidean',
-                            distance='cosine',
-                            conditional='time_delta', #added, keep
-                            device='cuda_if_available',
-                            num_hidden_units = 32,
-                            time_offsets = 1,
-                            verbose=True)
-
-
-
 
 
     fract_control_all = []
