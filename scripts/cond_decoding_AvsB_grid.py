@@ -122,7 +122,7 @@ def main():
         args.max_iterations
     )
 
-    print(results)
+    #print(results)
 
 
 def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink, learning_rates, min_temperatures, max_iterations_list):
@@ -194,15 +194,26 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               #print((fract_control_all))
               #print((fract_test_all))
 
-
+        # Calculate mean of all fractions
         mean_control = np.mean(fract_control_all)
-        mean_test = np.mean(fract_testB)
+        mean_test = np.mean(fract_test_all)  # Corrected to use fract_test_all
 
-        mean_control = round(mean_control,3)
-        mean_test = round(mean_test,3)
+        # Round the mean values
+        mean_control = round(mean_control, 3)
+        mean_test = round(mean_test, 3)
 
-        results.append({'learn_rate': lr, 'min_temp': temp, 'max_it': max_iter, 'fract_control': fract_control_all, 'fract_test': fract_test_all, 'mean_control': mean_control, 'mean_test': mean_test})
+        # Append the correctly calculated means to the results
+        results.append({
+            'learn_rate': lr,
+            'min_temp': temp,
+            'max_it': max_iter,
+            'fract_control': fract_control_all,
+            'fract_test': fract_test_all,
+            'mean_control': mean_control,  # Correctly calculated mean
+            'mean_test': mean_test         # Correctly calculated mean
+        })
 
+        print(results)
     return results
 
 if __name__ == "__main__":
