@@ -9,6 +9,7 @@ sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/
 from cond_decoding_AvsB import cond_decoding_AvsB
 
 
+#script for running CEBRA within the grid search
 #how to run:
     #conda activate cebra
     #python cond_decoding_AvsB_script.py traceA_file traceB_file trainingA_file trainingB_file how_many_divisions pretrial_y_or_n
@@ -86,5 +87,7 @@ elif how_many_divisions == 5:
     trainingB[trainingB > 8] = 5
     trainingB[trainingB == -1] = 0
 
+    dimensions = how_many_divisions + args.pretrial_y_or_n
+
 # Running the conditional decoding function
-fract_control_all, fract_test_all = cond_decoding_AvsB(traceA, trainingA, traceB, trainingB)
+fract_control_all, fract_test_all = cond_decoding_AvsB(traceA, trainingA, traceB, trainingB, dimensions)

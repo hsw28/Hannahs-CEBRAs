@@ -1,3 +1,6 @@
+import sys
+sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs/')
+sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
 import matplotlib.pyplot as plt
 import cebra
 from cebra import CEBRA
@@ -8,8 +11,9 @@ import joblib as jl
 from matplotlib.collections import LineCollection
 
 
-def normalize(array):
-    return (array - array.min()) / (array.max() - array.min())
+
+
+
 
 def plot_hippocampus3d(ax, embedding, label, label2, colormapping=True, binary=False, idx_order=(0, 1, 2), s=10):
 
@@ -30,23 +34,8 @@ def plot_hippocampus3d(ax, embedding, label, label2, colormapping=True, binary=F
 
         cbar = plt.colorbar(p, ax=ax, shrink=0.5)
 
-    '''
-    r_ind = label2 == 10
-    l_ind = label2 == 20
-
-
-    if binary:
-     #Using black color and size 5 for the points where label equals 10 or 20
-        ax.scatter(embedding[r_ind, idx1],
-                embedding[r_ind, idx2],
-                embedding[r_ind, idx3],
-                c='red')
-                #s=20, zorder=2)  # zorder ensures these points are plotted on top
-
-        ax.scatter(embedding[l_ind, idx1],
-                embedding[l_ind, idx2],
-                embedding[l_ind, idx3],
-                c='blue')
-                #s=20, zorder=2)  # zorder ensures these points are plotted on top
-    '''
     return ax, p
+
+
+def normalize(array):
+    return (array - array.min()) / (array.max() - array.min())

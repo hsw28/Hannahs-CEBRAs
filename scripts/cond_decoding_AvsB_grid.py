@@ -107,25 +107,29 @@ def main():
         trainingA[trainingA > 8] = 5
         trainingA[trainingA == -1] = 0
 
-        trainingA[(trainingB > 0) & (trainingB <= 2)]  = 1
+        training[(trainingB > 0) & (trainingB <= 2)]  = 1
         trainingB[(trainingB > 2) & (trainingB <= 4)] = 2
         trainingB[(trainingB > 4) & (trainingB <= 6)] = 3
         trainingB[(trainingB > 6) & (trainingB <= 8)] = 4
         trainingB[trainingB > 8] = 5
         trainingB[trainingB == -1] = 0
 
+    dimensions = how_many_divisions + args.pretrial_y_or_n
+
     # Run the grid search
     results = cond_decoding_AvsB_grid_cebra(
         traceA, trainingA, traceB, trainingB,
         args.learning_rate,
         args.min_temperature,
-        args.max_iterations
+        args.max_iterations,
+        dimensions
     )
+
 
     #print(results)
 
 
-def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink, learning_rates, min_temperatures, max_iterations_list):
+def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eyeblink, learning_rates, min_temperatures, max_iterations_list, dimensions):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
         #print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
@@ -137,7 +141,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
             model_architecture='offset10-model',
             batch_size=512,
             temperature_mode='auto',
-            output_dimension=2,
+            output_dimension=dimensions,
             distance='cosine',
             conditional='time_delta',
             device='cuda_if_available',
