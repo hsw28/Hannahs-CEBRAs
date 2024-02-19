@@ -36,7 +36,7 @@ def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 10,
+                            num_hidden_units = 32,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=False)

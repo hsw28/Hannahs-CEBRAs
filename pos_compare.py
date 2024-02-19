@@ -33,7 +33,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 10,
+                            num_hidden_units = 32,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
@@ -145,7 +145,6 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     mean = np.mean(data)
     std_dev = np.std(data)
     threshold = 2.5  # 3 standard deviations
-    print(distances.shape)
     wanted = np.abs(data - mean) <= threshold * std_dev
     wanted = wanted.flatten()
     distances = data[wanted]
@@ -258,7 +257,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     wanted = wanted.flatten()
     distances = data[wanted]
 
-    ax2, p2 = plot_hippocampus3d(axs[1, 3], test24[wanted,:], distances, distances, s=4)#<--------------------
+    ax2, p2 = plot_hippocampus3d(axs[1, 3], test24[wanted,:], distances, distances, s=5)#<--------------------
     #plot_hippocampus3d(axs3[1], test24, distances, distances, s=2) #<--------------------
     p2.set_clim(0.1, 0.8)
 
