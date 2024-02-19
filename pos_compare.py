@@ -24,14 +24,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
-                            #learning_rate= 5e-6,
-                            learning_rate= 5e-3,
+                            learning_rate= .00026,
                             #temperature = 2,
                             temperature_mode = 'auto',
-                            #min_temperature = .74,
+                            min_temperature = .15,
                             output_dimension=output_dimension,
-                            max_iterations=8000,
-                            #max_iterations=8000,
+                            max_iterations=10000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -43,14 +41,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
 
     shuff_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
-                            #learning_rate= 5e-6,
-                            learning_rate= 5e-3,
+                            learning_rate= .00026,
                             #temperature = 2,
                             temperature_mode = 'auto',
-                            #min_temperature = .74,
+                            min_temperature = .15,
                             output_dimension=output_dimension,
-                            max_iterations=8000,
-                            #max_iterations=8000,
+                            max_iterations=10000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -58,6 +54,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
+
 
 
 

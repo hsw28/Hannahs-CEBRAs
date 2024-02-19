@@ -76,7 +76,7 @@ def main():
 
 
     # Run the grid search
-    results = cond_decoding_AvsB_grid_cebra(
+    results = pos_decoding_AvsB_grid_cebra(
         traceA, trainingA, traceB, trainingB,
         args.learning_rate,
         args.min_temperature,
@@ -87,7 +87,7 @@ def main():
     #print(results)
 
 
-def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, learning_rates, min_temperatures, max_iterations_list):
+def pos_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, learning_rates, min_temperatures, max_iterations_list):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
         #print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
@@ -105,11 +105,13 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, 
             device='cuda_if_available',
             num_hidden_units=32,
             time_offsets=1,
-            verbose=False
+            verbose=True
         )
 
         fract_control_all = []
         fract_test_all = []
+        med_control_all = []
+        med_test_all = []
 
         # Loop to run the batch of code 50 times
         for i in range(3):
@@ -120,7 +122,9 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, 
 
               ######### use this to test in own environment
               eyeblink_train_control, eyeblink_test_control = hold_out(posA, 1)
+              eyeblink_test_control = eyeblink_train_control
               cell_train_control, cell_test_control  = hold_out(envA_cell_train, 1)
+              cell_test_control = cell_train_control
 
               #run the model
               cebra_loc_modelpos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
@@ -130,7 +134,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, 
 
 
               #find fraction correct
-              pos_test_score_train, pos_test_err, dis_mean, dis_median = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              pos_test_score_train, pos_test_err_train, dis_mean_train, dis_median_train = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
 
@@ -141,11 +145,13 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, 
               #determine model fit
               cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
               #find fraction correct
-              pos_test_score_test, pos_test_err, dis_mean, dis_median = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              pos_test_score_test, pos_test_err_test, dis_mean_test, dis_median_test = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
-              fract_control_all.append(pos_test_score_train)
+              fract_control_all.append(pos_test_err_train)
               fract_test_all.append(pos_test_score_test)
+              med_control_all.append(dis_median_train)
+              med_test_all.append(dis_median_test)
 
 
               del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
@@ -155,22 +161,22 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, 
               #print((fract_test_all))
 
         # Calculate mean of all fractions
-        mean_control = np.mean(fract_control_all)
-        mean_test = np.mean(fract_test_all)  # Corrected to use fract_test_all
+        fract_control_all = np.mean(fract_control_all)
+        fract_test_all = np.mean(fract_test_all)  # Corrected to use fract_test_all
+        med_control_all = np.mean(med_control_all)
+        med_test_all = np.mean(med_test_all)
 
-        # Round the mean values
-        mean_control = round(mean_control, 3)
-        mean_test = round(mean_test, 3)
+
 
         # Append the correctly calculated means to the results
         results.append({
             'learn_rate': lr,
             'min_temp': temp,
             'max_it': max_iter,
-            'fract_control': fract_control_all,
-            'fract_test': fract_test_all,
-            'mean_control': mean_control,  # Correctly calculated mean
-            'mean_test': mean_test         # Correctly calculated mean
+            'mean_control': fract_control_all,
+            'mean_test': fract_test_all,
+            'med_control': med_control_all,  # Correctly calculated mean
+            'mead_test': med_test_all       # Correctly calculated mean
         })
 
         print(results)

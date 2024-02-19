@@ -22,7 +22,6 @@ import sklearn.metrics
 
 def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36):
     pos_decoder = KNeighborsRegressor(n_neighbors, metric = 'cosine')
-
     pos_decoder.fit(emb_train, label_train)
     pos_pred = pos_decoder.predict(emb_test)
     prediction = pos_pred
