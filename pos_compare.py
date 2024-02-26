@@ -21,15 +21,17 @@ import matplotlib.pyplot as plt
 
 def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, pos22, pos21, pos24):
 
+
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
-                            learning_rate= .00026,
+                            #learning_rate= .00026,
+                            learning_rate= .001,
                             #temperature = 2,
                             temperature_mode = 'auto',
-                            min_temperature = .15,
+                            min_temperature = .3,
                             output_dimension=output_dimension,
-                            max_iterations=10000,
+                            max_iterations=12000, #was 10000 then 8000
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -41,16 +43,17 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
 
     shuff_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
-                            learning_rate= .00026,
+                            #learning_rate= .00026,
+                            learning_rate= .001,
                             #temperature = 2,
                             temperature_mode = 'auto',
-                            min_temperature = .15,
+                            min_temperature = .3,
                             output_dimension=output_dimension,
-                            max_iterations=10000,
+                            max_iterations=12000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
-                            num_hidden_units = 10,
+                            num_hidden_units = 32,
                             time_offsets = 1,
                             #hybrid=True, #added <-- if using time
                             verbose=True)
@@ -85,7 +88,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 0], train21, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[0], train21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs[0], train21, distances, distances, s=4) #<--------------------
 
 
     #plot day 21 after being trained on 22
@@ -102,7 +105,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
     plot_hippocampus3d(axs[0, 1], test21, distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs2[0], test21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs2[0], test21, distances, distances, s=4) #<--------------------
 
 
 
@@ -123,7 +126,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 2], train24, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[0], train21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs[0], train21, distances, distances, s=4) #<--------------------
 
 
     #plot 24 after being trained on 22
@@ -158,7 +161,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
 
     ax1, p1 = plot_hippocampus3d(axs[0, 3], test24, distances, distances, s=4)#<--------------------
     p1.set_clim(0.05, 0.85)
-    #plot_hippocampus3d(axs3[0], test24, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs3[0], test24, distances, distances, s=4) #<--------------------
 
 
 
@@ -192,7 +195,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
     plot_hippocampus3d(axs[1, 0], train21, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[1], train21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs[1], train21, distances, distances, s=4) #<--------------------
 
 
     #plot day 21 (shuff)
@@ -209,7 +212,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
     plot_hippocampus3d(axs[1, 1], test21, distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs2[1], test21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs2[1], test21, distances, distances, s=4) #<--------------------
 
 
 
@@ -231,7 +234,7 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
     plot_hippocampus3d(axs[1, 2], train24, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[1], train21, distances, distances, s=2) #<--------------------
+    #plot_hippocampus3d(axs[1], train21, distances, distances, s=4) #<--------------------
 
     #plot day 24 shuff
     pos = np.array(pos24)  # Replace with your pos array
@@ -257,11 +260,11 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     wanted = wanted.flatten()
     distances = data[wanted]
 
-    ax2, p2 = plot_hippocampus3d(axs[1, 3], test24[wanted,:], distances, distances, s=5)#<--------------------
-    #plot_hippocampus3d(axs3[1], test24, distances, distances, s=2) #<--------------------
+    ax2, p2 = plot_hippocampus3d(axs[1, 3], test24[wanted,:], distances, distances, s=4)#<--------------------
+    #plot_hippocampus3d(axs3[1], test24, distances, distances, s=4) #<--------------------
     p2.set_clim(0.1, 0.8)
 
-    plt.show()
+
 
     # Get the current date and time
     now = datetime.datetime.now()
@@ -275,3 +278,5 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     # Save the plot with the date and time in the file name, in the specified folder
     file_name = f'{folder_path}pos_compare_{date_time_str}.svg'
     plt.savefig(file_name, format='svg')
+
+    plt.show()
