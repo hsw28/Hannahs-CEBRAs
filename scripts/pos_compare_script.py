@@ -9,39 +9,53 @@ sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/
 from pos_compare import pos_compare
 
 #for making the shuffle position figure
-# python pos_compare_script traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, pos22, pos21, pos24
+# python pos_compare_script traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1
 
-
+#traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1
 
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
-parser.add_argument("traceA21A22_22", type=str)
-parser.add_argument("traceA22B24_22", type=str)
-parser.add_argument("traceA21A22_21", type=str)
-parser.add_argument("traceA22B24_24", type=str)
-parser.add_argument("pos22", type=str)
-parser.add_argument("pos21", type=str)
-parser.add_argument("pos24", type=str)
+parser.add_argument("traceA1An_An", type=str)
+parser.add_argument("traceAnB1_An", type=str)
+parser.add_argument("traceA1An_A1", type=str)
+parser.add_argument("traceAnB1_B1", type=str)
+parser.add_argument("posAn", type=str)
+parser.add_argument("posA1", type=str)
+parser.add_argument("posB1", type=str)
 
 # Parse arguments
 args = parser.parse_args()
 
-traceA21A22_22 = cebra.load_data(file=args.traceA21A22_22)  # Adjust 'your_key_here' as necessary
-traceA22B24_22 = cebra.load_data(file=args.traceA22B24_22)  # Adjust 'your_key_here' as necessary
-traceA21A22_21 = cebra.load_data(file=args.traceA21A22_21)  # Adjust 'your_key_here' as necessary
-traceA22B24_24 = cebra.load_data(file=args.traceA22B24_24)  # Adjust 'your_key_here' as necessary
-pos22 = cebra.load_data(file=args.pos22)  # Adjust 'your_key_here' as necessary
-pos21 = cebra.load_data(file=args.pos21)  # Adjust 'your_key_here' as necessary
-pos24 = cebra.load_data(file=args.pos24)  # Adjust 'your_key_here' as necessary
+traceA1An_An = cebra.load_data(file=args.traceA1An_An)  # Adjust 'your_key_here' as necessary
+traceAnB1_An = cebra.load_data(file=args.traceAnB1_An)  # Adjust 'your_key_here' as necessary
+traceA1An_A1 = cebra.load_data(file=args.traceA1An_A1)  # Adjust 'your_key_here' as necessary
+traceAnB1_B1 = cebra.load_data(file=args.traceAnB1_B1)  # Adjust 'your_key_here' as necessary
+posAn = cebra.load_data(file=args.posAn)  # Adjust 'your_key_here' as necessary
+posA1 = cebra.load_data(file=args.posA1)  # Adjust 'your_key_here' as necessary
+posB1 = cebra.load_data(file=args.posB1)  # Adjust 'your_key_here' as necessary
+
+traceA1An_An = np.transpose(traceA1An_An)
+traceAnB1_An = np.transpose(traceAnB1_An)
+traceA1An_A1 = np.transpose(traceA1An_A1)
+traceAnB1_B1 = np.transpose(traceAnB1_B1)
+
+posA1 = posA1[:,1:]
+#get every other point and check length
+posA1 = posA1[::2]
+if len(posA1) > len(traceA1An_A1):
+    posA1 = posA1[:len(traceA1An_A1)]
 
 
-pos21 = pos21[:,1:]
-pos22 = pos22[:,1:]
-pos24 = pos24[:,1:]
+posAn = posAn[:,1:]
+posAn = posAn[::2]
+if len(posAn) > len(traceA1An_An):
+    posAn = posAn[:len(traceA1An_An)]
 
-traceA21A22_22 = np.transpose(traceA21A22_22)
-traceA22B24_22 = np.transpose(traceA22B24_22)
-traceA21A22_21 = np.transpose(traceA21A22_21)
-traceA22B24_24 = np.transpose(traceA22B24_24)
+posB1 = posB1[:,1:]
+posB1 = posB1[::2]
+if len(posB1) > len(traceAnB1_B1):
+    posB1 = posB1[:len(traceAnB1_B1)]
 
 
-pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, pos22, pos21, pos24)
+
+
+pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1)

@@ -19,7 +19,8 @@ import matplotlib.pyplot as plt
 
 #for making the shuffle position figure
 
-def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, pos22, pos21, pos24):
+
+def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1):
 
 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
@@ -70,13 +71,13 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
             axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
 
 
-    cebra_loc_model.fit(traceA21A22_22, pos22)
-    train21 = cebra_loc_model.transform(traceA21A22_22)
-    test21 = cebra_loc_model.transform(traceA21A22_21)
+    cebra_loc_model.fit(traceA1An_An, posAn)
+    trainA1 = cebra_loc_model.transform(traceA1An_An)
+    testA1 = cebra_loc_model.transform(traceA1An_A1)
 
 
-    #plot day 22 (only cells also in day 21)(default model)
-    pos = np.array(pos22)  # Replace with your pos array
+    #plot day An (only cells also in day A1)(default model)
+    pos = np.array(posAn)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -87,12 +88,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-    plot_hippocampus3d(axs[0, 0], train21, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[0], train21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[0, 0], trainA1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
 
 
-    #plot day 21 after being trained on 22
-    pos = np.array(pos21)  # Replace with your pos array
+    #plot day A1 after being trained on An
+    pos = np.array(posA1)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -104,17 +105,17 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[0, 1], test21, distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs2[0], test21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[0, 1], testA1, distances, distances, s=4)#<--------------------
+    #plot_hippocampus3d(axs2[0], testA1, distances, distances, s=4) #<--------------------
 
 
 
-    cebra_loc_model.fit(traceA22B24_22, pos22)
-    train24 = cebra_loc_model.transform(traceA22B24_22)
-    test24 = cebra_loc_model.transform(traceA22B24_24)
+    cebra_loc_model.fit(traceAnB1_An, posAn)
+    trainB1 = cebra_loc_model.transform(traceAnB1_An)
+    testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
-    #plot day 22 (only cells also in day 24)(default model)
-    pos = np.array(pos22)  # Replace with your pos array
+    #plot day An (only cells also in day B1)(default model)
+    pos = np.array(posAn)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -125,12 +126,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-    plot_hippocampus3d(axs[0, 2], train24, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[0], train21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[0, 2], trainB1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
 
 
-    #plot 24 after being trained on 22
-    pos = np.array(pos24)  # Replace with your pos array
+    #plot B1 after being trained on An
+    pos = np.array(posB1)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.min(pos[:, 1])  # Maximum y-coordinate
@@ -156,19 +157,19 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
 
-    test24 = test24[wanted,:]
+    testB1 = testB1[wanted,:]
 
 
-    ax1, p1 = plot_hippocampus3d(axs[0, 3], test24, distances, distances, s=4)#<--------------------
+    ax1, p1 = plot_hippocampus3d(axs[0, 3], testB1, distances, distances, s=4)#<--------------------
     p1.set_clim(0.05, 0.85)
-    #plot_hippocampus3d(axs3[0], test24, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs3[0], testB1, distances, distances, s=4) #<--------------------
 
 
 
 
 
     # Convert to numpy array if not already
-    pos = np.array(pos22)
+    pos = np.array(posAn)
     # Create a new array to hold the shuffled data
     pos_shuff = pos.copy()
     # Shuffle each column independently
@@ -176,12 +177,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
         np.random.shuffle(pos_shuff[:, column])
 
     # Fit the model with the shuffled data
-    cebra_loc_model.fit(traceA21A22_22, pos_shuff)
-    train21 = cebra_loc_model.transform(traceA21A22_22)
-    test21 = cebra_loc_model.transform(traceA21A22_21)
+    cebra_loc_model.fit(traceA1An_An, pos_shuff)
+    trainA1 = cebra_loc_model.transform(traceA1An_An)
+    testA1 = cebra_loc_model.transform(traceA1An_A1)
 
 
-    #plot day 22 cells only in day 21 (shuff)
+    #plot day An cells only in day A1 (shuff)
     pos = np.array(pos_shuff)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
@@ -194,12 +195,12 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[1, 0], train21, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[1], train21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[1, 0], trainA1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[1], trainA1, distances, distances, s=4) #<--------------------
 
 
-    #plot day 21 (shuff)
-    pos = np.array(pos21)  # Replace with your pos array
+    #plot day A1 (shuff)
+    pos = np.array(posA1)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -211,16 +212,16 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[1, 1], test21, distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs2[1], test21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[1, 1], testA1, distances, distances, s=4)#<--------------------
+    #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
 
 
 
-    cebra_loc_model.fit(traceA22B24_22, pos_shuff)
-    train24 = cebra_loc_model.transform(traceA22B24_22)
-    test24 = cebra_loc_model.transform(traceA22B24_24)
+    cebra_loc_model.fit(traceAnB1_An, pos_shuff)
+    trainB1 = cebra_loc_model.transform(traceAnB1_An)
+    testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
-    #plot day 22-24 (shuff)
+    #plot day An-B1 (shuff)
     pos = np.array(pos_shuff)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
@@ -233,11 +234,11 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[1, 2], train24, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[1], train21, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[1, 2], trainB1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[1], trainA1, distances, distances, s=4) #<--------------------
 
-    #plot day 24 shuff
-    pos = np.array(pos24)  # Replace with your pos array
+    #plot day B1 shuff
+    pos = np.array(posB1)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.min(pos[:, 1])  # Maximum y-coordinate
@@ -260,8 +261,8 @@ def pos_compare(traceA21A22_22, traceA22B24_22, traceA21A22_21, traceA22B24_24, 
     wanted = wanted.flatten()
     distances = data[wanted]
 
-    ax2, p2 = plot_hippocampus3d(axs[1, 3], test24[wanted,:], distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs3[1], test24, distances, distances, s=4) #<--------------------
+    ax2, p2 = plot_hippocampus3d(axs[1, 3], testB1[wanted,:], distances, distances, s=4)#<--------------------
+    #plot_hippocampus3d(axs3[1], testB1, distances, distances, s=4) #<--------------------
     p2.set_clim(0.1, 0.8)
 
 
