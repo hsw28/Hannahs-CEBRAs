@@ -32,7 +32,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                             temperature_mode = 'auto',
                             min_temperature = .3,
                             output_dimension=output_dimension,
-                            max_iterations=12000, #was 10000 then 8000
+                            max_iterations=8000, #was 10000 then 8000
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
@@ -50,7 +50,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                             temperature_mode = 'auto',
                             min_temperature = .3,
                             output_dimension=output_dimension,
-                            max_iterations=12000,
+                            max_iterations=8000,
                             distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',

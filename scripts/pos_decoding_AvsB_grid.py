@@ -18,7 +18,6 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import shutil
 import cebra
-from cebra import CEBRA
 import sys
 import pandas as pd
 import joblib as jl
@@ -26,13 +25,15 @@ from matplotlib.collections import LineCollection
 from pos_score import pos_score
 from hold_out import hold_out
 import gc
+from smoothpos import smoothpos
+from ca_velocity import ca_velocity
 
 
 #grid search
 
 #how to run:
     #conda activate cebra
-    #python cond_decoding_AvsB_script.py traceA_file traceB_file trainingA_file trainingB_file
+    #python cond_decoding_AvsB_script.py traceA_file traceB_file PosA_file PosB_file
 
 #pretrial_y_or_n: 0 for only cs us, 1 for cs us pretrial
 #how many divisions you wanted-- for ex,
@@ -41,7 +42,7 @@ import gc
                         #= 10 will split CS and US each into 5
 
 #Example
-    # python cond_decoding_script.py traceA.npy traceB.npy trainingA.npy trainingB.npy --learning_rate 1e-4,5e-4 --min_temperature 0.1,0.3 --max_iterations 5000,10000
+    # python cond_decoding_AvsB_script.py traceA.npy traceB.npy PosA.npy PosB.npy --learning_rate 1e-4,5e-4 --min_temperature 0.1,0.3 --max_iterations 5000,10000
 
 
 def parse_list_argument(arg_value):
@@ -55,8 +56,8 @@ def main():
     parser = argparse.ArgumentParser(description="Run conditional decoding with CEBRA.")
     parser.add_argument("traceA", type=str, help="File path for traceA data.")
     parser.add_argument("traceB", type=str, help="File path for traceB data.")
-    parser.add_argument("trainingA", type=str, help="File path for trainingA data.")
-    parser.add_argument("trainingB", type=str, help="File path for trainingB data.")
+    parser.add_argument("PosA", type=str, help="File path for PosA data.")
+    parser.add_argument("PosB", type=str, help="File path for PosB data.")
     parser.add_argument("--learning_rate", type=parse_list_argument, default=[8.6e-4], help="Comma-separated learning rates.")
     parser.add_argument("--min_temperature", type=parse_list_argument, default=[0.2], help="Comma-separated minimum temperatures.")
     parser.add_argument("--max_iterations", type=parse_list_argument, default=[8000], help="Comma-separated max iterations.")
@@ -64,20 +65,45 @@ def main():
 
     traceA = cebra.load_data(file=args.traceA)  # Adjust 'your_key_here' as necessary
     traceB= cebra.load_data(file=args.traceB)  # Adjust 'your_key_here' as necessary
-    trainingA = cebra.load_data(file=args.trainingA)  # Adjust 'your_key_here' as necessary
-    trainingB = cebra.load_data(file=args.trainingB)  # Adjust 'your_key_here' as necessary
+    PosA = cebra.load_data(file=args.PosA)  # Adjust 'your_key_here' as necessary
+    PosB = cebra.load_data(file=args.PosB)  # Adjust 'your_key_here' as necessary
 
     # Data preprocessing steps
     traceA = np.transpose(traceA)
     traceB = np.transpose(traceB)
 
-    trainingA = trainingA[:,1:]
-    trainingB = trainingB[:,1:]
+    PosA = smoothpos(PosA)
+    PosB = smoothpos(PosB)
+
+    PosA = PosA[:,1:]
+    PosA = PosA[::2]
+    if len(PosA) > len(traceA):
+        PosA = PosA[:len(traceA)]
+
+    PosB = PosB[:,1:]
+    PosB = PosB[::2]
+    if len(PosB) > len(traceB):
+        PosB = PosB[:len(traceB)]
+
+
+    vel_A = ca_velocity(PosA)
+    vel_B = ca_velocity(PosB)
+    high_vel_indices_A = np.where(vel_A >= 4)[0]
+    high_vel_indices_B = np.where(vel_B >= 4)[0]
+    if high_vel_indices_A.size > 0 and high_vel_indices_A[-1] + 1 < len(PosA):
+        high_vel_indices_A = high_vel_indices_A + 1
+    if high_vel_indices_B.size > 0 and high_vel_indices_B[-1] + 1 < len(PosB):
+        high_vel_indices_B = high_vel_indices_B + 1
+    PosA = PosA[high_vel_indices_A]
+    PosB = PosB[high_vel_indices_B]
+    traceA = traceA[high_vel_indices_A]
+    traceB = traceB[high_vel_indices_B]
+
 
 
     # Run the grid search
     results = pos_decoding_AvsB_grid_cebra(
-        traceA, trainingA, traceB, trainingB,
+        traceA, PosA, traceB, PosB,
         args.learning_rate,
         args.min_temperature,
         args.max_iterations,
@@ -87,7 +113,7 @@ def main():
     #print(results)
 
 
-def pos_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, learning_rates, min_temperatures, max_iterations_list):
+def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, learning_rates, min_temperatures, max_iterations_list):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
         #print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
@@ -121,40 +147,40 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, posA, envB_cell_train, posB, l
               #test control environment
 
               ######### use this to test in own environment
-              eyeblink_train_control, eyeblink_test_control = hold_out(posA, 1)
+              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, 1)
               eyeblink_test_control = eyeblink_train_control
               cell_train_control, cell_test_control  = hold_out(envA_cell_train, 1)
               cell_test_control = cell_train_control
 
               #run the model
-              cebra_loc_modelpos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
+              cebra_loc_modelPos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
               #determine model fit
-              cebra_loc_train22 = cebra_loc_modelpos.transform(cell_train_control)
-              cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test_control)
+              cebra_loc_train22 = cebra_loc_modelPos.transform(cell_train_control)
+              cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test_control)
 
 
               #find fraction correct
-              pos_test_score_train, pos_test_err_train, dis_mean_train, dis_median_train = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              Pos_test_score_train, Pos_test_err_train, dis_mean_train, dis_median_train = Pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
 
               #test with using A to decode B
               cell_test = envB_cell_train
-              eyeblink_test_control = posB
+              eyeblink_test_control = PosB
 
               #determine model fit
-              cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
+              cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
               #find fraction correct
-              pos_test_score_test, pos_test_err_test, dis_mean_test, dis_median_test = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              Pos_test_score_test, Pos_test_err_test, dis_mean_test, dis_median_test = Pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
-              fract_control_all.append(pos_test_err_train)
-              fract_test_all.append(pos_test_score_test)
+              fract_control_all.append(Pos_test_err_train)
+              fract_test_all.append(Pos_test_score_test)
               med_control_all.append(dis_median_train)
               med_test_all.append(dis_median_test)
 
 
-              del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
+              del cebra_loc_modelPos, cebra_loc_train22, cebra_loc_test22
               gc.collect()
 
               #print((fract_control_all))
