@@ -134,8 +134,10 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             verbose=True
         )
 
-        fract_control_all = []
-        fract_test_all = []
+        Pos_err_train_all = []
+        Pos_err_test_all = []
+        Pos_r2_score_train_all = []      
+        Pos_r2_score_test_all = []
         med_control_all = []
         med_test_all = []
 
@@ -160,9 +162,12 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
 
               #find fraction correct
-              Pos_test_score_train, Pos_test_err_train, dis_mean_train, dis_median_train = Pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
-
+              Pos_test_score_train, Pos_test_err_train, dis_mean_train, dis_median_train = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              #pos_test_score: The R² score for both position predictions
+              #It represents the proportion of variance in the dependent variable that is predictable from the independent variables.
+              #pos_test_err: The median absolute error between the predicted positions and the true positions.
+              #This provides a robust measure of the error magnitude.
 
               #test with using A to decode B
               cell_test = envB_cell_train
@@ -171,11 +176,16 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #determine model fit
               cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
               #find fraction correct
-              Pos_test_score_test, Pos_test_err_test, dis_mean_test, dis_median_test = Pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              Pos_test_score_test, Pos_test_err_test, dis_mean_test, dis_median_test = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
-              fract_control_all.append(Pos_test_err_train)
-              fract_test_all.append(Pos_test_score_test)
+              Pos_err_train_all.append(Pos_test_err_train)
+              Pos_err_test_all.append(Pos_test_err_test)
+
+              Pos_r2_score_train_all.append(Pos_test_score_train)
+              Pos_r2_score_test_all.append(Pos_test_score_test)
+
+
               med_control_all.append(dis_median_train)
               med_test_all.append(dis_median_test)
 
@@ -183,12 +193,16 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               del cebra_loc_modelPos, cebra_loc_train22, cebra_loc_test22
               gc.collect()
 
-              #print((fract_control_all))
-              #print((fract_test_all))
+              #print((Pos_err_train_all))
+              #print((Pos_r2_score_test_all))
 
         # Calculate mean of all fractions
-        fract_control_all = np.mean(fract_control_all)
-        fract_test_all = np.mean(fract_test_all)  # Corrected to use fract_test_all
+        Pos_err_train_all = np.mean(Pos_err_train_all)
+        Pos_err_test_all = np.mean(Pos_err_test_all)
+
+        Pos_r2_score_train_all = np.mean(Pos_r2_score_train_all)
+        Pos_r2_score_test_all = np.mean(Pos_r2_score_test_all)
+
         med_control_all = np.mean(med_control_all)
         med_test_all = np.mean(med_test_all)
 
@@ -199,8 +213,10 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             'learn_rate': lr,
             'min_temp': temp,
             'max_it': max_iter,
-            'mean_control': fract_control_all,
-            'mean_test': fract_test_all,
+            'KNN_err_train': Pos_err_train_all,
+            'KNN_err_test': Pos_err_test_all,
+            'train_r2': Pos_r2_score_train_all,
+            'test_r2': Pos_r2_score_test_all,
             'med_control': med_control_all,  # Correctly calculated mean
             'mead_test': med_test_all       # Correctly calculated mean
         })
