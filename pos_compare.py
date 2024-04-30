@@ -15,7 +15,7 @@ from scipy import stats
 from pos_score import pos_score
 from plot_hippocampus3d import plot_hippocampus3d
 import datetime
-import matplotlib.pyplot as plt
+
 
 #for making the shuffle position figure
 
@@ -71,9 +71,24 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
             axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
 
 
-    cebra_loc_model.fit(traceA1An_An, posAn)
-    trainA1 = cebra_loc_model.transform(traceA1An_An)
+
+    traceA1An_An, traceA1An_An_test = hold_out(traceA1An_An, 0.8)
+    posAn_train, posAn_test = hold_out(posAn, 0.8)
+
+    # Fitting the model on training data
+    cebra_loc_model.fit(traceA1An_An, posAn_train)
+
+    # Transforming both the training and test data
+    trainA_train = cebra_loc_model.transform(traceA1An_An)
+    trainA1 = cebra_loc_model.transform(traceA1An_An_test)
     testA1 = cebra_loc_model.transform(traceA1An_A1)
+
+    # for held out
+    Pos_test_score_train_A1An_An, Pos_test_err_train_A1An_An, dis_mean_train_A1An_An, dis_median_train_A1An_An = pos_score(trainA_train, trainA1, posAn_train, posAn_test)
+    #for test
+    Pos_test_score_train_A1An_A1, Pos_test_err_train_A1An_A1, dis_mean_train_A1An_A1, dis_median_train_A1An_A1 = pos_score(trainA_train, testA1, posAn_train, posA1)
+
+
 
 
     #plot day An (only cells also in day A1)(default model)
@@ -110,9 +125,20 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    cebra_loc_model.fit(traceAnB1_An, posAn)
-    trainB1 = cebra_loc_model.transform(traceAnB1_An)
+    traceAnB1_An, traceAnB1_An_test = hold_out(traceA1An_An, .8)
+    posAn_train, posAn_test = hold_out(posAn, .8)
+    cebra_loc_model.fit(traceAnB1_An, posAn_train)
+    trainB1_train = cebra_loc_model.transform(traceAnB1_An)
+    trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
+
+
+    # for held out
+    Pos_test_score_train_AnB1_An, Pos_test_err_train_AnB1_An, dis_mean_train_AnB1_An, dis_median_train_AnB1_An = pos_score(trainB1_train, trainB1, posAn_train, posAn_test)
+    #for test
+    Pos_test_score_train_AnB1_B1, Pos_test_err_train_AnB1_B1, dis_mean_train_AnB1_B1, dis_median_train_AnB1_B1 = pos_score(trainB1_train, testB1, posAn_train, posB1)
+
+
 
     #plot day An (only cells also in day B1)(default model)
     pos = np.array(posAn)  # Replace with your pos array
@@ -176,10 +202,21 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     for column in range(pos_shuff.shape[1]):
         np.random.shuffle(pos_shuff[:, column])
 
+
     # Fit the model with the shuffled data
-    cebra_loc_model.fit(traceA1An_An, pos_shuff)
-    trainA1 = cebra_loc_model.transform(traceA1An_An)
+    traceA1An_An, traceA1An_An_test = hold_out(traceA1An_An, .8)
+    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
+
+    cebra_loc_model.fit(traceA1An_An, pos_shuff_train)
+    trainA_train = cebra_loc_model.transform(traceA1An_An)
+    trainA1 = cebra_loc_model.transform(traceA1An_An_test)
     testA1 = cebra_loc_model.transform(traceA1An_A1)
+
+
+    # for held out
+    Pos_test_score_train_A1An_An_shuff, Pos_test_err_train_A1An_An_shuff, dis_mean_train_A1An_An_shuff, dis_median_train_A1An_An_shuff = pos_score(trainA_train, trainA1, pos_shuff_train, pos_shuff_test)
+    #for test
+    Pos_test_score_train_A1An_A1_shuff, Pos_test_err_train_A1An_A1_shuff, dis_mean_train_A1An_A1_shuff, dis_median_train_A1An_A1_shuff = pos_score(trainA_train, testA1, pos_shuff_train, posA1)
 
 
     #plot day An cells only in day A1 (shuff)
@@ -216,10 +253,20 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
 
 
+    traceAnB1_An, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
+    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
 
     cebra_loc_model.fit(traceAnB1_An, pos_shuff)
-    trainB1 = cebra_loc_model.transform(traceAnB1_An)
+
+    trainB1_train = cebra_loc_model.transform(traceAnB1_An)
+    trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
+
+
+    Pos_test_score_train_AnB1_An_shuff, Pos_test_err_train_AnB1_An_shuff, dis_mean_train_AnB1_An_shuff, dis_median_train_AnB1_An_shuff = pos_score(trainB1_train, trainB1, pos_shuff_train, pos_shuff_test)
+    #for test
+    Pos_test_score_train_AnB1_B1_shuff, Pos_test_err_train_AnB1_B1_shuff, dis_mean_train_AnB1_B1_shuff, dis_median_train_AnB1_B1_shuff = pos_score(trainB1_train, testB1, pos_shuff_train, posB1)
+
 
     #plot day An-B1 (shuff)
     pos = np.array(pos_shuff)  # Replace with your pos array

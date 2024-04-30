@@ -176,14 +176,13 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
               #find fraction correct
               Pos_test_score_test, Pos_test_err_test, dis_mean_test, dis_median_test = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
-
+              #r2, Knn_pos_err, distance_mean, distance_median
 
               Pos_err_train_all.append(Pos_test_err_train)
               Pos_err_test_all.append(Pos_test_err_test)
 
               Pos_r2_score_train_all.append(Pos_test_score_train)
               Pos_r2_score_test_all.append(Pos_test_score_test)
-
 
               med_control_all.append(dis_median_train)
               med_test_all.append(dis_median_test)
