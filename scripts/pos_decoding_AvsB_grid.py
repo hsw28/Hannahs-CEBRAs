@@ -120,13 +120,12 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
         # Setup the CEBRA model with the current set of parameters
         cebra_loc_model = CEBRA(
             learning_rate=lr,
-            min_temperature=temp,
             max_iterations=max_iter,
             model_architecture='offset10-model',
             batch_size=512,
             temperature_mode='auto',
             output_dimension=3,
-            distance='cosine',
+            distance='euclidean',
             conditional='time_delta',
             device='cuda_if_available',
             num_hidden_units=32,
@@ -136,7 +135,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
         Pos_err_train_all = []
         Pos_err_test_all = []
-        Pos_r2_score_train_all = []      
+        Pos_r2_score_train_all = []
         Pos_r2_score_test_all = []
         med_control_all = []
         med_test_all = []
