@@ -14,6 +14,6 @@ def ca_velocity(positions):
     delta_pos = np.diff(positions, axis=0)
 
     # Calculate Euclidean distance (speed) between points
-    velocities = np.sqrt((delta_pos[:, 0] ** 2) + (delta_pos[:, 1] ** 2))
+    velocities = np.sqrt((delta_pos[:, 0] ** 2) + (delta_pos[:, 1] ** 2)) / 0.1333
 
     return velocities

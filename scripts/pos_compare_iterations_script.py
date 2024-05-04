@@ -12,8 +12,8 @@ from smoothpos import smoothpos
 from ca_velocity import ca_velocity
 
 #for using with slurm to run over a bunch of iterations
-# python pos_compare_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 10
-
+# python pos_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 10
+# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./PosAn.mat ./PosA1.mat ./PosB1.mat --iterations 1
 
 # Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
@@ -24,7 +24,8 @@ parser.add_argument("traceAnB1_B1", type=str, help="Path to the traceAnB1_B1 dat
 parser.add_argument("PosAn", type=str, help="Path to the PosAn data file.")
 parser.add_argument("PosA1", type=str, help="Path to the PosA1 data file.")
 parser.add_argument("PosB1", type=str, help="Path to the PosB1 data file.")
-parser.add_argument("--iterations", type=int, default=1, help="Number of iterations to run.")
+parser.add_argument("--iterations", type=int, default=100, help="Number of iterations to run.")
+
 
 # Parse arguments
 args = parser.parse_args()
@@ -52,6 +53,7 @@ PosA1 = PosA1[::2]
 if len(PosA1) > len(traceA1An_A1):
     PosA1 = PosA1[:len(traceA1An_A1)]
 
+
 PosAn = PosAn[:,1:]
 PosAn = PosAn[::2]
 if len(PosAn) > len(traceA1An_An):
@@ -62,9 +64,16 @@ PosB1 = PosB1[::2]
 if len(PosB1) > len(traceAnB1_B1):
     PosB1 = PosB1[:len(traceAnB1_B1)]
 
+
+
 vel_A1 = ca_velocity(PosA1)
 vel_An = ca_velocity(PosAn)
 vel_B1 = ca_velocity(PosB1)
+
+print(PosA1.shape)
+print(vel_A1.shape)
+
+
 
 high_vel_indices_A1 = np.where(vel_A1 >= 4)[0]
 high_vel_indices_An = np.where(vel_An >= 4)[0]
@@ -83,8 +92,9 @@ PosB1 = PosB1[high_vel_indices_B1]
 
 traceA1An_A1 = traceA1An_A1[high_vel_indices_A1]
 traceA1An_An = traceA1An_An[high_vel_indices_An]
-traceAnB1_A = traceAnB1_An[high_vel_indices_An]
+traceAnB1_An = traceAnB1_An[high_vel_indices_An]
 traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
+
 
 
 

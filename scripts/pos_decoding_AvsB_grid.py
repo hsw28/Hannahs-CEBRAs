@@ -123,9 +123,11 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             max_iterations=max_iter,
             model_architecture='offset10-model',
             batch_size=512,
-            temperature_mode='auto',
+            temperature_mode='constant',
+            #min_temperature=temp,
+            temperature=temp,
             output_dimension=3,
-            distance='euclidean',
+            distance='cosine',
             conditional='time_delta',
             device='cuda_if_available',
             num_hidden_units=32,
@@ -141,7 +143,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
         med_test_all = []
 
         # Loop to run the batch of code 50 times
-        for i in range(3):
+        for i in range(2):
 
 
 
