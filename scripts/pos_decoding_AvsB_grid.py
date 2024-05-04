@@ -150,9 +150,9 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #test control environment
 
               ######### use this to test in own environment
-              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, 1)
+              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, .75)
               eyeblink_test_control = eyeblink_train_control
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train, 1)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .75)
               cell_test_control = cell_train_control
 
               #run the model

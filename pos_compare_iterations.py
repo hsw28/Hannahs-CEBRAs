@@ -65,15 +65,15 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
 
     try:
         for i in range(iterations):
-            traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 80)
-            posAn_train, posAn_test = hold_out(posAn, 80)
+            traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
+            posAn_train, posAn_test = hold_out(posAn, 75)
             print(posAn_train.shape)
             print(posAn_test.shape)
-            traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 80)
-            posAnB1_train, posAnB1_test = hold_out(posAn, 80)
+            traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
+            posAnB1_train, posAnB1_test = hold_out(posAn, 75)
 
             posAn_shuffled = np.random.permutation(posAn)
-            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 80)
+            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
 
 
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
