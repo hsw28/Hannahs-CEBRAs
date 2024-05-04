@@ -23,4 +23,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 
 # Run the Python script with hardcoded arguments
-python pos_compare_script_iterations.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 100
+python /home/hsw967/Programming/Hannahs-CEBRAs/SLURM/pos_compare_script_iterations.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./PosAn.mat ./PosA1.mat ./PosB1.mat --iterations 100
