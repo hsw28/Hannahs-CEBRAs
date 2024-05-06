@@ -68,12 +68,12 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
         for i in range(iterations):
             traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 80)
             posAn_train, posAn_test = hold_out(posAn, 80)
-            print(posAn_train.shape)
-            print(posAn_test.shape)
             traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 80)
             posAnB1_train, posAnB1_test = hold_out(posAn, 80)
 
-            posAn_shuffled = np.random.permutation(posAn)
+            indices = np.random.permutation(posAn.shape[0])  # Get a permutation of the row indices
+            posAn_shuffled = posAn[indices, :] #apply and shuffle
+
             posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 80)
 
 

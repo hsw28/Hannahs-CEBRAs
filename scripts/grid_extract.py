@@ -7,7 +7,8 @@ def print_formatted_values(data):
         knn_err_test = round(entry['KNN_err_test'], 2)
         test_r2 = round(entry['test_r2'], 2)
         mead_test = round(entry['mead_test'], 2)
-        print(f"{knn_err_test}, {test_r2}, {mead_test}")
+        shuff_dif = round(entry['shuff_minus_not'],2)
+        print(f"{knn_err_test}, {test_r2}, {mead_test}, {shuff_dif}")
     for entry in data:
         learn_rate = entry['learn_rate']
         min_temp = entry['min_temp']

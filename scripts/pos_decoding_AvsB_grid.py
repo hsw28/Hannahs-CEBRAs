@@ -135,12 +135,15 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             verbose=True
         )
 
+        Pos_err_shuff_all = []
         Pos_err_train_all = []
         Pos_err_test_all = []
         Pos_r2_score_train_all = []
         Pos_r2_score_test_all = []
         med_control_all = []
         med_test_all = []
+
+
 
         # Loop to run the batch of code 50 times
         for i in range(2):
@@ -150,10 +153,9 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #test control environment
 
               ######### use this to test in own environment
-              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, .75)
-              eyeblink_test_control = eyeblink_train_control
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .75)
-              cell_test_control = cell_train_control
+              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, .8)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .8)
+
 
               #run the model
               cebra_loc_modelPos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
@@ -173,13 +175,34 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #test with using A to decode B
               cell_test = envB_cell_train
               eyeblink_test_control = PosB
-
               #determine model fit
               cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
               #find fraction correct
               Pos_test_score_test, Pos_test_err_test, dis_mean_test, dis_median_test = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
               #r2, Knn_pos_err, distance_mean, distance_median
 
+
+              #now shuffled
+              indices = np.random.permutation(PosA.shape[0])  # Get a permutation of the row indices
+              posAn_shuffled = PosA[indices, :] #apply and shuffle
+
+              eyeblink_train_control, eyeblink_test_control = hold_out(posAn_shuffled, .8)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .8)
+
+              cell_test = envB_cell_train
+              eyeblink_test_control = PosB
+
+
+              cebra_loc_modelPos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
+
+              cebra_loc_train22 = cebra_loc_modelPos.transform(cell_train_control)
+              cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
+
+              Pos_test_score_test_shuff, Pos_test_err_test_shuff, dis_mean_test_shuff, dis_median_test_shuff = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+
+
+
+              Pos_err_shuff_all.append(Pos_test_err_test_shuff)
               Pos_err_train_all.append(Pos_test_err_train)
               Pos_err_test_all.append(Pos_test_err_test)
 
@@ -197,6 +220,12 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #print((Pos_r2_score_test_all))
 
         # Calculate mean of all fractions
+
+        Pos_err_shuff_all = np.array(Pos_err_shuff_all)
+        Pos_err_test_all = np.array(Pos_err_test_all)
+
+        shuff_dif_all = np.mean(Pos_err_shuff_all - Pos_err_test_all)
+
         Pos_err_train_all = np.mean(Pos_err_train_all)
         Pos_err_test_all = np.mean(Pos_err_test_all)
 
@@ -205,6 +234,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
         med_control_all = np.mean(med_control_all)
         med_test_all = np.mean(med_test_all)
+
+
 
 
 
@@ -218,7 +249,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             'train_r2': Pos_r2_score_train_all,
             'test_r2': Pos_r2_score_test_all,
             'med_control': med_control_all,  # Correctly calculated mean
-            'mead_test': med_test_all       # Correctly calculated mean
+            'mead_test': med_test_all,       # Correctly calculated mean
+            'shuff_minus_not': shuff_dif_all
         })
 
         print(results)
