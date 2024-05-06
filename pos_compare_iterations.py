@@ -48,32 +48,33 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
     output_dimension = 3
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
-                        learning_rate=.000001,
+                        learning_rate=.00000055,
                         temperature_mode='constant',
                         temperature=0.6,
                         #min_temperature=0.6,
                         output_dimension=output_dimension,
                         max_iterations=9000,
-                        distance='euclidean',
+                        distance='cosine',
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
                         time_offsets=1,
-                        verbose=True)
+                        verbose=False)
+
 
     results = np.zeros((iterations, 32))  # Each iteration results in 32 outputs
 
     try:
         for i in range(iterations):
-            traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
-            posAn_train, posAn_test = hold_out(posAn, 75)
+            traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 80)
+            posAn_train, posAn_test = hold_out(posAn, 80)
             print(posAn_train.shape)
             print(posAn_test.shape)
-            traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
-            posAnB1_train, posAnB1_test = hold_out(posAn, 75)
+            traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 80)
+            posAnB1_train, posAnB1_test = hold_out(posAn, 80)
 
             posAn_shuffled = np.random.permutation(posAn)
-            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
+            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 80)
 
 
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
@@ -82,7 +83,8 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
             shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train, posAn_test_shuffled, posB1)
 
             # Flatten results into a single row per iteration
-            results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(shuffled_A1), np.ravel(regular_B1), np.ravel(shuffled_B1)))
+            results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
+
             print(results)
 
         # Save the results to a CSV file with the current date and time in the filename
