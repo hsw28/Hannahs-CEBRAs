@@ -127,7 +127,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             min_temperature=temp,
             #temperature=temp,
             output_dimension=3,
-            distance='cosine',
+            distance='euclidean',
             conditional='time_delta',
             device='cuda_if_available',
             num_hidden_units=32,
