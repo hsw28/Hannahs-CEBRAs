@@ -132,7 +132,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             device='cuda_if_available',
             num_hidden_units=32,
             time_offsets=1,
-            verbose=True
+            verbose=False
         )
 
         Pos_err_shuff_all = []
