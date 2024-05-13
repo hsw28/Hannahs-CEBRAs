@@ -25,40 +25,36 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
-                            batch_size=512,
-                            #learning_rate= .00026,
-                            learning_rate= .001,
-                            #temperature = 2,
-                            temperature_mode = 'auto',
-                            min_temperature = .3,
-                            output_dimension=output_dimension,
-                            max_iterations=8000, #was 10000 then 8000
-                            distance='euclidean',
-                            conditional='time_delta', #added, keep
-                            device='cuda_if_available',
-                            num_hidden_units = 32,
-                            time_offsets = 1,
-                            #hybrid=True, #added <-- if using time
-                            verbose=True)
+                        batch_size=512,
+                        learning_rate=.00775,
+                        temperature_mode='auto',
+                        #temperature=0.6,
+                        min_temperature=0.25,
+                        output_dimension=output_dimension,
+                        max_iterations=15000,
+                        distance='euclidean',
+                        conditional='time_delta',
+                        device='cuda_if_available',
+                        num_hidden_units=32,
+                        time_offsets=1,
+                        verbose=True)
+
 
 
     shuff_model = CEBRA(model_architecture='offset10-model',
-                            batch_size=512,
-                            #learning_rate= .00026,
-                            learning_rate= .001,
-                            #temperature = 2,
-                            temperature_mode = 'auto',
-                            min_temperature = .3,
-                            output_dimension=output_dimension,
-                            max_iterations=8000,
-                            distance='euclidean',
-                            conditional='time_delta', #added, keep
-                            device='cuda_if_available',
-                            num_hidden_units = 32,
-                            time_offsets = 1,
-                            #hybrid=True, #added <-- if using time
-                            verbose=True)
-
+                        batch_size=512,
+                        learning_rate=.00775,
+                        temperature_mode='auto',
+                        #temperature=0.6,
+                        min_temperature=0.25,
+                        output_dimension=output_dimension,
+                        max_iterations=15000,
+                        distance='euclidean',
+                        conditional='time_delta',
+                        device='cuda_if_available',
+                        num_hidden_units=32,
+                        time_offsets=1,
+                        verbose=True)
 
 
 
