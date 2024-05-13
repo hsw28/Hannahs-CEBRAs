@@ -81,7 +81,7 @@ PosB1 = PosB1[high_vel_indices_B1]
 
 traceA1An_A1 = traceA1An_A1[high_vel_indices_A1]
 traceA1An_An = traceA1An_An[high_vel_indices_An]
-traceAnB1_A = traceAnB1_An[high_vel_indices_An]
+traceAnB1_An = traceAnB1_An[high_vel_indices_An]
 traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
 
 

@@ -15,6 +15,7 @@ from scipy import stats
 from pos_score import pos_score
 from plot_hippocampus3d import plot_hippocampus3d
 import datetime
+from hold_out import hold_out
 
 
 #for making the shuffle position figure
@@ -31,7 +32,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         #temperature=0.6,
                         min_temperature=0.25,
                         output_dimension=output_dimension,
-                        max_iterations=15000,
+                        max_iterations=150,
                         distance='euclidean',
                         conditional='time_delta',
                         device='cuda_if_available',
@@ -48,7 +49,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         #temperature=0.6,
                         min_temperature=0.25,
                         output_dimension=output_dimension,
-                        max_iterations=15000,
+                        max_iterations=150,
                         distance='euclidean',
                         conditional='time_delta',
                         device='cuda_if_available',
@@ -68,14 +69,14 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    traceA1An_An, traceA1An_An_test = hold_out(traceA1An_An, 0.8)
+    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 0.8)
     posAn_train, posAn_test = hold_out(posAn, 0.8)
 
     # Fitting the model on training data
-    cebra_loc_model.fit(traceA1An_An, posAn_train)
+    cebra_loc_model.fit(traceA1An_An_train, posAn_train)
 
     # Transforming both the training and test data
-    trainA_train = cebra_loc_model.transform(traceA1An_An)
+    trainA_train = cebra_loc_model.transform(traceA1An_An_train)
     trainA1 = cebra_loc_model.transform(traceA1An_An_test)
     testA1 = cebra_loc_model.transform(traceA1An_A1)
 
@@ -86,9 +87,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-
     #plot day An (only cells also in day A1)(default model)
-    pos = np.array(posAn)  # Replace with your pos array
+    pos = np.array(posAn_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -121,10 +121,10 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    traceAnB1_An, traceAnB1_An_test = hold_out(traceA1An_An, .8)
+    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
     posAn_train, posAn_test = hold_out(posAn, .8)
-    cebra_loc_model.fit(traceAnB1_An, posAn_train)
-    trainB1_train = cebra_loc_model.transform(traceAnB1_An)
+    cebra_loc_model.fit(traceAnB1_An_train, posAn_train)
+    trainB1_train = cebra_loc_model.transform(traceAnB1_An_train)
     trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
@@ -137,7 +137,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     #plot day An (only cells also in day B1)(default model)
-    pos = np.array(posAn)  # Replace with your pos array
+    pos = np.array(posAn_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -167,20 +167,18 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
 
-    data = distances  # Your data
-    mean = np.mean(data)
-    std_dev = np.std(data)
-    threshold = 2.5  # 3 standard deviations
-    wanted = np.abs(data - mean) <= threshold * std_dev
-    wanted = wanted.flatten()
-    distances = data[wanted]
+
+    #data = distances  # Your data
+    #mean = np.mean(data)
+    #std_dev = np.std(data)
+    #threshold = 2.5  # 3 standard deviations
+    #wanted = np.abs(data - mean) <= threshold * std_dev
+    #wanted = wanted.flatten()
+    #distances = data[wanted]
 
 
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-
-
-    testB1 = testB1[wanted,:]
-
+    #testB1 = testB1[wanted,:]
 
     ax1, p1 = plot_hippocampus3d(axs[0, 3], testB1, distances, distances, s=4)#<--------------------
     p1.set_clim(0.05, 0.85)
@@ -199,12 +197,13 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
         np.random.shuffle(pos_shuff[:, column])
 
 
+
     # Fit the model with the shuffled data
-    traceA1An_An, traceA1An_An_test = hold_out(traceA1An_An, .8)
+    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, .8)
     pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
 
-    cebra_loc_model.fit(traceA1An_An, pos_shuff_train)
-    trainA_train = cebra_loc_model.transform(traceA1An_An)
+    cebra_loc_model.fit(traceA1An_An_train, pos_shuff_train)
+    trainA_train = cebra_loc_model.transform(traceA1An_An_train)
     trainA1 = cebra_loc_model.transform(traceA1An_An_test)
     testA1 = cebra_loc_model.transform(traceA1An_A1)
 
@@ -216,7 +215,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     #plot day An cells only in day A1 (shuff)
-    pos = np.array(pos_shuff)  # Replace with your pos array
+    pos = np.array(pos_shuff_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -249,12 +248,12 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
 
 
-    traceAnB1_An, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
+    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
     pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
 
-    cebra_loc_model.fit(traceAnB1_An, pos_shuff)
+    cebra_loc_model.fit(traceAnB1_An_train, pos_shuff_train)
 
-    trainB1_train = cebra_loc_model.transform(traceAnB1_An)
+    trainB1_train = cebra_loc_model.transform(traceAnB1_An_train)
     trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
@@ -265,7 +264,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     #plot day An-B1 (shuff)
-    pos = np.array(pos_shuff)  # Replace with your pos array
+    pos = np.array(pos_shuff_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
