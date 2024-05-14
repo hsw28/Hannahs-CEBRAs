@@ -21,7 +21,7 @@ import gc
 
 
 #decodes conditioning in envB using envA.
-#Outputs percent correct in envA after being trained in env A(based on a 70/30 split)
+#Outputs percent correct in envA after being trained in env A(based on a 75/25 split)
 #Outputs percent correct in envB using the model trained in envA
 
 
@@ -55,8 +55,8 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
 
 
           ######### use this to test in own environment
-          eyeblink_train_control, eyeblink_test_control = hold_out(envA_eyeblink, .70)
-          cell_train_control, cell_test_control  = hold_out(envA_cell_train,.70)
+          eyeblink_train_control, eyeblink_test_control = hold_out(envA_eyeblink, .75)
+          cell_train_control, cell_test_control  = hold_out(envA_cell_train,.75)
 
           #run the model
           cebra_loc_modelpos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
@@ -74,8 +74,11 @@ def cond_decoding_AvsB(envA_cell_train, envA_eyeblink, envB_cell_train, envB_eye
           cell_test = envB_cell_train
           eyeblink_test_control = envB_eyeblink
 
+          cebra_loc_modelpos_full = cebra_loc_model.fit(envA_cell_train, envA_eyeblink)
+
           #determine model fit
-          cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
+          cebra_loc_train22 = cebra_loc_modelpos.transform(envA_cell_train)
+          cebra_loc_test22 = cebra_loc_modelpos_full.transform(cell_test)
           #find fraction correct
           fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 

@@ -39,11 +39,11 @@ def CSUSconsistency(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eyebli
     fract_control_all = []
     fract_test_all = []
 
-    eyeblink_train_controlA, eyeblink_test_controlA = hold_out(envA_eyeblink, .70)
-    cell_train_controlA, cell_test_controlA  = hold_out(envA_cell_train,.70)
+    eyeblink_train_controlA, eyeblink_test_controlA = hold_out(envA_eyeblink, .75)
+    cell_train_controlA, cell_test_controlA  = hold_out(envA_cell_train,.75)
 
-    eyeblink_train_controlB, eyeblink_test_controlB = hold_out(envB_eyeblink, .70)
-    cell_train_controlB, cell_test_controlB  = hold_out(envB_cell_train,.70)
+    eyeblink_train_controlB, eyeblink_test_controlB = hold_out(envB_eyeblink, .75)
+    cell_train_controlB, cell_test_controlB  = hold_out(envB_cell_train,.75)
 
     if not np.array_equal(eyeblink_test_controlA[:10], eyeblink_test_controlB[:10]):
         # Determine the amount to truncate from the training sets to make the first 10 values the same
@@ -55,7 +55,6 @@ def CSUSconsistency(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eyebli
 
     model1 = cebra_loc_model.fit(envA_cell_train, envA_eyeblink)
     model1 = model1.transform(cell_test_controlA)
-
 
     model2 = cebra_loc_model.fit(envB_cell_train, envB_eyeblink)
     model2 = model2.transform(cell_test_controlB)

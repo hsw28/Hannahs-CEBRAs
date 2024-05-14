@@ -7,7 +7,7 @@ import cebra
 from cebra import CEBRA
 import cebra.helper as cebra_helper
 import numpy as np
-from pos_compare_iterations import pos_compare_iterations
+from pos_compare_iterations2 import pos_compare_iterations2
 from smoothpos import smoothpos
 from ca_velocity import ca_velocity
 

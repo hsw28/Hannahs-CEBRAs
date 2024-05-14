@@ -32,7 +32,7 @@ import gc
 
 #how to run:
     #conda activate cebra
-    #python cond_decoding_AvsB_script.py traceA_file traceB_file trainingA_file trainingB_file how_many_divisions pretrial_y_or_n
+    #python cond_decoding_AvsB_grid.py traceA_file traceB_file trainingA_file trainingB_file how_many_divisions pretrial_y_or_n
 
 #pretrial_y_or_n: 0 for only cs us, 1 for cs us pretrial
 #how many divisions you wanted-- for ex,
@@ -41,7 +41,7 @@ import gc
                         #= 10 will split CS and US each into 5
 
 #Example
-    # python cond_decoding_script.py traceA.npy traceB.npy trainingA.npy trainingB.npy 2 1 --learning_rate 1e-4,5e-4 --min_temperature 0.1,0.3 --max_iterations 5000,10000
+    # python cond_decoding_AvsB_grid.py traceA.npy traceB.npy trainingA.npy trainingB.npy 2 0 --learning_rate 1e-4,5e-4 --min_temperature 0.1,0.3 --max_iterations 5000,10000
 
 
 def parse_list_argument(arg_value):
@@ -152,6 +152,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
 
         fract_control_all = []
         fract_test_all = []
+        loss_all = []
 
         # Loop to run the batch of code 50 times
         for i in range(5):
@@ -161,8 +162,8 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               #test control environment
 
               ######### use this to test in own environment
-              eyeblink_train_control, eyeblink_test_control = hold_out(envA_eyeblink, .70)
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train,.70)
+              eyeblink_train_control, eyeblink_test_control = hold_out(envA_eyeblink, .75)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train,.75)
 
               #run the model
               cebra_loc_modelpos = cebra_loc_model.fit(cell_train_control, eyeblink_train_control)
@@ -175,13 +176,17 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
               fract_controlA = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
 
-
               #test with using A to decode B
               cell_test = envB_cell_train
               eyeblink_test_control = envB_eyeblink
 
+              cebra_loc_modelpos_full = cebra_loc_model.fit(envA_cell_train, envA_eyeblink)
+              loss_all.append(cebra_loc_model.state_dict_['loss'][-1])
+
               #determine model fit
-              cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
+              cebra_loc_train22 = cebra_loc_modelpos.transform(envA_cell_train)
+              cebra_loc_test22 = cebra_loc_modelpos_full.transform(cell_test)
+
               #find fraction correct
               fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
 
@@ -201,18 +206,25 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envA_eyeblink, envB_cell_trai
         # Calculate mean of all fractions
         mean_control = np.mean(fract_control_all)
         mean_test = np.mean(fract_test_all)  # Corrected to use fract_test_all
+        mean_loss = np.mean(loss_all)
+        std_loss = np.std(loss_all)
+
 
         # Round the mean values
         mean_control = round(mean_control, 3)
         mean_test = round(mean_test, 3)
+        mean_loss = round(mean_loss,3)
+        std_loss = round(std_loss,3)
 
         # Append the correctly calculated means to the results
         results.append({
             'learn_rate': lr,
             'min_temp': temp,
             'max_it': max_iter,
-            'fract_control': fract_control_all,
-            'fract_test': fract_test_all,
+        #    'fract_control': fract_control_all,
+        #    'fract_test': fract_test_all,
+            'mean_loss': mean_loss,
+            'std_loss': std_loss,
             'mean_control': mean_control,  # Correctly calculated mean
             'mean_test': mean_test         # Correctly calculated mean
         })

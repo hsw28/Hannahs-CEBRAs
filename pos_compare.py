@@ -16,6 +16,8 @@ from pos_score import pos_score
 from plot_hippocampus3d import plot_hippocampus3d
 import datetime
 from hold_out import hold_out
+import os
+
 
 
 #for making the shuffle position figure
@@ -25,15 +27,20 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
+    learning_rate = 0.00775
+    min_temperature = 0.25
+    max_iterations = 15000
+    distance = 'euclidean'
+
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
-                        learning_rate=.00775,
+                        learning_rate=learning_rate,
                         temperature_mode='auto',
                         #temperature=0.6,
-                        min_temperature=0.25,
+                        min_temperature=min_temperature,
                         output_dimension=output_dimension,
-                        max_iterations=150,
-                        distance='euclidean',
+                        max_iterations=max_iterations,
+                        distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
@@ -44,13 +51,13 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
     shuff_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
-                        learning_rate=.00775,
+                        learning_rate=learning_rate,
                         temperature_mode='auto',
                         #temperature=0.6,
-                        min_temperature=0.25,
+                        min_temperature=min_temperature,
                         output_dimension=output_dimension,
-                        max_iterations=150,
-                        distance='euclidean',
+                        max_iterations=max_iterations,
+                        distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
@@ -69,8 +76,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 0.8)
-    posAn_train, posAn_test = hold_out(posAn, 0.8)
+    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 0.75)
+    posAn_train, posAn_test = hold_out(posAn, 0.75)
 
     # Fitting the model on training data
     cebra_loc_model.fit(traceA1An_An_train, posAn_train)
@@ -78,6 +85,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Transforming both the training and test data
     trainA_train = cebra_loc_model.transform(traceA1An_An_train)
     trainA1 = cebra_loc_model.transform(traceA1An_An_test)
+
+    cebra_loc_model.fit(traceA1An_An, posAn)
     testA1 = cebra_loc_model.transform(traceA1An_A1)
 
     # for held out
@@ -121,11 +130,14 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
-    posAn_train, posAn_test = hold_out(posAn, .8)
+    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
+    posAn_train, posAn_test = hold_out(posAn, .75)
     cebra_loc_model.fit(traceAnB1_An_train, posAn_train)
     trainB1_train = cebra_loc_model.transform(traceAnB1_An_train)
     trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
+
+
+    cebra_loc_model.fit(traceAnB1_An, posAn)
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
 
@@ -199,8 +211,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     # Fit the model with the shuffled data
-    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, .8)
-    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
+    traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, .75)
+    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .75)
 
     cebra_loc_model.fit(traceA1An_An_train, pos_shuff_train)
     trainA_train = cebra_loc_model.transform(traceA1An_An_train)
@@ -248,8 +260,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
 
 
-    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .8)
-    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .8)
+    traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
+    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .75)
 
     cebra_loc_model.fit(traceAnB1_An_train, pos_shuff_train)
 
@@ -313,13 +325,21 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     now = datetime.datetime.now()
 
     # Format the date and time as a string
-    date_time_str = now.strftime("%Y-%m-%d_%H-%M-%S")
+    current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
 
-    # Specify the folder path
-    folder_path = '/Users/Hannah/Programming/data_eyeblink/tempfigs/'
+    # Get the current working directory
+    current_directory = os.getcwd()
+
+    # Specify the folder path as the current directory
+    folder_path = current_directory
 
     # Save the plot with the date and time in the file name, in the specified folder
-    file_name = f'{folder_path}pos_compare_{date_time_str}.svg'
+    #file_name = f'{folder_path}/pos_compare_{date_time_str}.svg'
+    file_name = f"{folder_path}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
+
     plt.savefig(file_name, format='svg')
 
-    plt.show()
+    # Close the figure to free up memory
+    plt.close(fig)
+
+    #plt.show()
