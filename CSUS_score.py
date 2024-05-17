@@ -18,6 +18,10 @@ from matplotlib.collections import LineCollection
 
 def CSUS_score(emb_train, emb_test, label_train, label_test, n_neighbors=32):
     CSUS_decoder = KNeighborsClassifier(n_neighbors, metric = 'cosine')
+    #print(emb_train)
+    #print(label_train)
+    #print(emb_train.shape)
+    #print(label_train.shape)
     CSUS_decoder.fit(emb_train, label_train)
     predicted = CSUS_decoder.predict(emb_test)
 

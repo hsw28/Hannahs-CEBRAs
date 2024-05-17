@@ -132,7 +132,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             device='cuda_if_available',
             num_hidden_units=32,
             time_offsets=1,
-            verbose=False
+            verbose=True
         )
 
         Pos_err_shuff_all = []
@@ -154,8 +154,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               #test control environment
 
               ######### use this to test in own environment
-              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, .8)
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .8)
+              eyeblink_train_control, eyeblink_test_control = hold_out(PosA, .75)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .75)
 
 
               #run the model
@@ -187,8 +187,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               indices = np.random.permutation(PosA.shape[0])  # Get a permutation of the row indices
               posAn_shuffled = PosA[indices, :] #apply and shuffle
 
-              eyeblink_train_control, eyeblink_test_control = hold_out(posAn_shuffled, .8)
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .8)
+              eyeblink_train_control, eyeblink_test_control = hold_out(posAn_shuffled, .75)
+              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .75)
 
               cell_test = envB_cell_train
               eyeblink_test_control = PosB

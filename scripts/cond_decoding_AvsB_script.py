@@ -14,6 +14,8 @@ from cond_decoding_AvsB import cond_decoding_AvsB
     #conda activate cebra
     #python cond_decoding_AvsB_script.py traceA_file traceB_file trainingA_file trainingB_file how_many_divisions pretrial_y_or_n
 
+#ex
+    #python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0
 #pretrial_y_or_n: 0 for only cs us, 1 for cs us pretrial
 #how many divisions you wanted-- for ex,
 #pretrial_y_or_n = 1
@@ -40,7 +42,8 @@ trainingA = cebra.load_data(file=args.trainingA)  # Adjust 'your_key_here' as ne
 trainingB = cebra.load_data(file=args.trainingB)  # Adjust 'your_key_here' as necessary
 
 
-
+trainingA = trainingA[0, :]
+trainingB = trainingB[0, :]
 traceA = np.transpose(traceA)
 traceB = np.transpose(traceB)
 trainingA = trainingA.flatten()
@@ -64,14 +67,24 @@ else:
 
 
 how_many_divisions = args.how_many_divisions
+#    if how_many_divisions == 2:
+#        trainingA[(trainingA > 0) & (trainingA <= 5)]  = 1
+#        trainingA[trainingA > 5] = 2
+#        trainingA[trainingA == -1] = 0
+
+#        trainingB[(trainingB > 0) & (trainingB <= 5)]  = 1
+#        trainingB[trainingB > 5] = 2
+#        trainingB[trainingB == -1] = 0
+
 if how_many_divisions == 2:
-    trainingA[(trainingA > 0) & (trainingA <= 5)]  = 1
-    trainingA[trainingA > 5] = 2
+    trainingA[(trainingA > 0) & (trainingA <= 6)]  = 1
+    trainingA[trainingA > 6] = 2
     trainingA[trainingA == -1] = 0
 
-    trainingB[(trainingB > 0) & (trainingB <= 5)]  = 1
-    trainingB[trainingB > 5] = 2
+    trainingB[(trainingB > 0) & (trainingB <= 6)]  = 1
+    trainingB[trainingB > 6] = 2
     trainingB[trainingB == -1] = 0
+
 elif how_many_divisions == 5:
     trainingA[(trainingA > 0) & (trainingA <= 2)]  = 1
     trainingA[(trainingA > 2) & (trainingA <= 4)] = 2
@@ -87,7 +100,7 @@ elif how_many_divisions == 5:
     trainingB[trainingB > 8] = 5
     trainingB[trainingB == -1] = 0
 
-    dimensions = how_many_divisions + args.pretrial_y_or_n
+dimensions = how_many_divisions + args.pretrial_y_or_n
 
 # Running the conditional decoding function
-fract_control_all, fract_test_all = cond_decoding_AvsB(traceA, trainingA, traceB, trainingB, dimensions)
+fract_control_all, fract_test_all = cond_decoding_AvsB(traceA, traceB, trainingA, trainingB, dimensions)

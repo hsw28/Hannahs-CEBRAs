@@ -87,6 +87,8 @@ if __name__ == '__main__':
     trainingB = cebra.load_data(file=args.trainingB)  # Adjust 'your_key_here' as necessary
 
     # Data preprocessing steps
+    trainingA = trainingA[0, :]
+    trainingB = trainingB[0, :]
     traceA = np.transpose(traceA)
     traceB = np.transpose(traceB)
     trainingA = trainingA.flatten()

@@ -11,9 +11,12 @@ from smoothpos import smoothpos
 from ca_velocity import ca_velocity
 
 #for making the shuffle Position figure
-# python Pos_compare_script traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1
+#can optionally input parameters or hard code them
+#not inputed:
+    # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./posAn.mat ./posA1.mat ./posB1.mat;
+#inputed:
+    # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./posAn.mat ./posA1.mat ./posB1.mat --learning_rate 0.001 --min_temperature 0.2 --max_iterations 20 --distance euclidean
 
-#traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1
 
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
 parser.add_argument("traceA1An_An", type=str)
@@ -23,6 +26,10 @@ parser.add_argument("traceAnB1_B1", type=str)
 parser.add_argument("PosAn", type=str)
 parser.add_argument("PosA1", type=str)
 parser.add_argument("PosB1", type=str)
+parser.add_argument("--learning_rate", type=float, default=0.000775)
+parser.add_argument("--min_temperature", type=float, default=0.001)
+parser.add_argument("--max_iterations", type=int, default=6000)
+parser.add_argument("--distance", type=str, default='cosine')
 
 # Parse arguments
 args = parser.parse_args()
@@ -87,4 +94,4 @@ traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
 
 
 
-pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1)
+pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, learning_rate=args.learning_rate, min_temperature=args.min_temperature, max_iterations=args.max_iterations, distance=args.distance)

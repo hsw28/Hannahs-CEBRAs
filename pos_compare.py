@@ -21,16 +21,24 @@ import os
 
 
 #for making the shuffle position figure
+#can optionally input parameters or hard code them
+#not inputed:
+    # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./posAn.mat ./posA1.mat ./posB1.mat;
+#inputed:
+    # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./posAn.mat ./posA1.mat ./posB1.mat --learning_rate 0.1 --min_temperature 0.5 --max_iterations 20 --distance euclidean
 
 
-def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1):
+def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1, learning_rate=0.000775, min_temperature=0.001, max_iterations=6000, distance='cosine'):
 
 
-    output_dimension = 3 #here, we set as a variable for hypothesis testing below.
-    learning_rate = 0.00775
-    min_temperature = 0.25
-    max_iterations = 15000
-    distance = 'euclidean'
+    output_dimension = 3
+
+
+#    output_dimension = 3 #here, we set as a variable for hypothesis testing below.
+#    learning_rate = 0.000775
+#    min_temperature = 0.1
+#    max_iterations = 18000
+#    distance = 'cosine'
 
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
@@ -67,12 +75,16 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     # Create a figure and a 2x3 grid of subplots
-    fig, axs = plt.subplots(2, 4, figsize=(15, 10))  # Adjust figsize as needed
+    ###fig, axs = plt.subplots(2, 4, figsize=(15, 10))  # Adjust figsize as needed
+    fig, axs = plt.subplots(4, 6, figsize=(15, 15))  # Adjust figsize as needed
+
 
     # Convert each subplot to a 3D plot
-    for i in range(2):
-        for j in range(4):
-            axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
+    ###for i in range(2):
+    for i in range(4):
+        for j in range(6):
+            ###axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
+            axs[i, j] = fig.add_subplot(4, 6, i * 4 + j + 1, projection='3d')
 
 
 
@@ -86,7 +98,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     trainA_train = cebra_loc_model.transform(traceA1An_An_train)
     trainA1 = cebra_loc_model.transform(traceA1An_An_test)
 
-    cebra_loc_model.fit(traceA1An_An, posAn)
+    #cebra_loc_model.fit(traceA1An_An, posAn) #this if want to fit on full data and not held out
     testA1 = cebra_loc_model.transform(traceA1An_A1)
 
     # for held out
@@ -94,9 +106,24 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #for test
     Pos_test_score_train_A1An_A1, Pos_test_err_train_A1An_A1, dis_mean_train_A1An_A1, dis_median_train_A1An_A1 = pos_score(trainA_train, testA1, posAn_train, posA1)
 
+    #plot day An not out (only cells also in day A1)(default model)
+    pos = np.array(posAn_train)  # Replace with your pos array
+    # Identify a corner, e.g., top-right corner
+    corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
+    corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
+    corner = np.array([corner_x, corner_y])
+    center_x = np.mean(pos[:, 0])  # Mean of x-coordinates
+    center_y = np.mean(pos[:, 1])  # Mean of y-coordinates
+    center = np.array([center_x, center_y])
+    # Calculate distances from each point to the corner
+    distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
+    #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
+    plot_hippocampus3d(axs[0, 0], trainA_train, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[2, 0], trainA_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 0], trainA_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
-
-    #plot day An (only cells also in day A1)(default model)
+    #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(posAn_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
@@ -108,8 +135,10 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-    plot_hippocampus3d(axs[0, 0], trainA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[0, 1], trainA1, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[2, 1], trainA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 1], trainA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
     #plot day A1 after being trained on An
@@ -125,8 +154,10 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[0, 1], testA1, distances, distances, s=4)#<--------------------
+    plot_hippocampus3d(axs[0, 2], testA1, distances, distances, s=4)#<--------------------
     #plot_hippocampus3d(axs2[0], testA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[2, 2], testA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 2], testA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
 
@@ -137,7 +168,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     trainB1 = cebra_loc_model.transform(traceAnB1_An_test)
 
 
-    cebra_loc_model.fit(traceAnB1_An, posAn)
+    #cebra_loc_model.fit(traceAnB1_An, posAn) #this if want to fit on full data and not held out
     testB1 = cebra_loc_model.transform(traceAnB1_B1)
 
 
@@ -147,8 +178,25 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     Pos_test_score_train_AnB1_B1, Pos_test_err_train_AnB1_B1, dis_mean_train_AnB1_B1, dis_median_train_AnB1_B1 = pos_score(trainB1_train, testB1, posAn_train, posB1)
 
 
+    #plot day An held out (only cells also in day B1)(default model)
+    pos = np.array(posAn_train)  # Replace with your pos array
+    # Identify a corner, e.g., top-right corner
+    corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
+    corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
+    corner = np.array([corner_x, corner_y])
+    center_x = np.mean(pos[:, 0])  # Mean of x-coordinates
+    center_y = np.mean(pos[:, 1])  # Mean of y-coordinates
+    center = np.array([center_x, center_y])
+    # Calculate distances from each point to the corner
+    distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
+    #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
+    plot_hippocampus3d(axs[0, 3], trainB1_train, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[2, 3], trainB1_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 3], trainB1_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
-    #plot day An (only cells also in day B1)(default model)
+
+    #plot day An held out (only cells also in day B1)(default model)
     pos = np.array(posAn_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
@@ -160,8 +208,10 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-    plot_hippocampus3d(axs[0, 2], trainB1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[0, 4], trainB1, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[2, 4], trainB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 4], trainB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
     #plot B1 after being trained on An
@@ -180,6 +230,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
 
 
+    ##WHY DID I DO THIS?
     #data = distances  # Your data
     #mean = np.mean(data)
     #std_dev = np.std(data)
@@ -187,19 +238,20 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #wanted = np.abs(data - mean) <= threshold * std_dev
     #wanted = wanted.flatten()
     #distances = data[wanted]
-
-
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     #testB1 = testB1[wanted,:]
 
-    ax1, p1 = plot_hippocampus3d(axs[0, 3], testB1, distances, distances, s=4)#<--------------------
-    p1.set_clim(0.05, 0.85)
+    plot_hippocampus3d(axs[0, 5], testB1, distances, distances, s=4)#<--------------------
+    plot_hippocampus3d(axs[2, 5], testB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    plot_hippocampus3d(axs[3, 5], testB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    ###p1.set_clim(0.05, 0.85)
     #plot_hippocampus3d(axs3[0], testB1, distances, distances, s=4) #<--------------------
 
 
 
 
 
+    '''
     # Convert to numpy array if not already
     pos = np.array(posAn)
     # Create a new array to hold the shuffled data
@@ -319,7 +371,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #plot_hippocampus3d(axs3[1], testB1, distances, distances, s=4) #<--------------------
     p2.set_clim(0.1, 0.8)
 
-
+    '''
 
     # Get the current date and time
     now = datetime.datetime.now()
@@ -343,3 +395,88 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     plt.close(fig)
 
     #plt.show()
+
+    '''
+    # Same thing, different point size
+    fig2, axs2 = plt.subplots(4, 4, figsize=(15, 10))
+    for i in range(4):
+        for j in range(4):
+            axs2[i, j] = fig2.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
+
+    # Plotting code with s=5
+    plot_hippocampus3d(axs2[0, 0], trainA1, distances, distances, s=5)
+    plot_hippocampus3d(axs2[2, 0], trainA1, pos[:, 0], pos[:, 0], s=5)
+    plot_hippocampus3d(axs2[3, 0], trainA1, pos[:, 1], pos[:, 1], s=5)
+    plot_hippocampus3d(axs2[0, 1], testA1, distances, distances, s=5)
+    plot_hippocampus3d(axs2[2, 1], testA1, pos[:, 0], pos[:, 0], s=5)
+    plot_hippocampus3d(axs2[3, 1], testA1, pos[:, 1], pos[:, 1], s=5)
+    plot_hippocampus3d(axs2[0, 2], trainB1, distances, distances, s=5)
+    plot_hippocampus3d(axs2[2, 2], trainB1, pos[:, 0], pos[:, 0], s=5)
+    plot_hippocampus3d(axs2[3, 2], trainB1, pos[:, 1], pos[:, 1], s=5)
+    plot_hippocampus3d(axs2[0, 3], testB1, distances, distances, s=5)
+    plot_hippocampus3d(axs2[2, 3], testB1, pos[:, 0], pos[:, 0], s=5)
+    plot_hippocampus3d(axs2[3, 3], testB1, pos[:, 1], pos[:, 1], s=5)
+
+    # Save the second figure
+    file_name2 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size5.svg"
+    plt.savefig(file_name2, format='svg')
+    plt.close(fig2)
+
+
+    # Same thing, different point size
+    fig3, axs3 = plt.subplots(4, 4, figsize=(15, 10))
+    for i in range(4):
+        for j in range(4):
+            axs3[i, j] = fig3.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
+
+    # Plotting code with s=5
+    plot_hippocampus3d(axs3[0, 0], trainA1, distances, distances, s=3)
+    plot_hippocampus3d(axs3[2, 0], trainA1, pos[:, 0], pos[:, 0], s=3)
+    plot_hippocampus3d(axs3[3, 0], trainA1, pos[:, 1], pos[:, 1], s=3)
+    plot_hippocampus3d(axs3[0, 1], testA1, distances, distances, s=3)
+    plot_hippocampus3d(axs3[2, 1], testA1, pos[:, 0], pos[:, 0], s=3)
+    plot_hippocampus3d(axs3[3, 1], testA1, pos[:, 1], pos[:, 1], s=3)
+    plot_hippocampus3d(axs3[0, 2], trainB1, distances, distances, s=3)
+    plot_hippocampus3d(axs3[2, 2], trainB1, pos[:, 0], pos[:, 0], s=3)
+    plot_hippocampus3d(axs3[3, 2], trainB1, pos[:, 1], pos[:, 1], s=3)
+    plot_hippocampus3d(axs3[0, 3], testB1, distances, distances, s=3)
+    plot_hippocampus3d(axs3[2, 3], testB1, pos[:, 0], pos[:, 0], s=3)
+    plot_hippocampus3d(axs3[3, 3], testB1, pos[:, 1], pos[:, 1], s=3)
+
+    # Save the second figure
+    file_name3 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size3.svg"
+    plt.savefig(file_name3, format='svg')
+    plt.close(fig3)
+
+
+    # Save the second figure
+    file_name2 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size5.svg"
+    plt.savefig(file_name2, format='svg')
+    plt.close(fig2)
+
+
+    # Same thing, different point size
+    fig4, axs4 = plt.subplots(4, 4, figsize=(15, 10))
+    for i in range(4):
+        for j in range(4):
+            axs4[i, j] = fig3.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
+
+    # Plotting code with s=5
+    plot_hippocampus3d(axs4[0, 0], trainA1, distances, distances, s=6)
+    plot_hippocampus3d(axs4[2, 0], trainA1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs4[3, 0], trainA1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs4[0, 1], testA1, distances, distances, s=6)
+    plot_hippocampus3d(axs4[2, 1], testA1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs4[3, 1], testA1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs4[0, 2], trainB1, distances, distances, s=6)
+    plot_hippocampus3d(axs4[2, 2], trainB1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs4[3, 2], trainB1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs4[0, 3], testB1, distances, distances, s=6)
+    plot_hippocampus3d(axs4[2, 3], testB1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs4[3, 3], testB1, pos[:, 1], pos[:, 1], s=6)
+
+    # Save the second figure
+    file_name4 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size6.svg"
+    plt.savefig(file_name4, format='svg')
+    plt.close(fig4)
+    '''

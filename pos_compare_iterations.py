@@ -46,15 +46,19 @@ def generate_headers():
 def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1,iterations):
 
     output_dimension = 3
+    learning_rate = 0.00775
+    min_temperature = 0.25
+    max_iterations = 15000
+    distance = 'euclidean'
+
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
-                        learning_rate=.00775,
+                        learning_rate=learning_rate,
                         temperature_mode='auto',
-                        #temperature=0.6,
-                        min_temperature=0.25,
+                        min_temperature=min_temperature,
                         output_dimension=output_dimension,
-                        max_iterations=15000,
-                        distance='euclidean',
+                        max_iterations=max_iterations,
+                        distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
@@ -80,7 +84,7 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
             shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)
             regular_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train, posAn_test, posB1)
-            shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train, posAn_test_shuffled, posB1)
+            shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train_shuffled, posAn_test_shuffled, posB1)
 
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
@@ -89,7 +93,7 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
 
         # Save the results to a CSV file with the current date and time in the filename
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"pos_compare_{current_time}.csv"
+        filename = f"pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.csv"
         header = generate_headers()
         np.savetxt(filename, results, delimiter=',', header=header, comments='', fmt='%.3f')  # Adjust precision as needed
         print(f"Results saved to {filename}")

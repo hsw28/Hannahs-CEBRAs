@@ -17,10 +17,10 @@ from matplotlib.collections import LineCollection
 from pos_score import pos_score
 import gc
 
-
+###THIS MIGHT BE DEPRECATED WITH POS_COMPARE
 #decodes own position using trace and pos from A, then uses it to decide pos from B, compares both to shuffled
 
-def pos_decoding_AvsB(cell_traceA, posA, cell_traceB, posB, percent_to_train):
+def pos_decoding_AvsB_dep(cell_traceA, posA, cell_traceB, posB, percent_to_train):
 
     output_dimension = 3 #here, we set as a variable for hypothesis testing below.
     cebra_loc_model = CEBRA(model_architecture='offset10-model',

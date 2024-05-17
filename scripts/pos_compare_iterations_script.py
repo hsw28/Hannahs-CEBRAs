@@ -99,4 +99,4 @@ traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
 
 
 
-pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations)
+pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations)
