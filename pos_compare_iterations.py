@@ -22,7 +22,7 @@ from hold_out import hold_out
 # traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1 are to be defined or loaded before calling this function.
 # results = pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1)
 # print(results)
-
+#     results = pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1, args.iterations, args.parameter_set_name)
 
 
 def train_and_evaluate(cebra_model, trace_train, trace_test, test_trace, pos_train, pos_test, test_pos):
@@ -43,13 +43,13 @@ def generate_headers():
 
     return ','.join(headers)
 
-def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1,iterations):
+def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1, iterations, parameter_set):
+    learning_rate = parameter_set["learning_rate"]
+    min_temperature = parameter_set["min_temperature"]
+    max_iterations = parameter_set["max_iterations"]
 
     output_dimension = 3
-    learning_rate = 0.00775
-    min_temperature = 0.25
-    max_iterations = 15000
-    distance = 'euclidean'
+    distance = 'cosine'
 
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
@@ -65,7 +65,6 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
                         time_offsets=1,
                         verbose=False)
 
-
     results = np.zeros((iterations, 32))  # Each iteration results in 32 outputs
 
     try:
@@ -76,10 +75,9 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
             posAnB1_train, posAnB1_test = hold_out(posAn, 75)
 
             indices = np.random.permutation(posAn.shape[0])  # Get a permutation of the row indices
-            posAn_shuffled = posAn[indices, :] #apply and shuffle
+            posAn_shuffled = posAn[indices, :]  # Apply and shuffle
 
             posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
-
 
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
             shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)

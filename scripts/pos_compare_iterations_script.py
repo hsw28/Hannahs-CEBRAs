@@ -12,8 +12,19 @@ from smoothpos import smoothpos
 from ca_velocity import ca_velocity
 
 #for using with slurm to run over a bunch of iterations
-# python pos_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 10
-# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./PosAn.mat ./PosA1.mat ./PosB1.mat --iterations 1
+# python pos_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 10 --parameter_set_name set0307
+# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./PosAn.mat ./PosA1.mat ./PosB1.mat --iterations 10 --parameter_set_name set0222
+
+
+# Define parameter sets
+parameter_sets = {
+    "set0222": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 16000},
+    "set0307": {"learning_rate": 0.00775, "min_temperature": 0.05, "max_iterations": 10000},
+    "set313": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 8000},
+    "set314": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 12000},
+    "set314b": {"learning_rate": 0.0006625, "min_temperature": 0.2, "max_iterations": 12000},
+    "set816": {"learning_rate": 0.00775, "min_temperature": 0.2, "max_iterations": 14000}
+}
 
 # Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
@@ -25,7 +36,7 @@ parser.add_argument("PosAn", type=str, help="Path to the PosAn data file.")
 parser.add_argument("PosA1", type=str, help="Path to the PosA1 data file.")
 parser.add_argument("PosB1", type=str, help="Path to the PosB1 data file.")
 parser.add_argument("--iterations", type=int, default=100, help="Number of iterations to run.")
-
+parser.add_argument("--parameter_set_name", type=str, default="set0222", help="Name of the parameter set to use.")
 
 # Parse arguments
 args = parser.parse_args()
@@ -53,7 +64,6 @@ PosA1 = PosA1[::2]
 if len(PosA1) > len(traceA1An_A1):
     PosA1 = PosA1[:len(traceA1An_A1)]
 
-
 PosAn = PosAn[:,1:]
 PosAn = PosAn[::2]
 if len(PosAn) > len(traceA1An_An):
@@ -64,16 +74,12 @@ PosB1 = PosB1[::2]
 if len(PosB1) > len(traceAnB1_B1):
     PosB1 = PosB1[:len(traceAnB1_B1)]
 
-
-
 vel_A1 = ca_velocity(PosA1)
 vel_An = ca_velocity(PosAn)
 vel_B1 = ca_velocity(PosB1)
 
 print(PosA1.shape)
 print(vel_A1.shape)
-
-
 
 high_vel_indices_A1 = np.where(vel_A1 >= 4)[0]
 high_vel_indices_An = np.where(vel_An >= 4)[0]
@@ -95,8 +101,5 @@ traceA1An_An = traceA1An_An[high_vel_indices_An]
 traceAnB1_An = traceAnB1_An[high_vel_indices_An]
 traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
 
-
-
-
-
-pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations)
+parameter_set = parameter_sets[args.parameter_set_name]
+pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations, parameter_set)

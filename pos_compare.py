@@ -51,7 +51,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
-                        num_hidden_units=32,
+                        num_hidden_units=42,
                         time_offsets=1,
                         verbose=True)
 
@@ -68,7 +68,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
-                        num_hidden_units=32,
+                        num_hidden_units=42,
                         time_offsets=1,
                         verbose=True)
 
@@ -84,7 +84,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     for i in range(4):
         for j in range(6):
             ###axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
-            axs[i, j] = fig.add_subplot(4, 6, i * 4 + j + 1, projection='3d')
+            axs[i, j] = fig.add_subplot(4, 6, i * 6 + j + 1, projection='3d')
 
 
 
@@ -392,9 +392,9 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     plt.savefig(file_name, format='svg')
 
     # Close the figure to free up memory
-    plt.close(fig)
+    #plt.close(fig)
 
-    #plt.show()
+    plt.show()
 
     '''
     # Same thing, different point size
@@ -403,19 +403,19 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
         for j in range(4):
             axs2[i, j] = fig2.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
 
-    # Plotting code with s=5
-    plot_hippocampus3d(axs2[0, 0], trainA1, distances, distances, s=5)
-    plot_hippocampus3d(axs2[2, 0], trainA1, pos[:, 0], pos[:, 0], s=5)
-    plot_hippocampus3d(axs2[3, 0], trainA1, pos[:, 1], pos[:, 1], s=5)
-    plot_hippocampus3d(axs2[0, 1], testA1, distances, distances, s=5)
-    plot_hippocampus3d(axs2[2, 1], testA1, pos[:, 0], pos[:, 0], s=5)
-    plot_hippocampus3d(axs2[3, 1], testA1, pos[:, 1], pos[:, 1], s=5)
-    plot_hippocampus3d(axs2[0, 2], trainB1, distances, distances, s=5)
-    plot_hippocampus3d(axs2[2, 2], trainB1, pos[:, 0], pos[:, 0], s=5)
-    plot_hippocampus3d(axs2[3, 2], trainB1, pos[:, 1], pos[:, 1], s=5)
-    plot_hippocampus3d(axs2[0, 3], testB1, distances, distances, s=5)
-    plot_hippocampus3d(axs2[2, 3], testB1, pos[:, 0], pos[:, 0], s=5)
-    plot_hippocampus3d(axs2[3, 3], testB1, pos[:, 1], pos[:, 1], s=5)
+    # Plotting code with s=6
+    plot_hippocampus3d(axs2[0, 0], trainA1, distances, distances, s=6)
+    plot_hippocampus3d(axs2[2, 0], trainA1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs2[3, 0], trainA1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs2[0, 1], testA1, distances, distances, s=6)
+    plot_hippocampus3d(axs2[2, 1], testA1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs2[3, 1], testA1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs2[0, 2], trainB1, distances, distances, s=6)
+    plot_hippocampus3d(axs2[2, 2], trainB1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs2[3, 2], trainB1, pos[:, 1], pos[:, 1], s=6)
+    plot_hippocampus3d(axs2[0, 3], testB1, distances, distances, s=6)
+    plot_hippocampus3d(axs2[2, 3], testB1, pos[:, 0], pos[:, 0], s=6)
+    plot_hippocampus3d(axs2[3, 3], testB1, pos[:, 1], pos[:, 1], s=6)
 
     # Save the second figure
     file_name2 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size5.svg"
@@ -429,19 +429,19 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
         for j in range(4):
             axs3[i, j] = fig3.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
 
-    # Plotting code with s=5
-    plot_hippocampus3d(axs3[0, 0], trainA1, distances, distances, s=3)
-    plot_hippocampus3d(axs3[2, 0], trainA1, pos[:, 0], pos[:, 0], s=3)
-    plot_hippocampus3d(axs3[3, 0], trainA1, pos[:, 1], pos[:, 1], s=3)
-    plot_hippocampus3d(axs3[0, 1], testA1, distances, distances, s=3)
-    plot_hippocampus3d(axs3[2, 1], testA1, pos[:, 0], pos[:, 0], s=3)
-    plot_hippocampus3d(axs3[3, 1], testA1, pos[:, 1], pos[:, 1], s=3)
-    plot_hippocampus3d(axs3[0, 2], trainB1, distances, distances, s=3)
-    plot_hippocampus3d(axs3[2, 2], trainB1, pos[:, 0], pos[:, 0], s=3)
-    plot_hippocampus3d(axs3[3, 2], trainB1, pos[:, 1], pos[:, 1], s=3)
-    plot_hippocampus3d(axs3[0, 3], testB1, distances, distances, s=3)
-    plot_hippocampus3d(axs3[2, 3], testB1, pos[:, 0], pos[:, 0], s=3)
-    plot_hippocampus3d(axs3[3, 3], testB1, pos[:, 1], pos[:, 1], s=3)
+    # Plotting code with s=6
+    plot_hippocampus3d(axs3[0, 0], trainA1, distances, distances, s=4)
+    plot_hippocampus3d(axs3[2, 0], trainA1, pos[:, 0], pos[:, 0], s=4)
+    plot_hippocampus3d(axs3[3, 0], trainA1, pos[:, 1], pos[:, 1], s=4)
+    plot_hippocampus3d(axs3[0, 1], testA1, distances, distances, s=4)
+    plot_hippocampus3d(axs3[2, 1], testA1, pos[:, 0], pos[:, 0], s=4)
+    plot_hippocampus3d(axs3[3, 1], testA1, pos[:, 1], pos[:, 1], s=4)
+    plot_hippocampus3d(axs3[0, 2], trainB1, distances, distances, s=4)
+    plot_hippocampus3d(axs3[2, 2], trainB1, pos[:, 0], pos[:, 0], s=4)
+    plot_hippocampus3d(axs3[3, 2], trainB1, pos[:, 1], pos[:, 1], s=4)
+    plot_hippocampus3d(axs3[0, 3], testB1, distances, distances, s=4)
+    plot_hippocampus3d(axs3[2, 3], testB1, pos[:, 0], pos[:, 0], s=4)
+    plot_hippocampus3d(axs3[3, 3], testB1, pos[:, 1], pos[:, 1], s=4)
 
     # Save the second figure
     file_name3 = f"{current_directory}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}_size3.svg"
@@ -461,7 +461,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
         for j in range(4):
             axs4[i, j] = fig3.add_subplot(4, 4, i * 4 + j + 1, projection='3d')
 
-    # Plotting code with s=5
+    # Plotting code with s=6
     plot_hippocampus3d(axs4[0, 0], trainA1, distances, distances, s=6)
     plot_hippocampus3d(axs4[2, 0], trainA1, pos[:, 0], pos[:, 0], s=6)
     plot_hippocampus3d(axs4[3, 0], trainA1, pos[:, 1], pos[:, 1], s=6)

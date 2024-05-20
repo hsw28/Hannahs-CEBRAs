@@ -45,11 +45,12 @@ def generate_headers():
 
 def pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1,iterations):
 
+
     output_dimension = 3
     learning_rate = 0.000775
     min_temperature = 0.1
     max_iterations = 18000
-    distance = 'cosine'
+    distance = 'euclidean'
 
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
@@ -85,7 +86,7 @@ def pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
             shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)
             regular_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train, posAn_test, posB1)
             shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train_shuffled, posAn_test_shuffled, posB1)
-            
+
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
 

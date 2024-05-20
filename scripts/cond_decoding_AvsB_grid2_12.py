@@ -73,6 +73,20 @@ def main():
     trainingA = trainingA[0, :]
     trainingB = trainingB[0, :]
 
+    # Find the indices where the pattern [10, 0, 0] occurs
+    indices = np.where((trainingA[:-2] == 10) & (trainingA[1:-1] == 0) & (trainingA[2:] == 0))[0]
+    # Update the pattern [10, 0, 0] to [10, 11, 12]
+    for idx in indices:
+        trainingA[idx + 1] = 11
+        trainingA[idx + 2] = 12
+
+    # Find the indices where the pattern [10, 0, 0] occurs
+    indices = np.where((trainingB[:-2] == 10) & (trainingB[1:-1] == 0) & (trainingB[2:] == 0))[0]
+    # Update the pattern [10, 0, 0] to [10, 11, 12]
+    for idx in indices:
+        trainingB[idx + 1] = 11
+        trainingB[idx + 2] = 12
+
     traceA = np.transpose(traceA)
     traceB = np.transpose(traceB)
     trainingA = trainingA.flatten()
