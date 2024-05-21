@@ -31,12 +31,12 @@ def cond_decoding_AvsB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                             batch_size=512,
                             #learning_rate= .046,
-                            learning_rate= .001,
+                            learning_rate= 4.5e-07,
                             temperature_mode = 'auto',
-                            #min_temperature = .2,
+                            min_temperature = .25,
                             output_dimension=output_dimension,
-                            max_iterations= 8000, #15000, #<--------------1-20000
-                            distance='cosine',
+                            max_iterations= 14000, #15000, #<--------------1-20000
+                            distance='euclidean',
                             conditional='time_delta', #added, keep
                             device='cuda_if_available',
                             num_hidden_units = 32,
@@ -52,7 +52,7 @@ def cond_decoding_AvsB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
 
 
     # Loop to run the batch of code 50 times
-    for i in range(1):
+    for i in range(5):
 
           #test control environment
 

@@ -20,10 +20,10 @@ from ca_velocity import ca_velocity
 parameter_sets = {
     "set0222": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 16000},
     "set0307": {"learning_rate": 0.00775, "min_temperature": 0.05, "max_iterations": 10000},
-    "set313": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 8000},
-    "set314": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 12000},
-    "set314b": {"learning_rate": 0.0006625, "min_temperature": 0.2, "max_iterations": 12000},
-    "set816": {"learning_rate": 0.00775, "min_temperature": 0.2, "max_iterations": 14000}
+    "set0313": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 8000},
+    "set0314": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 12000},
+    "set0314b": {"learning_rate": 0.0006625, "min_temperature": 0.2, "max_iterations": 12000},
+    "set0816": {"learning_rate": 0.00775, "min_temperature": 0.2, "max_iterations": 14000}
 }
 
 # Setup argparse for command line arguments
@@ -78,8 +78,8 @@ vel_A1 = ca_velocity(PosA1)
 vel_An = ca_velocity(PosAn)
 vel_B1 = ca_velocity(PosB1)
 
-print(PosA1.shape)
-print(vel_A1.shape)
+#print(PosA1.shape)
+#print(vel_A1.shape)
 
 high_vel_indices_A1 = np.where(vel_A1 >= 4)[0]
 high_vel_indices_An = np.where(vel_An >= 4)[0]

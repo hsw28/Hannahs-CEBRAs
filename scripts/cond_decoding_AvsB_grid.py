@@ -160,7 +160,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
             device='cuda_if_available',
             num_hidden_units=32,
             time_offsets=1,
-            verbose=True
+            verbose=False
         )
 
         fract_control_all = []
