@@ -149,11 +149,13 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         # Setup the CEBRA model with the current set of parameters
         cebra_loc_model = CEBRA(
             learning_rate=lr,
-            min_temperature=temp,
             max_iterations=max_iter,
             model_architecture='offset10-model',
             batch_size=512,
-            temperature_mode='auto',
+            temperature_mode= 'constant',
+            #temperature_mode='auto',
+            #min_temperature=temp,
+            temperature=temp,
             output_dimension=dimensions,
             distance='cosine',
             conditional='time_delta',

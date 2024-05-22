@@ -200,7 +200,10 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
               cebra_loc_test22 = cebra_loc_modelPos.transform(cell_test)
 
               Pos_test_score_test_shuff, Pos_test_err_test_shuff, dis_mean_test_shuff, dis_median_test_shuff = pos_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
-
+              #pos_test_score = r2
+              #pos_test_err = median absolute error
+              #dis_mean = distance mean
+              #dis_med = distance median
 
 
               Pos_err_shuff_all.append(Pos_test_err_test_shuff)
@@ -224,13 +227,14 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
         # Calculate mean of all fractions
 
+        #making into numpy arrays
         Pos_err_shuff_all = np.array(Pos_err_shuff_all)
         Pos_err_test_all = np.array(Pos_err_test_all)
         med_shuff_all = np.array(med_shuff_all)
         med_test_all = np.array(med_test_all)
 
-        shuff_dif_all = np.mean(Pos_err_shuff_all - Pos_err_test_all)
-        shuff_med_all = np.mean(med_test_all-med_shuff_all)
+        shuff_dif_all = np.mean(Pos_err_shuff_all - Pos_err_test_all) #knn error of shuffled - knn error of test
+        shuff_med_all = np.mean(med_shuff_all-med_test_all) #median error distance of test minus median distance of shuffle -- think this is subtracted wrong
 
         Pos_err_train_all = np.mean(Pos_err_train_all)
         Pos_err_test_all = np.mean(Pos_err_test_all)
@@ -238,8 +242,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
         Pos_r2_score_train_all = np.mean(Pos_r2_score_train_all)
         Pos_r2_score_test_all = np.mean(Pos_r2_score_test_all)
 
-        med_control_all = np.mean(med_control_all)
-        med_test_all = np.mean(med_test_all)
+        med_control_all = np.mean(med_control_all) #distance median control
+        med_test_all = np.mean(med_test_all) #distance median test
 
 
 
@@ -250,14 +254,15 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             'learn_rate': lr,
             'min_temp': temp,
             'max_it': max_iter,
-            'KNN_err_train': Pos_err_train_all,
-            'KNN_err_test': Pos_err_test_all,
-            'train_r2': Pos_r2_score_train_all,
-            'test_r2': Pos_r2_score_test_all,
-            'med_control': med_control_all,  # Correctly calculated mean
-            'mead_test': med_test_all,       # Correctly calculated mean
-            'shuff_minus_not': shuff_dif_all,
-            'shuf_med': shuff_med_all
+            'KNN_err_train': Pos_err_train_all, #knn abs error train
+            'KNN_err_test': Pos_err_test_all, #knn abs error test
+            'train_r2': Pos_r2_score_train_all, #r2 train
+            'test_r2': Pos_r2_score_test_all, #r2 test
+            'med_control': med_control_all,  # distance median control
+            'mead_test': med_test_all,       # distance median test
+            'shuff_minus_not': shuff_dif_all, #knn error of shuffled - knn error of test
+            'shuf_med': shuff_med_all #median error distance of test minus median distance of shuffle
+
         })
 
         Pos_err_shuff_all = []
