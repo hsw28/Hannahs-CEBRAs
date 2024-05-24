@@ -31,9 +31,9 @@ def plot_hippocampus3d(ax, embedding, label, label2, colormapping=True, binary=F
                        s=s,
                        alpha=1,
                        depthshade=True,
-                       edgecolors='w',
-                       linewidth=0.1,
-                       rasterized=True)
+                       #edgecolors='w',
+                       #linewidth=0.1,
+                       #rasterized=True)
                        #s=0.5, zorder=1)
 
         cbar = plt.colorbar(p, ax=ax, shrink=0.5)

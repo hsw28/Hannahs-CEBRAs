@@ -392,9 +392,9 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     plt.savefig(file_name, format='svg')
 
     # Close the figure to free up memory
-    #plt.close(fig)
+    plt.close(fig)
 
-    plt.show()
+    #plt.show()
 
     '''
     # Same thing, different point size
