@@ -15,15 +15,13 @@ from ca_velocity import ca_velocity
 # python pos_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 PosAn PosA1 PosB1 --iterations 10 --parameter_set_name set0307
 # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/pos_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./PosAn.mat ./PosA1.mat ./PosB1.mat --iterations 10 --parameter_set_name set0222
 
-
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 16000},
-    "set0307": {"learning_rate": 0.00775, "min_temperature": 0.05, "max_iterations": 10000},
-    "set0313": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 8000},
-    "set0314": {"learning_rate": 0.00775, "min_temperature": 0.15, "max_iterations": 12000},
-    "set0314b": {"learning_rate": 0.0006625, "min_temperature": 0.2, "max_iterations": 12000},
-    "set0816": {"learning_rate": 0.00775, "min_temperature": 0.2, "max_iterations": 14000}
+    "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000},
+    "set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
+    "set0313": {"learning_rate": 0.001, "min_temperature": 0.4, "max_iterations": 10000},
+    "set0314": {"learning_rate": 0.001, "min_temperature": 0.05, "max_iterations": 30000},
+    "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000}
 }
 
 # Setup argparse for command line arguments
