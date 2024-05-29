@@ -69,7 +69,7 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
                         device='cuda_if_available',
                         num_hidden_units=32,
                         time_offsets=1,
-                        verbose=True)
+                        verbose=False)
 
     results = np.zeros((iterations, 8))  # Each iteration results in 8 outputs
 

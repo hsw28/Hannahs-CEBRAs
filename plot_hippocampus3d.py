@@ -31,8 +31,8 @@ def plot_hippocampus3d(ax, embedding, label, label2, colormapping=True, binary=F
                        s=s,
                        alpha=1,
                        depthshade=True,
-                       #edgecolors='w',
-                       #linewidth=0.1,
+                       edgecolors='w',
+                       linewidth=0.1,
                        rasterized=False)
                        #s=0.5, zorder=1)
 
