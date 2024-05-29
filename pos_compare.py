@@ -76,15 +76,15 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
     # Create a figure and a 2x3 grid of subplots
     ###fig, axs = plt.subplots(2, 4, figsize=(15, 10))  # Adjust figsize as needed
-    fig, axs = plt.subplots(4, 6, figsize=(15, 15))  # Adjust figsize as needed
+    fig, axs = plt.subplots(2, 6, figsize=(15, 15))  # Adjust figsize as needed
 
 
     # Convert each subplot to a 3D plot
     ###for i in range(2):
-    for i in range(4):
+    for i in range(2):
         for j in range(6):
             ###axs[i, j] = fig.add_subplot(2, 4, i * 4 + j + 1, projection='3d')
-            axs[i, j] = fig.add_subplot(4, 6, i * 6 + j + 1, projection='3d')
+            axs[i, j] = fig.add_subplot(2, 6, i * 6 + j + 1, projection='3d')
 
 
 
@@ -137,8 +137,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 1], trainA1, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
-    plot_hippocampus3d(axs[2, 1], trainA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 1], trainA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 1], trainA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 1], trainA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
     #plot day A1 after being trained on An
@@ -156,8 +156,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
     plot_hippocampus3d(axs[0, 2], testA1, distances, distances, s=4)#<--------------------
     #plot_hippocampus3d(axs2[0], testA1, distances, distances, s=4) #<--------------------
-    plot_hippocampus3d(axs[2, 2], testA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 2], testA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 2], testA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 2], testA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
 
@@ -192,8 +192,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 3], trainB1_train, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
-    plot_hippocampus3d(axs[2, 3], trainB1_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 3], trainB1_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 3], trainB1_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 3], trainB1_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
     #plot day An held out (only cells also in day B1)(default model)
@@ -210,8 +210,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 4], trainB1, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
-    plot_hippocampus3d(axs[2, 4], trainB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 4], trainB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 4], trainB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 4], trainB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
 
     #plot B1 after being trained on An
@@ -242,8 +242,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #testB1 = testB1[wanted,:]
 
     plot_hippocampus3d(axs[0, 5], testB1, distances, distances, s=4)#<--------------------
-    plot_hippocampus3d(axs[2, 5], testB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 5], testB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 5], testB1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 5], testB1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
     ###p1.set_clim(0.05, 0.85)
     #plot_hippocampus3d(axs3[0], testB1, distances, distances, s=4) #<--------------------
 

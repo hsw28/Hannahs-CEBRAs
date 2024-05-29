@@ -4,11 +4,11 @@ import os
 
 # List of CSV files
 csv_files = [
-    'pos_compare_lr0.001_mt0.05_mi30000_dcosine_2024-05-29_00-52-12.csv',
-    'pos_compare_lr0.001_mt0.05_mi30000_dcosine_2024-05-29_07-36-36.csv',
-    'pos_compare_lr0.001_mt0.05_mi30000_dcosine_2024-05-29_07-03-51.csv',
-    'pos_compare_lr0.001_mt0.05_mi30000_dcosine_2024-05-29_04-56-49.csv',
-    'pos_compare_lr0.001_mt0.05_mi30000_dcosine_2024-05-29_00-56-24.csv'
+    'pos_compare_lr0.00055_mt1.5_mi8000_dcosine_2024-05-29_04-47-13.csv',
+    'pos_compare_lr0.00055_mt1.5_mi8000_dcosine_2024-05-29_16-28-53.csv',
+    'pos_compare_lr0.00055_mt1.5_mi8000_dcosine_2024-05-29_06-26-31.csv',
+    'pos_compare_lr0.00055_mt1.5_mi8000_dcosine_2024-05-29_05-40-18.csv',
+    'pos_compare_lr0.00055_mt1.5_mi8000_dcosine_2024-05-29_05-28-44.csv'
 
     #ex
     #'path/to/csv_files/pos_compare_lr0.00775_mt0.25_mi15000_deuclidean_2024-05-13_20-11-37.csv',
