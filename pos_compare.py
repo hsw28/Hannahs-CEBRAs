@@ -120,8 +120,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
     plot_hippocampus3d(axs[0, 0], trainA_train, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
-    plot_hippocampus3d(axs[2, 0], trainA_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
-    plot_hippocampus3d(axs[3, 0], trainA_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[2, 0], trainA_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 0], trainA_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
     #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(posAn_test)  # Replace with your pos array
