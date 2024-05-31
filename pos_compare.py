@@ -159,7 +159,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #plot_hippocampus3d(axs[2, 2], testA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
     #plot_hippocampus3d(axs[3, 2], testA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
-
+    '''
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
     posAn_train, posAn_test = hold_out(posAn, .75)
@@ -228,6 +228,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     center = np.array([center_x, center_y])
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
+    distances = (distances/max(distances))
 
 
     ##WHY DID I DO THIS?
@@ -251,7 +252,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    '''
+
     # Convert to numpy array if not already
     pos = np.array(posAn)
     # Create a new array to hold the shuffled data
@@ -261,7 +262,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
         np.random.shuffle(pos_shuff[:, column])
 
 
-
+    '''
     # Fit the model with the shuffled data
     traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, .75)
     pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .75)
@@ -327,7 +328,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
     plot_hippocampus3d(axs[1, 2], testA1, distances, distances, s=4)#<--------------------
     #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
-
+    '''
 
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
@@ -395,7 +396,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     #distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-
+    distances = (distances/max(distances))
     plot_hippocampus3d(axs[1, 5], testB1, distances, distances, s=4)#<--------------------
 
 
