@@ -87,7 +87,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
             axs[i, j] = fig.add_subplot(2, 6, i * 6 + j + 1, projection='3d')
 
 
-
+    '''
     traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 0.75)
     posAn_train, posAn_test = hold_out(posAn, 0.75)
 
@@ -278,7 +278,24 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     Pos_test_score_train_A1An_A1_shuff, Pos_test_err_train_A1An_A1_shuff, dis_mean_train_A1An_A1_shuff, dis_median_train_A1An_A1_shuff = pos_score(trainA_train, testA1, pos_shuff_train, posA1)
 
 
-    #plot day An cells only in day A1 (shuff)
+    #plot day An not out (only cells also in day A1)(default model)
+    pos = np.array(pos_shuff_train)  # Replace with your pos array
+    # Identify a corner, e.g., top-right corner
+    corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
+    corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
+    corner = np.array([corner_x, corner_y])
+    center_x = np.mean(pos[:, 0])  # Mean of x-coordinates
+    center_y = np.mean(pos[:, 1])  # Mean of y-coordinates
+    center = np.array([center_x, center_y])
+    # Calculate distances from each point to the corner
+    distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
+    #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
+    plot_hippocampus3d(axs[1, 0], trainA_train, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[2, 0], trainA_train, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 0], trainA_train, pos[:, 1], pos[:, 1], s=4) #<--------------------new
+
+    #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(pos_shuff_test)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
@@ -290,10 +307,10 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-
-    plot_hippocampus3d(axs[1, 0], trainA1, distances, distances, s=4) #<--------------------
-    #plot_hippocampus3d(axs[1], trainA1, distances, distances, s=4) #<--------------------
-
+    plot_hippocampus3d(axs[1, 1], trainA1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[0], trainA1, distances, distances, s=4) #<--------------------
+    #plot_hippocampus3d(axs[2, 1], trainA1, pos[:, 0], pos[:, 0], s=4) #<--------------------new
+    #plot_hippocampus3d(axs[3, 1], trainA1, pos[:, 1], pos[:, 1], s=4) #<--------------------new
 
     #plot day A1 (shuff)
     pos = np.array(posA1)  # Replace with your pos array
@@ -308,8 +325,9 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    plot_hippocampus3d(axs[1, 1], testA1, distances, distances, s=4)#<--------------------
+    plot_hippocampus3d(axs[1, 2], testA1, distances, distances, s=4)#<--------------------
     #plot_hippocampus3d(axs2[1], testA1, distances, distances, s=4) #<--------------------
+
 
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
@@ -328,7 +346,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     #plot day An-B1 (shuff)
-    pos = np.array(pos_shuff_test)  # Replace with your pos array
+    pos = np.array(pos_shuff_train)  # Replace with your pos array
     # Identify a corner, e.g., top-right corner
     corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
     corner_y = np.max(pos[:, 1])  # Maximum y-coordinate
@@ -339,9 +357,28 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     # Calculate distances from each point to the corner
     distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     #distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
-
-    plot_hippocampus3d(axs[1, 2], trainB1, distances, distances, s=4) #<--------------------
+    plot_hippocampus3d(axs[1, 3], trainB1_train, distances, distances, s=4) #<--------------------
     #plot_hippocampus3d(axs[1], trainA1, distances, distances, s=4) #<--------------------
+
+    #plot day B1 shuff
+    pos = np.array(pos_shuff_test)  # Replace with your pos array
+    # Identify a corner, e.g., top-right corner
+    corner_x = np.min(pos[:, 0])  # Maximum x-coordinate
+    corner_y = np.min(pos[:, 1])  # Maximum y-coordinate
+    # Find the index of the minimum x-coordinate, # Use this index to find the corresponding y-coordinate
+    min_x_index = np.argmin(pos[:, 0])
+    corner_y = pos[min_x_index, 1]
+    corner = np.array([corner_x, corner_y])
+    center_x = np.mean(pos[:, 0])  # Mean of x-coordinates
+    center_y = np.mean(pos[:, 1])  # Mean of y-coordinates
+    center = np.array([center_x, center_y])
+    # Calculate distances from each point to the corner
+    #distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
+    distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
+
+    plot_hippocampus3d(axs[1, 4], trainB1, distances, distances, s=4)#<--------------------
+    #plot_hippocampus3d(axs3[1], testB1, distances, distances, s=4) #<--------------------
+    #p2.set_clim(0.1, 0.8)
 
     #plot day B1 shuff
     pos = np.array(posB1)  # Replace with your pos array
@@ -359,19 +396,8 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
     #distances = np.sqrt(np.sum((pos - corner) ** 2, axis=1))
     distances = np.sqrt(np.sum((pos - center) ** 2, axis=1))
 
-    data = distances  # Your data
-    mean = np.mean(data)
-    std_dev = np.std(data)
-    threshold = 2.5  # 3 standard deviations
-    wanted = np.abs(data - mean) <= threshold * std_dev
-    wanted = wanted.flatten()
-    distances = data[wanted]
+    plot_hippocampus3d(axs[1, 5], testB1, distances, distances, s=4)#<--------------------
 
-    ax2, p2 = plot_hippocampus3d(axs[1, 3], testB1[wanted,:], distances, distances, s=4)#<--------------------
-    #plot_hippocampus3d(axs3[1], testB1, distances, distances, s=4) #<--------------------
-    p2.set_clim(0.1, 0.8)
-
-    '''
 
     # Get the current date and time
     now = datetime.datetime.now()
