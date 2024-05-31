@@ -24,4 +24,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/pos_decoding_AvsB_grid.py ./traceA1An_An.mat ./traceA1An_A1.mat ./posAn.mat ./posA1.mat --learning_rate .000055 --min_temperature 1,1.5 --max_iterations 6000,8000,10000,14000,18000,20000,25000,30000,40000
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/pos_decoding_AvsB_grid.py ./traceA1An_An.mat ./traceA1An_A1.mat ./posAn.mat ./posA1.mat --learning_rate .0085,0.000325,0.00055 --min_temperature .1,.25,.5,.75,1,1.25,1.5,1.75 --max_iterations 12000,16000,20000,24000,28000,32000

@@ -32,6 +32,20 @@ def train_and_evaluate(cebra_model, trace_train, trace_test, test_trace, pos_tra
     test_external_transformed = cebra_model.transform(test_trace)
     return pos_score(train_transformed, test_transformed, pos_train, pos_test), pos_score(train_transformed, test_external_transformed, pos_train, test_pos)
 
+
+
+    ###notes: this is equivalent to, for ex:
+    #shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)
+    #cebra_model.fit(traceA1An_An_train, posAn_train_shuffled)
+    #train_transformed = cebra_model.transform(traceA1An_An_train)
+    #train_transformed = cebra_model.transform(traceA1An_An_test)
+    #test_external_transformed = cebra_model.transform(traceA1An_A1)
+    #pos_score(train_transformed, test_transformed, posAn_train_shuffled, posAn_test_shuffled)
+    #pos_score(train_transformed, test_external_transformed, posAn_train_shuffled, posA1)
+
+
+
+
 def generate_headers():
     prefixes = ["A1An_held_out", "A1", "B1An_held_out", "B1", "SHUFF_A1An_held_out", "SHUFF_A1", "SHUFF_B1An_held_out", "SHUFF_B1"]
     metrics = ["r2", "Knn_pos_err", "distance_mean", "distance_median"]
