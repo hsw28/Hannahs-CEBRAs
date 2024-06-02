@@ -31,11 +31,11 @@ from cond_compare_iterations import cond_compare_iterations
 
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.00001, "min_temperature": 1, "max_iterations": 10000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0222": {"learning_rate": 0.0035, "min_temperature": 2, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0307": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0313": {"learning_rate": 0.0055, "min_temperature": 0.3, "max_iterations": 10000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0314": {"learning_rate": 0.0055, "min_temperature": 0.3, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816": {"learning_rate": 0.003, "min_temperature": 1.16, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
 }
 
 # Setup argparse for command line arguments
