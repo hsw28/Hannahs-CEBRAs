@@ -48,7 +48,7 @@ def generate_headers():
 
     return ','.join(headers)
 
-def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, iterations, parameter_set):
+def cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, iterations, parameter_set):
 
     learning_rate = parameter_set["learning_rate"]
     min_temperature = parameter_set["min_temperature"]
@@ -56,7 +56,7 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
     distance = parameter_set["distance"]
     temp_mode = parameter_set["temp_mode"]
 
-    dimensions = dimensions
+    output_dimension = dimensions
 
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,

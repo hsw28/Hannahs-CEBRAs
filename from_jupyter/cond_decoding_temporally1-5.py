@@ -2,7 +2,6 @@
 from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
 from sklearn.metrics import r2_score
 from google.colab import drive
-
 import sklearn
 import numpy as np
 import torch
@@ -78,9 +77,8 @@ for i in range(1):
 
 
 
-  fract21, CSUS_test_err21, CSUS_test_score, abs_dif, predicted, actual = decoding_CSUS5(cebra_loc_train21, cebra_loc_test21, eyeblink_train, eyeblink_test)
-  print(fract21)
-  p21 = confmatrix(axs[0], actual, predicted)
+
+ #p21 = confmatrix(axs[0], actual, predicted)
 
 
 
