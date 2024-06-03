@@ -10,7 +10,7 @@ from matplotlib.collections import LineCollection
 def normalize(array):
     return (array - array.min()) / (array.max() - array.min())
 
-def plot_hippocampus2d(ax, embedding, label, label2, colormapping=False, binary=True, idx_order=(0, 1)):
+def plot_hippocampus2d(ax, embedding, label, label2, colormapping=True, binary=False, idx_order=(0, 1), s=3):
     idx1, idx2 = idx_order
 
     if colormapping:
@@ -20,8 +20,12 @@ def plot_hippocampus2d(ax, embedding, label, label2, colormapping=False, binary=
                        c=normalized_labels,
                        cmap='rainbow',
                        #s=0.5, zorder=1)
-                       s=15, zorder=1,
-                       rasterized=True)
+                       s=s,
+                       alpha=1,
+                       depthshade=True,
+                       edgecolors='w',
+                       linewidth=0.1,
+                       rasterized=False)
         plt.colorbar(p, ax=ax, shrink=0.5)
 
     r_ind = label2 == 1
