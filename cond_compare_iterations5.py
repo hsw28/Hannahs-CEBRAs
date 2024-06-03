@@ -13,7 +13,7 @@ from scipy import stats
 from datetime import datetime
 from cebra import CEBRA
 from hold_out import hold_out
-from CSUS_score import CSUS_score
+from CSUS_score5 import CSUS_score5
 import gc
 
 #decodes conditioning in envB using envA.
@@ -34,12 +34,12 @@ def train_and_evaluate(cebra_model, trace_train, trace_test, test_trace, pos_tra
     train_transformed = cebra_model.transform(trace_train)
     test_transformed = cebra_model.transform(trace_test)
     test_external_transformed = cebra_model.transform(test_trace)
-    return CSUS_score(train_transformed, test_transformed, pos_train, pos_test), CSUS_score(train_transformed, test_external_transformed, pos_train, test_pos)
+    return CSUS_score5(train_transformed, test_transformed, pos_train, pos_test), CSUS_score5(train_transformed, test_external_transformed, pos_train, test_pos)
 
 
 def generate_headers():
     prefixes = ["A1An_held_out", "A1", "B1An_held_out", "B1", "SHUFF_A1An_held_out", "SHUFF_A1", "SHUFF_B1An_held_out", "SHUFF_B1"]
-    metrics = ["% correct"]
+    metrics = ["accuracy", "precision", "recall", "f1", "roc_auc"]
     headers = []
 
     for prefix in prefixes:
@@ -72,7 +72,7 @@ def cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1
                         time_offsets=1,
                         verbose=False)
 
-    results = np.zeros((iterations, 8))  # Each iteration results in 8 outputs
+    results = np.zeros((iterations, 40))  # Each iteration results in 8 outputs
 
     try:
         for i in range(iterations):

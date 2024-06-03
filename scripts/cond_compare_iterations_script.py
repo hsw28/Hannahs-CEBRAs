@@ -22,11 +22,12 @@ import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
 from cond_compare_iterations import cond_compare_iterations
+from cond_compare_iterations5 import cond_compare_iterations5
 
 
 #for using with slurm to run over a bunch of iterations
 # python cond_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 CSUSAn CSUSA1 CSUSB1 2 0 --iterations 10 --parameter_set_name set0307
-# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 2 0 --iterations 10 --parameter_set_name set0222
+# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 5 0 --iterations 11 --parameter_set_name test
 
 
 # Define parameter sets
@@ -38,6 +39,7 @@ parameter_sets = {
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
+    "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
 }
 
 # Setup argparse for command line arguments
@@ -139,5 +141,7 @@ dimensions = how_many_divisions + args.pretrial_y_or_n
 parameter_set = parameter_sets[args.parameter_set_name]
 
 
-
-cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
+if how_many_divisions == 2:
+    cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
+elif how_many_divisions == 5:
+    cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)

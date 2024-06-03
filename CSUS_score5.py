@@ -10,7 +10,7 @@ from cebra import CEBRA
 import sys
 import pandas as pd
 import joblib as jl
-from matplotlib.collections import LineCollections
+from matplotlib.collections import LineCollection
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 from sklearn.preprocessing import label_binarize
 from sklearn.metrics import roc_auc_score
