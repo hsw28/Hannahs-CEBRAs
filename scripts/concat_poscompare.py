@@ -2,13 +2,14 @@ import pandas as pd
 import re
 import os
 
+#run from hte folder with the files using  python ~/Programming/Hannahs-CEBRAs/scripts/concat_poscompare.py
+
 # List of CSV files
 csv_files = [
-    'pos_compare_lr0.001_mt1e-09_mi30000_dcosine_2024-05-31_13-30-48.csv',
-    'pos_compare_lr0.001_mt1e-09_mi30000_dcosine_2024-05-31_14-22-32.csv',
-    'pos_compare_lr0.001_mt1e-09_mi30000_dcosine_2024-05-31_14-12-01.csv',
-    'pos_compare_lr0.001_mt1e-09_mi30000_dcosine_2024-05-31_14-03-19.csv',
-    'pos_compare_lr0.001_mt1e-09_mi30000_dcosine_2024-05-31_13-59-30.csv'
+    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_12-02-50.csv',
+    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_11-53-42.csv',
+    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_11-49-58.csv',
+    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_10-24-59.csv'
 
     #ex
     #'path/to/csv_files/pos_compare_lr0.00775_mt0.25_mi15000_deuclidean_2024-05-13_20-11-37.csv',
