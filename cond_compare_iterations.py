@@ -36,6 +36,7 @@ def train_and_evaluate(cebra_model, trace_train, trace_test, test_trace, pos_tra
     test_external_transformed = cebra_model.transform(test_trace)
     return CSUS_score(train_transformed, test_transformed, pos_train, pos_test), CSUS_score(train_transformed, test_external_transformed, pos_train, test_pos)
 
+
 def generate_headers():
     prefixes = ["A1An_held_out", "A1", "B1An_held_out", "B1", "SHUFF_A1An_held_out", "SHUFF_A1", "SHUFF_B1An_held_out", "SHUFF_B1"]
     metrics = ["% correct"]
@@ -89,8 +90,8 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
 
 
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, CSUSAn_train, CSUSAn_test, CSUSA1)
-            shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, CSUSAn_train_shuffled, CSUSAn_test_shuffled, CSUSA1)
             regular_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, CSUSAn_train, CSUSAn_test, CSUSB1)
+            shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, CSUSAn_train_shuffled, CSUSAn_test_shuffled, CSUSA1)
             shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, CSUSAn_train_shuffled, CSUSAn_test_shuffled, CSUSB1)
 
             # Flatten results into a single row per iteration

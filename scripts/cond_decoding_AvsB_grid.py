@@ -72,11 +72,12 @@ def main():
     # Data preprocessing steps
     trainingA = trainingA[0, :]
     trainingB = trainingB[0, :]
+    trainingA = trainingA.flatten()
+    trainingB = trainingB.flatten()
 
     traceA = np.transpose(traceA)
     traceB = np.transpose(traceB)
-    trainingA = trainingA.flatten()
-    trainingB = trainingB.flatten()
+
 
     # Logic to divide data based on 'divisions' and 'pretrial'
     if args.pretrial_y_or_n == 0:
@@ -193,8 +194,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
 
 
               #test with using A to decode B
-              cell_test = envB_cell_train
-              eyeblink_test_control = envB_eyeblink
+
 
               #if i want to fit B using fulling training, but i think i want to do it with held out
               '''
@@ -209,9 +209,9 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
 
 
               #determine model fit
-              cebra_loc_test22 = cebra_loc_modelpos.transform(cell_test)
+              cebra_loc_test22 = cebra_loc_modelpos.transform(envB_cell_train)
               #find fraction correct
-              fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, eyeblink_test_control)
+              fract_testB = CSUS_score(cebra_loc_train22, cebra_loc_test22, eyeblink_train_control, envB_eyeblink)
 
               fract_controlA = round(fract_controlA,3)
               fract_testB = round(fract_testB,3)
