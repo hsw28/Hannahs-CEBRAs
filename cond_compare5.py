@@ -20,6 +20,8 @@ from CSUS_prediction5 import CSUS_prediction5
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
 
+plt.rcParams['svg.fonttype'] = 'none'
+
 
 #for making the shuffle position figure
 #can optionally input parameters or hard code them
@@ -75,7 +77,7 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
     # Create a figure and a 2x3 grid of subplots
     ###fig, axs = plt.subplots(2, 4, figsize=(15, 10))  # Adjust figsize as needed
     fig, axs = plt.subplots(2, 6, figsize=(15, 15))  # Adjust figsize as needed
-    fig2, axs2 = plt.subplots(2, 6, figsize=(15, 15))
+    fig2, axs2 = plt.subplots(2, 6, figsize=(30, 10))
 
 
     # Convert each subplot to a 3D plot
@@ -253,3 +255,7 @@ def plot_confusion_matrix(ax, actual, predicted):
     sns.heatmap(matrix, annot=True, fmt='d', cmap='Blues', ax=ax)
     ax.set_xlabel('Predicted Label')
     ax.set_ylabel('Actual Label')
+    ax.set_aspect('equal')  # This line sets the aspect ratio to be equal, ensuring the plot is square
+
+    # Depending on your version of matplotlib, you might need to adjust the layout
+    plt.tight_layout()

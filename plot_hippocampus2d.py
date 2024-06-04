@@ -7,6 +7,10 @@ import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
 
+
+
+plt.rcParams['svg.fonttype'] = 'none'
+
 def normalize(array):
     return (array - array.min()) / (array.max() - array.min())
 
