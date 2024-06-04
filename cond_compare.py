@@ -42,9 +42,9 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     cebra_loc_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
                         learning_rate=learning_rate,
-                        temperature_mode='constant',
-                        temperature=min_temperature,
-                        #min_temperature=min_temperature,
+                        temperature_mode='auto',
+                        #temperature=min_temperature,
+                        min_temperature=min_temperature,
                         output_dimension=output_dimension,
                         max_iterations=max_iterations,
                         distance=distance,
@@ -57,9 +57,9 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     shuff_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
                         learning_rate=learning_rate,
-                        temperature_mode='constant',
-                        temperature=min_temperature,
-                        #min_temperature=min_temperature,
+                        temperature_mode='auto',
+                        #temperature=min_temperature,
+                        min_temperature=min_temperature,
                         output_dimension=output_dimension,
                         max_iterations=max_iterations,
                         distance=distance,
@@ -237,7 +237,7 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
 
     # Save the plot with the date and time in the file name, in the specified folder
     #file_name = f'{folder_path}/pos_compare_{date_time_str}.svg'
-    file_name = f"{folder_path}/pos_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
+    file_name = f"{folder_path}/cond_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
 
     plt.savefig(file_name, format='svg')
 

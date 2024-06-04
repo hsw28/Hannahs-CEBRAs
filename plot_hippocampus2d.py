@@ -22,7 +22,6 @@ def plot_hippocampus2d(ax, embedding, label, label2, colormapping=False, binary=
                        #s=0.5, zorder=1)
                        s=s,
                        alpha=1,
-                       depthshade=True,
                        edgecolors='w',
                        linewidth=0.1,
                        rasterized=False)
@@ -32,19 +31,20 @@ def plot_hippocampus2d(ax, embedding, label, label2, colormapping=False, binary=
     l_ind = label2 == 2
 
     if binary:
-     #Using black color and size 5 for the points where label equals 10 or 20
         ax.scatter(embedding[r_ind, idx1],
                 embedding[r_ind, idx2],
-                c='red',
-                depthshade=True,
-                s=s, alpha=1,
-                rasterized=False) # zorder ensures these points are plotted on top
+                c='blue',
+                s=5, alpha=.8,
+                edgecolors='w',
+                linewidth=0.1,
+                rasterized=False)
 
         ax.scatter(embedding[l_ind, idx1],
                 embedding[l_ind, idx2],
-                c='blue',
-                depthshade=True,
-                s=s, alpha=1,
-                rasterized=False)  # zorder ensures these points are plotted on top
+                c='red',
+                edgecolors='w',
+                linewidth=0.1,
+                s=5, alpha=.6,
+                rasterized=False)
 
     return ax
