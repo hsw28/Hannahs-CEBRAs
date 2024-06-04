@@ -51,7 +51,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
-                        num_hidden_units=42,
+                        num_hidden_units=32,
                         time_offsets=1,
                         verbose=True)
 
@@ -68,7 +68,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
                         distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
-                        num_hidden_units=42,
+                        num_hidden_units=32,
                         time_offsets=1,
                         verbose=True)
 
