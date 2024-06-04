@@ -43,3 +43,13 @@ def CSUS_score5(emb_train, emb_test, label_train, label_test, n_neighbors=32):
     roc_auc = roc_auc_score(y_true_bin, y_pred_prob, multi_class='ovr')
 
     return accuracy, precision, recall, f1, roc_auc
+
+def prediction5(emb_train, emb_test, label_train, label_test, n_neighbors=32):
+    CSUS_decoder = KNeighborsClassifier(n_neighbors=n_neighbors, metric='cosine')
+
+    # Fit the model and predict
+    CSUS_decoder.fit(emb_train, label_train)
+    predicted = CSUS_decoder.predict(emb_test)
+    actual = label_test
+
+    return actual, predicted

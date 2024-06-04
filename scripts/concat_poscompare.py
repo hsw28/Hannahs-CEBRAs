@@ -6,10 +6,10 @@ import os
 
 # List of CSV files
 csv_files = [
-    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_12-02-50.csv',
-    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_11-53-42.csv',
-    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_11-49-58.csv',
-    'cond_lr0.0035_mt2_mi16000_dcosine_modeauto_2024-06-02_10-24-59.csv'
+    'cond5_lr0.0075_mt1.67_mi18000_deuclidean_modeconstant_2024-06-04_12-16-33.csv',
+    'cond5_lr0.0075_mt1.67_mi18000_deuclidean_modeconstant_2024-06-04_12-12-47.csv',
+    'cond5_lr0.0075_mt1.67_mi18000_deuclidean_modeconstant_2024-06-04_12-06-37.csv',
+    'cond5_lr0.0075_mt1.67_mi18000_deuclidean_modeconstant_2024-06-04_12-06-02.csv'
 
     #ex
     #'path/to/csv_files/pos_compare_lr0.00775_mt0.25_mi15000_deuclidean_2024-05-13_20-11-37.csv',
