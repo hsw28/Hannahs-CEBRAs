@@ -10,7 +10,7 @@ from matplotlib.collections import LineCollection
 def normalize(array):
     return (array - array.min()) / (array.max() - array.min())
 
-def plot_hippocampus2d(ax, embedding, label, label2, colormapping=True, binary=False, idx_order=(0, 1), s=3):
+def plot_hippocampus2d(ax, embedding, label, label2, colormapping=False, binary=True, idx_order=(0, 1), s=3):
     idx1, idx2 = idx_order
 
     if colormapping:
@@ -36,13 +36,15 @@ def plot_hippocampus2d(ax, embedding, label, label2, colormapping=True, binary=F
         ax.scatter(embedding[r_ind, idx1],
                 embedding[r_ind, idx2],
                 c='red',
-                s=20, zorder=1, alpha=1,
-                rasterized=True) # zorder ensures these points are plotted on top
+                depthshade=True,
+                s=s, alpha=1,
+                rasterized=False) # zorder ensures these points are plotted on top
 
         ax.scatter(embedding[l_ind, idx1],
                 embedding[l_ind, idx2],
                 c='blue',
-                s=20, zorder=2, alpha=.25,
-                rasterized=True)  # zorder ensures these points are plotted on top
+                depthshade=True,
+                s=s, alpha=1,
+                rasterized=False)  # zorder ensures these points are plotted on top
 
     return ax
