@@ -12,12 +12,13 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import stats
-from prediction5 import prediction5
 from plot_hippocampus2d import plot_hippocampus2d
 import datetime
 from hold_out import hold_out
 import os
-from plot_hippocampus2d import prediction5
+from CSUS_prediction5 import CSUS_prediction5
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 
 #for making the shuffle position figure
@@ -26,7 +27,7 @@ from plot_hippocampus2d import prediction5
 
 
 
-def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, learning_rate=0.000775, min_temperature=0.001, max_iterations=6000, distance='cosine'):
+def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, learning_rate=0.000775, min_temperature=0.001, max_iterations=6000, distance='cosine'):
 
 
     output_dimension = 5
@@ -74,6 +75,7 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     # Create a figure and a 2x3 grid of subplots
     ###fig, axs = plt.subplots(2, 4, figsize=(15, 10))  # Adjust figsize as needed
     fig, axs = plt.subplots(2, 6, figsize=(15, 15))  # Adjust figsize as needed
+    fig2, axs2 = plt.subplots(2, 6, figsize=(15, 15))
 
 
     # Convert each subplot to a 3D plot
@@ -102,18 +104,21 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     #plot day An not out (only cells also in day A1)(default model)
     pos = np.array(CSUSAn_train)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainA_train, trainA_train, CSUSAn_train, CSUSAn_test)
+    actual, predicted = CSUS_prediction5(trainA_train, trainA_train, CSUSAn_train, CSUSAn_train)
+    plot_confusion_matrix(axs2[0, 0], actual, predicted)
 
     #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(CSUSAn_test)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainA_train, trainA1, CSUSAn_train, CSUSAn_test)
+    actual, predicted = CSUS_prediction5(trainA_train, trainA1, CSUSAn_train, CSUSAn_test)
+    plot_confusion_matrix(axs2[0, 1], actual, predicted)
 
 
     #plot day A1 after being trained on An
     pos = np.array(CSUSA1)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
-    actual, predicted = prediction5(trainA_train, testA1, CSUSAn_train, CSUSA1)
+    actual, predicted = CSUS_prediction5(trainA_train, testA1, CSUSAn_train, CSUSA1)
+    plot_confusion_matrix(axs2[0, 2], actual, predicted)
 
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
@@ -131,19 +136,22 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     #plot day An held out (only cells also in day B1)(default model)
     pos = np.array(CSUSAn_train)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainB1_train, trainB1_train, CSUSAn_train, CSUSB1)
+    actual, predicted = CSUS_prediction5(trainB1_train, trainB1_train, CSUSAn_train, CSUSAn_train)
+    plot_confusion_matrix(axs2[0, 3], actual, predicted)
 
     #plot day An held out (only cells also in day B1)(default model)
     pos = np.array(CSUSAn_test)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainB1_train, trainB1, CSUSAn_train, CSUSAn_test)
+    actual, predicted = CSUS_prediction5(trainB1_train, trainB1, CSUSAn_train, CSUSAn_test)
+    plot_confusion_matrix(axs2[0, 4], actual, predicted)
 
 
 
     #plot B1 after being trained on An
     pos = np.array(CSUSB1)  # Replace with your pos array
     plot_hippocampus2d(axs[0, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
-    actual, predicted = prediction5(trainB1_train, testB1, CSUSAn_train, CSUSB1)
+    actual, predicted = CSUS_prediction5(trainB1_train, testB1, CSUSAn_train, CSUSB1)
+    plot_confusion_matrix(axs2[0, 5], actual, predicted)
 
 
 
@@ -176,17 +184,20 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     #plot day An not out (only cells also in day A1)(default model)
     pos = np.array(pos_shuff_train)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainA_train, trainA1, pos_shuff_train, pos_shuff_test)
+    actual, predicted = CSUS_prediction5(trainA_train, trainA_train, pos_shuff_train, pos_shuff_train)
+    plot_confusion_matrix(axs2[1, 0], actual, predicted)
 
     #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(pos_shuff_test)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainA_train, trainA1, pos_shuff_train, pos_shuff_test)
+    actual, predicted = CSUS_prediction5(trainA_train, trainA1, pos_shuff_train, pos_shuff_test)
+    plot_confusion_matrix(axs2[1, 1], actual, predicted)
 
     #plot day A1 (shuff)
     pos = np.array(CSUSA1)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
-    actual, predicted = prediction5(trainA_train, testA1, pos_shuff_train, CSUSA1)
+    actual, predicted = CSUS_prediction5(trainA_train, testA1, pos_shuff_train, CSUSA1)
+    plot_confusion_matrix(axs2[1, 2], actual, predicted)
 
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
@@ -203,38 +214,42 @@ def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn,
     #plot day An-B1 (shuff)
     pos = np.array(pos_shuff_train)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
-    actual, predicted = prediction5(trainB1_train, trainB1_train, pos_shuff_train, CSUSB1)
+    actual, predicted = CSUS_prediction5(trainB1_train, trainB1_train, pos_shuff_train, pos_shuff_train)
+    plot_confusion_matrix(axs2[1, 3], actual, predicted)
 
     #plot day B1 shuff
     pos = np.array(pos_shuff_test)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
-    actual, predicted = prediction5(trainB1_train, trainB1, pos_shuff_train, pos_shuff_test)
+    actual, predicted = CSUS_prediction5(trainB1_train, trainB1, pos_shuff_train, pos_shuff_test)
+    plot_confusion_matrix(axs2[1, 4], actual, predicted)
 
     #plot day B1 shuff
     pos = np.array(CSUSB1)  # Replace with your pos array
     plot_hippocampus2d(axs[1, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
-    actual, predicted = prediction5(trainB1_train, testB1, pos_shuff_train, CSUSB1)
+    actual, predicted = CSUS_prediction5(trainB1_train, testB1, pos_shuff_train, CSUSB1)
+    plot_confusion_matrix(axs2[1, 5], actual, predicted)
 
 
-    # Get the current date and time
+    # Save the first figure
     now = datetime.datetime.now()
-
-    # Format the date and time as a string
     current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
-
-    # Get the current working directory
-    current_directory = os.getcwd()
-
-    # Specify the folder path as the current directory
-    folder_path = current_directory
-
-    # Save the plot with the date and time in the file name, in the specified folder
-    #file_name = f'{folder_path}/pos_compare_{date_time_str}.svg'
-    file_name = f"{folder_path}/cond_compare_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
-
+    folder_path = os.getcwd()
+    file_name = f"{folder_path}/cond_compare5_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
+    plt.figure(fig.number)
     plt.savefig(file_name, format='svg')
-
-    # Close the figure to free up memory
     plt.close(fig)
 
-    #plt.show()
+    # Save the second figure with confusion matrices
+    conf_matrix_file_name = f"{folder_path}/cond_compare5conf_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
+    plt.figure(fig2.number)
+    plt.savefig(conf_matrix_file_name, format='svg')
+    plt.close(fig2)
+
+
+
+
+def plot_confusion_matrix(ax, actual, predicted):
+    matrix = confusion_matrix(actual, predicted)
+    sns.heatmap(matrix, annot=True, fmt='d', cmap='Blues', ax=ax)
+    ax.set_xlabel('Predicted Label')
+    ax.set_ylabel('Actual Label')

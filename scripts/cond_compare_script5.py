@@ -1,47 +1,19 @@
 import sys
 sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs/')
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs')
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
+sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
 import argparse
-import gc
-import numpy as np
-import torch
-import random
-import seaborn as sns
-import matplotlib.pyplot as plt
-import shutil
-import pandas as pd
-import joblib as jl
-from itertools import product
-from matplotlib.collections import LineCollection
-from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
-from sklearn.metrics import r2_score
 import cebra
 from cebra import CEBRA
 import cebra.helper as cebra_helper
-from CSUS_score import CSUS_score
-from hold_out import hold_out
-from cond_compare_iterations import cond_compare_iterations
-from cond_compare_iterations5 import cond_compare_iterations5
+import numpy as np
+from cond_compare5 import cond_compare5
 
+#for making the shuffle Position figure
+#can optionally input parameters or hard code them
+#not inputed:
+#inputed:
+#python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_compare_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.0035 --min_temperature 1.67 --max_iterations 20 --distance cosine
 
-#for using with slurm to run over a bunch of iterations
-# python cond_compare_iterations_script.py traceA1An_An traceAnB1_An traceA1An_A1 traceAnB1_B1 CSUSAn CSUSA1 CSUSB1 2 0 --iterations 10 --parameter_set_name set0307
-# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 5 0 --iterations 11 --parameter_set_name test
-
-# Define parameter sets
-parameter_sets = {
-    "set0222": {"learning_rate": 0.0095, "min_temperature": 1.33, "max_iterations": 20000, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0222b": {"learning_rate": 0.0055, "min_temperature": 1.67, "max_iterations": 10000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307": {"learning_rate": 0.003, "min_temperature": 1.16, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307b": {"learning_rate": 0.02, "min_temperature": 3.5, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
-    "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
-}
-
-# Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
 parser.add_argument("traceA1An_An", type=str, help="Path to the traceA1An_An data file.")
 parser.add_argument("traceAnB1_An", type=str, help="Path to the traceAnB1_An data file.")
@@ -52,8 +24,11 @@ parser.add_argument("CSUSA1", type=str, help="Path to the CSUSA1 data file.")
 parser.add_argument("CSUSB1", type=str, help="Path to the CSUSB1 data file.")
 parser.add_argument("how_many_divisions", type=int, help="Number of divisions for categorizing data.")
 parser.add_argument("pretrial_y_or_n", type=int, choices=[0, 1], help="Pretrial flag (0 or 1).")
-parser.add_argument("--iterations", type=int, default=100, help="Number of iterations to run.")
-parser.add_argument("--parameter_set_name", type=str, default="set0222", help="Name of the parameter set to use.")
+parser.add_argument("--learning_rate", type=float, default=0.000775)
+parser.add_argument("--min_temperature", type=float, default=0.001)
+parser.add_argument("--max_iterations", type=int, default=6000)
+parser.add_argument("--distance", type=str, default='cosine')
+
 
 # Parse arguments
 args = parser.parse_args()
@@ -137,10 +112,4 @@ elif how_many_divisions == 5:
 
 dimensions = how_many_divisions + args.pretrial_y_or_n
 
-parameter_set = parameter_sets[args.parameter_set_name]
-
-
-if how_many_divisions == 2:
-    cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
-elif how_many_divisions == 5:
-    cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
+cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, learning_rate=args.learning_rate, min_temperature=args.min_temperature, max_iterations=args.max_iterations, distance=args.distance)
