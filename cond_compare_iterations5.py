@@ -86,7 +86,7 @@ def cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1
                             num_hidden_units=32,
                             time_offsets=1,
                             verbose=False)
-                            
+
 
     results = np.zeros((iterations, 40))  # Each iteration results in 8 outputs
 
@@ -117,7 +117,7 @@ def cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1
 
         # Save the results to a CSV file with the current date and time in the filename
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"cond_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_mode{temp_mode}_{current_time}.csv"
+        filename = f"cond5_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_mode{temp_mode}_{current_time}.csv"
         header = generate_headers()
         np.savetxt(filename, results, delimiter=',', header=header, comments='', fmt='%.3f')  # Adjust precision as needed
         print(f"Results saved to {filename}")
