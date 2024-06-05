@@ -26,7 +26,7 @@ def CSUSconsistency(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eyebli
                             learning_rate= .001,
                             temperature_mode = 'auto',
                             #min_temperature = .2,
-                            output_dimension=output_dimension,
+                            output_dimension=3,
                             max_iterations=15000, #<--------------1-20000
                             distance='cosine',
                             conditional='time_delta', #added, keep

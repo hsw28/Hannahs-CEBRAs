@@ -29,7 +29,7 @@ import os
 def cond_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, learning_rate=0.000775, min_temperature=0.001, max_iterations=6000, distance='cosine'):
 
 
-    output_dimension = 2
+    output_dimension = 3
 
 
 #    output_dimension = 3 #here, we set as a variable for hypothesis testing below.
