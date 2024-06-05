@@ -12,7 +12,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import stats
-from plot_hippocampus2d import plot_hippocampus2d
+from plot_hippocampus5d import plot_hippocampus5d
 import datetime
 from hold_out import hold_out
 import os
@@ -48,7 +48,7 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
                         temperature_mode='constant',
                         #temperature=min_temperature,
                         min_temperature=min_temperature,
-                        output_dimension=output_dimension,
+                        output_dimension=5,
                         max_iterations=max_iterations,
                         distance='euclidean',
                         conditional='time_delta',
@@ -105,20 +105,20 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
 
     #plot day An not out (only cells also in day A1)(default model)
     pos = np.array(CSUSAn_train)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[0, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, trainA_train, CSUSAn_train, CSUSAn_train)
     plot_confusion_matrix(axs2[0, 0], actual, predicted)
 
     #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(CSUSAn_test)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[0, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, trainA1, CSUSAn_train, CSUSAn_test)
     plot_confusion_matrix(axs2[0, 1], actual, predicted)
 
 
     #plot day A1 after being trained on An
     pos = np.array(CSUSA1)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
+    plot_hippocampus5d(axs[0, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, testA1, CSUSAn_train, CSUSA1)
     plot_confusion_matrix(axs2[0, 2], actual, predicted)
 
@@ -137,13 +137,13 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
 
     #plot day An held out (only cells also in day B1)(default model)
     pos = np.array(CSUSAn_train)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[0, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, trainB1_train, CSUSAn_train, CSUSAn_train)
     plot_confusion_matrix(axs2[0, 3], actual, predicted)
 
     #plot day An held out (only cells also in day B1)(default model)
     pos = np.array(CSUSAn_test)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[0, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, trainB1, CSUSAn_train, CSUSAn_test)
     plot_confusion_matrix(axs2[0, 4], actual, predicted)
 
@@ -151,7 +151,7 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
 
     #plot B1 after being trained on An
     pos = np.array(CSUSB1)  # Replace with your pos array
-    plot_hippocampus2d(axs[0, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
+    plot_hippocampus5d(axs[0, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, testB1, CSUSAn_train, CSUSB1)
     plot_confusion_matrix(axs2[0, 5], actual, predicted)
 
@@ -185,19 +185,19 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
 
     #plot day An not out (only cells also in day A1)(default model)
     pos = np.array(pos_shuff_train)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[1, 0], trainA_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, trainA_train, pos_shuff_train, pos_shuff_train)
     plot_confusion_matrix(axs2[1, 0], actual, predicted)
 
     #plot day An held out (only cells also in day A1)(default model)
     pos = np.array(pos_shuff_test)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[1, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, trainA1, pos_shuff_train, pos_shuff_test)
     plot_confusion_matrix(axs2[1, 1], actual, predicted)
 
     #plot day A1 (shuff)
     pos = np.array(CSUSA1)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
+    plot_hippocampus5d(axs[1, 2], testA1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, testA1, pos_shuff_train, CSUSA1)
     plot_confusion_matrix(axs2[1, 2], actual, predicted)
 
@@ -215,19 +215,19 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
 
     #plot day An-B1 (shuff)
     pos = np.array(pos_shuff_train)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
+    plot_hippocampus5d(axs[1, 3], trainB1_train, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, trainB1_train, pos_shuff_train, pos_shuff_train)
     plot_confusion_matrix(axs2[1, 3], actual, predicted)
 
     #plot day B1 shuff
     pos = np.array(pos_shuff_test)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
+    plot_hippocampus5d(axs[1, 4], trainB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, trainB1, pos_shuff_train, pos_shuff_test)
     plot_confusion_matrix(axs2[1, 4], actual, predicted)
 
     #plot day B1 shuff
     pos = np.array(CSUSB1)  # Replace with your pos array
-    plot_hippocampus2d(axs[1, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
+    plot_hippocampus5d(axs[1, 5], testB1, pos, pos, s=4, colormapping=False, binary=True)#<--------------------
     actual, predicted = CSUS_prediction5(trainB1_train, testB1, pos_shuff_train, CSUSB1)
     plot_confusion_matrix(axs2[1, 5], actual, predicted)
 

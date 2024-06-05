@@ -59,12 +59,14 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
     dimensions = dimensions
 
     if temp_mode == 'auto':
-        cebra_model = CEBRA(model_architecture='offset10-model',
-                            batch_size=512,
+        cebra_model = CEBRA(
                             learning_rate=learning_rate,
-                            min_temperature=min_temperature,
-                            output_dimension=dimensions,
                             max_iterations=max_iterations,
+                            model_architecture='offset10-model',
+                            batch_size=512,
+                            temperature_mode='auto',
+                            min_temperature=min_temperature,
+                            output_dimension=3,
                             distance=distance,
                             conditional='time_delta',
                             device='cuda_if_available',
@@ -73,20 +75,20 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
                             verbose=False)
 
     if temp_mode == 'constant':
-            cebra_model = CEBRA(model_architecture='offset10-model',
-                            batch_size=512,
+            cebra_model = CEBRA(
                             learning_rate=learning_rate,
-                            temperature_mode=temp_mode,
-                            temperature=min_temperature,
-                            output_dimension=dimensions,
                             max_iterations=max_iterations,
+                            model_architecture='offset10-model',
+                            batch_size=512,
+                            temperature_mode='constant',
+                            temperature=min_temperature,
+                            output_dimension=3,
                             distance=distance,
                             conditional='time_delta',
                             device='cuda_if_available',
                             num_hidden_units=32,
                             time_offsets=1,
                             verbose=False)
-
 
     results = np.zeros((iterations, 8))  # Each iteration results in 8 outputs
 

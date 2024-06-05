@@ -157,7 +157,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
             #temperature_mode='auto',
             #min_temperature=temp,
             temperature=temp,
-            output_dimension=dimensions,
+            output_dimension=3,
             distance='cosine',
             conditional='time_delta',
             device='cuda_if_available',
