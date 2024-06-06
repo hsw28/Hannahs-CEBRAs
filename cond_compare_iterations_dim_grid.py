@@ -118,12 +118,12 @@ def cond_compare_iterations_dim_grid(traceA1An_An, traceAnB1_An, traceA1An_A1, t
 
 
 
-        # Outside the loop: save all results to a CSV file
-        all_results_array = np.array(all_results)
-        current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        filename = f"cond_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_mode{temp_mode}_{current_time}_DIM_GRID.csv"
-        header = generate_headers()
-        np.savetxt(filename, all_results_array, delimiter=',', header=header, comments='', fmt='%.3f')  # Adjust precision as needed
-        print(f"Results saved to {filename}")
+    # Outside the loop: save all results to a CSV file
+    all_results_array = np.array(all_results)
+    current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    filename = f"cond_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_mode{temp_mode}_{current_time}_DIM_GRID.csv"
+    header = generate_headers()
+    np.savetxt(filename, all_results_array, delimiter=',', header=header, comments='', fmt='%.3f')  # Adjust precision as needed
+    print(f"Results saved to {filename}")
 
     return all_results_array
