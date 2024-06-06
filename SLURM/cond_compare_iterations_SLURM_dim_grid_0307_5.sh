@@ -24,4 +24,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script_dim_grid5.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 2 0 --iterations 25 --parameter_set_name set0307 --dimensions 2,3,5,7,10
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script_dim_grid5.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 5 0 --iterations 25 --parameter_set_name set0307 --dimensions 2,3,5,7,10
