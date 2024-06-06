@@ -22,14 +22,11 @@ def parse_list_argument(arg_value):
 # Define parameter sets
 parameter_sets = {
     "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000},
-    #"set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
-    #"set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 8000},
-    "set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 12000},
+    "set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
     #"set0313": {"learning_rate": 0.001, "min_temperature": 0.4, "max_iterations": 10000},
     #"set0313": {"learning_rate": 0.0006625, "min_temperature": 0.000000001, "max_iterations": 22500},
     #"set0313": {"learning_rate": 0.00055, "min_temperature": 0.25, "max_iterations": 20000},
     "set0313": {"learning_rate": 0.00055, "min_temperature": 0.1, "max_iterations": 20000},
-    #"set0314": {"learning_rate": 0.001, "min_temperature": 0.05, "max_iterations": 30000},
     "set0314": {"learning_rate": 0.001, "min_temperature": 0.000000001, "max_iterations": 30000},
     "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000},
     "test": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 20},
