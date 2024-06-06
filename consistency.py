@@ -51,6 +51,7 @@ def consistency(models):
     assert ids_runs.shape == (n_runs, )
 
     # Plotting
+    '''
     fig = plt.figure(figsize=(10,4))
 
     ax1 = fig.add_subplot(121)
@@ -66,4 +67,5 @@ def consistency(models):
     )
 
     plt.show()
+    '''
     return scores_runs, pairs_runs

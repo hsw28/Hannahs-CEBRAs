@@ -57,7 +57,7 @@ def generate_headers():
 
     return ','.join(headers)
 
-def pos_compare_iterations_euc(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1, iterations, parameter_set):
+def pos_compare_iterations_cos_fixed(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, posA1, posB1, iterations, parameter_set):
     learning_rate = parameter_set["learning_rate"]
     min_temperature = parameter_set["min_temperature"]
     max_iterations = parameter_set["max_iterations"]

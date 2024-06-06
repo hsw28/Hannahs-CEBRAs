@@ -7,7 +7,7 @@ import cebra
 from cebra import CEBRA
 import cebra.helper as cebra_helper
 import numpy as np
-from pos_compare_iterations_script_cos_fixed import pos_compare_iterations_script_cos_fixed
+from pos_compare_iterations_cos_fixed import pos_compare_iterations_cos_fixed
 from smoothpos import smoothpos
 from ca_velocity import ca_velocity
 
@@ -108,4 +108,4 @@ traceAnB1_An = traceAnB1_An[high_vel_indices_An]
 traceAnB1_B1 = traceAnB1_B1[high_vel_indices_B1]
 
 parameter_set = parameter_sets[args.parameter_set_name]
-pos_compare_iterations_euc(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations, parameter_set)
+pos_compare_iterations_cos_fixed(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, PosAn, PosA1, PosB1, args.iterations, parameter_set)
