@@ -63,13 +63,14 @@ def pos_compare_iterations_euc(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAn
     max_iterations = parameter_set["max_iterations"]
 
     output_dimension = 3
-    distance = 'euclidean'
+    distance = 'cosine'
 
     cebra_model = CEBRA(model_architecture='offset10-model',
                         batch_size=512,
                         learning_rate=learning_rate,
-                        temperature_mode='auto',
-                        min_temperature=min_temperature,
+                        temperature_mode='constant',
+                        temperature=min_temperature,
+                        #min_temperature=min_temperature,
                         output_dimension=output_dimension,
                         max_iterations=max_iterations,
                         distance=distance,
