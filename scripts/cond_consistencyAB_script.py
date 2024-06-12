@@ -21,18 +21,14 @@ from cebra import CEBRA
 import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
-from CSUSconsistencyAB import CSUSconsistencyAB
+from cond_consistencyAB import cond_consistencyAB
 
 
+#ex: python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
 
 
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.0035, "min_temperature": 2, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0222b": {"learning_rate": 0.0055, "min_temperature": 2, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0222c": {"learning_rate": 0.0095, "min_temperature": 1.33, "max_iterations": 18000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307b": {"learning_rate": 0.003, "min_temperature": 1.16, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
@@ -107,4 +103,5 @@ elif how_many_divisions == 5:
     trainingB[trainingB == -1] = 0
 
 
-CSUSconsistency(traceA, traceB, trainingA, trainingB, args.iterations, parameter_set)
+parameter_set = parameter_sets[args.parameter_set_name]
+cond_consistencyAB(traceA, traceB, trainingA, trainingB, args.iterations, parameter_set)

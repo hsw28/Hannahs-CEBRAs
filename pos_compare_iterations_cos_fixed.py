@@ -84,6 +84,7 @@ def pos_compare_iterations_cos_fixed(traceA1An_An, traceAnB1_An, traceA1An_A1, t
 
     try:
         for i in range(iterations):
+            print(i)
             traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
             posAn_train, posAn_test = hold_out(posAn, 75)
             traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
@@ -102,7 +103,6 @@ def pos_compare_iterations_cos_fixed(traceA1An_An, traceAnB1_An, traceA1An_A1, t
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
 
-            print(results)
 
         # Save the results to a CSV file with the current date and time in the filename
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')

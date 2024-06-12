@@ -50,6 +50,7 @@ def consistency(models):
     assert pairs_runs.shape == (n_runs**2 - n_runs, 2)
     assert ids_runs.shape == (n_runs, )
 
+
     # Plotting
     '''
     fig = plt.figure(figsize=(10,4))
@@ -68,4 +69,5 @@ def consistency(models):
 
     plt.show()
     '''
-    return scores_runs, pairs_runs
+
+    return scores_runs, pairs_runs, ids_runs

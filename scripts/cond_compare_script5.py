@@ -8,7 +8,7 @@ import cebra.helper as cebra_helper
 import numpy as np
 from cond_compare5 import cond_compare5
 
-#for making the shuffle Position figure
+#for making the shuffle figure
 #can optionally input parameters or hard code them
 #not inputed:
 #inputed:

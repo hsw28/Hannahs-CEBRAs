@@ -48,9 +48,9 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
                         temperature_mode='constant',
                         #temperature=min_temperature,
                         min_temperature=min_temperature,
-                        output_dimension=5,
+                        output_dimension=3,
                         max_iterations=max_iterations,
-                        distance='euclidean',
+                        distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
@@ -63,9 +63,9 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
                         temperature_mode='constant',
                         #temperature=min_temperature,
                         min_temperature=min_temperature,
-                        output_dimension=output_dimension,
+                        output_dimension=3,
                         max_iterations=max_iterations,
-                        distance='euclidean',
+                        distance=distance,
                         conditional='time_delta',
                         device='cuda_if_available',
                         num_hidden_units=32,
@@ -109,7 +109,7 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
     actual, predicted = CSUS_prediction5(trainA_train, trainA_train, CSUSAn_train, CSUSAn_train)
     plot_confusion_matrix(axs2[0, 0], actual, predicted)
 
-    #plot day An held out (only cells also in day A1)(default model)
+    #plot day An held out (only cells also in daTy A1)(default model)
     pos = np.array(CSUSAn_test)  # Replace with your pos array
     plot_hippocampus5d(axs[0, 1], trainA1, pos, pos, s=4, colormapping=False, binary=True) #<--------------------
     actual, predicted = CSUS_prediction5(trainA_train, trainA1, CSUSAn_train, CSUSAn_test)
@@ -236,14 +236,16 @@ def cond_compare5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn
     now = datetime.datetime.now()
     current_time = now.strftime("%Y-%m-%d_%H-%M-%S")
     folder_path = os.getcwd()
-    file_name = f"{folder_path}/cond_compare5_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
+    file_name = f"{folder_path}/cond_compare5plot_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
     plt.figure(fig.number)
+    #plt.show()
     plt.savefig(file_name, format='svg')
     plt.close(fig)
 
     # Save the second figure with confusion matrices
     conf_matrix_file_name = f"{folder_path}/cond_compare5conf_lr{learning_rate}_mt{min_temperature}_mi{max_iterations}_d{distance}_{current_time}.svg"
     plt.figure(fig2.number)
+    #plt.show()
     plt.savefig(conf_matrix_file_name, format='svg')
     plt.close(fig2)
 

@@ -95,6 +95,8 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
     try:
         for i in range(iterations):
 
+            print(i)
+
             traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
             CSUSAn_train, CSUSAn_test = hold_out(CSUSAn, 75)
             traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
@@ -115,7 +117,10 @@ def cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
 
-            print(results)
+            try:
+                print(results[i])
+            except Exception as e:
+                print(f"An error occurred: {e}")
 
         # Save the results to a CSV file with the current date and time in the filename
         current_time = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')

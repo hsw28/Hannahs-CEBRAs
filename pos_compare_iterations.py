@@ -83,6 +83,7 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
 
     try:
         for i in range(iterations):
+            print(i)
             traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
             posAn_train, posAn_test = hold_out(posAn, 75)
             traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
