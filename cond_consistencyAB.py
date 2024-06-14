@@ -50,7 +50,7 @@ def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
                                 device='cuda_if_available',
                                 num_hidden_units=32,
                                 time_offsets=1,
-                                verbose='false')
+                                verbose=False)
 
     elif temp_mode == 'constant':
         cebra_loc_model = CEBRA(model_architecture='offset10-model',
@@ -65,12 +65,13 @@ def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
                                 device='cuda_if_available',
                                 num_hidden_units=32,
                                 time_offsets=1,
-                                verbose='false')
+                                verbose=False)
 
     fract_control_all = []
     fract_test_all = []
 
     for i in range(iterations):
+        print(i)
         # First unshuffled
         eyeblink_train_controlA = envA_eyeblink
         cell_train_controlA = envA_cell_train
