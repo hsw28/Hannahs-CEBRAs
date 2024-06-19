@@ -21,7 +21,7 @@ from cebra import CEBRA
 import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
-from cond_consistencyAB import cond_consistencyAB
+from cond_consistencyAB_temp import cond_consistencyAB_temp
 
 
 #ex: python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
@@ -29,14 +29,14 @@ from cond_consistencyAB import cond_consistencyAB
 
 # Define parameter sets
 parameter_sets = {
-    #0222 is pretty good and 307 are both good, in the 60s
+
     "set0222": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
 
-    "set0307": {"learning_rate": 0.001, "min_temperature": .84, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307b": {"learning_rate": 0.045, "min_temperature": 0.75, "max_iterations": 22000, "distance": 'cosine', "temp_mode": 'auto'},
-    #c was very good and very bad
-    "set0307c": {"learning_rate": 0.045, "min_temperature": 1, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0307d": {"learning_rate": 0.008, "min_temperature": 4, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307": {"learning_rate": 0.008, "min_temperature": 4, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307b": {"learning_rate": 0.001, "min_temperature": .84, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307c": {"learning_rate": 0.045, "min_temperature": 0.75, "max_iterations": 22000, "distance": 'cosine', "temp_mode": 'auto'},
+    #d was very good and very bad
+    "set0307d": {"learning_rate": 0.045, "min_temperature": 1, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
 
 
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
@@ -131,4 +131,4 @@ elif how_many_divisions == 5:
 
 
 parameter_set = parameter_sets[args.parameter_set_name]
-cond_consistencyAB(traceA, traceB, trainingA, trainingB, args.iterations, parameter_set)
+cond_consistencyAB_temp(traceA, traceB, trainingA, trainingB, args.iterations, parameter_set)
