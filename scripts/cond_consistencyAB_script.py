@@ -51,7 +51,7 @@ parameter_sets = {
     # X    "set0816e": {"learning_rate": 5e-6, "min_temperature": .5, "max_iterations": 5000, "distance": 'euclidean', "temp_mode": 'auto'},
     #     "set0816f": {"learning_rate": 5e-6, "min_temperature": .74, "max_iterations": 10000, "distance": 'euclidean', "temp_mode": 'auto'},
 
-    "set0816i": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 9000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816i": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 22000, "distance": 'cosine', "temp_mode": 'auto'},
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
 }
