@@ -25,7 +25,8 @@ import matplotlib.pyplot as plt
 import joblib as jl
 from matplotlib.collections import LineCollection
 
-#ex: python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
+#ex
+##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
 
 
 # This function measures consistency across environments for the same rat
@@ -36,7 +37,7 @@ import joblib as jl
 
 
 # Function to handle the fitting and evaluation of models, and saving the top 5%
-def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, model_prefix, iterations=3):
+def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, model_prefix, iterations=2):
     models = []
     losses = []
     model_filenames = []  # List to store filenames of saved models
@@ -87,6 +88,7 @@ def calculate_all_pairs_consistency(models1, models2, transform1, transform2):
 
             mod1results = model1.transform(transform1)
             mod2results = model2.transform(transform2)
+            print('trans done')
 
             scores, pairs, ids = consistency([mod1results, mod2results])
             results.append((scores, pairs, ids))
@@ -148,24 +150,29 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
     # Ensure eyeblink data is of equal length before processing
     if not np.array_equal(envA_eyeblink[:10], envB_eyeblink[:10]):
         min_length = min(len(envA_eyeblink), len(envB_eyeblink))
-        envA_eyeblink, envB_eyeblink = envA_eyeblink[:min_length], envB_eyeblink[:min_length]
-        envA_cell_train, envB_cell_train = envA_cell_train[:min_length], envB_cell_train[:min_length]
+        eyeblink_train_controlA, eyeblink_train_controlB = envA_eyeblink[:min_length], envB_eyeblink[:min_length]
+        cell_train_controlA, cell_train_controlB = envA_cell_train[:min_length], envB_cell_train[:min_length]
+    else:
+        eyeblink_train_controlA, eyeblink_train_controlB = envA_eyeblink, envB_eyeblink
+        cell_train_controlA, cell_train_controlB = envA_cell_train, envB_cell_train
+
 
     # Evaluate and save models for non-shuffled data
-    top_models_A, model_filenamesA = evaluate_and_save_models(cebra_loc_model, envA_cell_train, envA_eyeblink, "model1")
-    top_models_B, model_filenamesB = evaluate_and_save_models(cebra_loc_model, envB_cell_train, envB_eyeblink, "model2")
+    top_models_A, model_filenamesA = evaluate_and_save_models(cebra_loc_model, cell_train_controlA, eyeblink_train_controlA, "model1")
+    top_models_B, model_filenamesB = evaluate_and_save_models(cebra_loc_model, cell_train_controlB, eyeblink_train_controlB, "model2")
 
     # Evaluate and save models for shuffled data
-    shuffled_index_A = np.random.permutation(envA_cell_train.shape[0])
-    envA_cell_train_shuffled = envA_cell_train[shuffled_index_A, :]
-    top_models_A_shuff, model_filenamesA_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, envA_eyeblink, "model1_shuff")
+    shuffled_index_A = np.random.permutation(cell_train_controlA.shape[0])
+    envA_cell_train_shuffled = cell_train_controlA[shuffled_index_A, :]
+    top_models_A_shuff, model_filenamesA_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, eyeblink_train_controlA, "model1_shuff")
 
-    shuffled_index_B = np.random.permutation(envB_cell_train.shape[0])
-    envB_cell_train_shuffled = envB_cell_train[shuffled_index_B, :]
-    top_models_B_shuff, model_filenamesB_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, envB_eyeblink, "model2_shuff")
+    shuffled_index_B = np.random.permutation(cell_train_controlB.shape[0])
+    envB_cell_train_shuffled = cell_train_controlB[shuffled_index_B, :]
+    top_models_B_shuff, model_filenamesB_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, eyeblink_train_controlB, "model2_shuff")
+
 
     # Calculate consistency for non-shuffled models
-    consistency_results = calculate_all_pairs_consistency(top_models_A, top_models_B, envA_cell_train, envB_cell_train)
+    consistency_results = calculate_all_pairs_consistency(top_models_A, top_models_B, cell_train_controlA, cell_train_controlB)
     save_results(consistency_results, "consistency_results.csv")
 
     # Calculate consistency for shuffled models
@@ -186,7 +193,7 @@ if __name__ == "__main__":
     parser.add_argument("--iterations", type=int, required=True, help="Number of iterations to run.")
     parser.add_argument("--learning_rate", type=float, default=0.01, help="Learning rate for the model.")
     parser.add_argument("--min_temperature", type=float, default=0.1, help="Minimum temperature for the model.")
-    parser.add_argument("--max_iterations", type=int, default=100, help="Maximum iterations for the model.")
+    parser.add_argument("--max_iterations", type=int, default=1000, help="Maximum iterations for the model.")
     parser.add_argument("--distance", default="euclidean", help="Distance measure for the model.")
     parser.add_argument("--temp_mode", default="auto", help="Temperature mode for the model.")
     args = parser.parse_args()

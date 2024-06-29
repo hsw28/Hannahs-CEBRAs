@@ -25,6 +25,7 @@ from matplotlib.collections import LineCollection
 
 #ex: python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
 
+#ex: python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_script.py ./traceAn.mat ./traceB1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
 
 # This function measures consistency across environments for the same rat
 def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eyeblink, iterations, parameter_set):
@@ -50,7 +51,7 @@ def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
                                 device='cuda_if_available',
                                 num_hidden_units=32,
                                 time_offsets=1,
-                                verbose=False)
+                                verbose=True)
 
     elif temp_mode == 'constant':
         cebra_loc_model = CEBRA(model_architecture='offset10-model',
