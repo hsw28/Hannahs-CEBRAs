@@ -44,6 +44,17 @@ parameter_sets = {
     "set0222h": {"learning_rate": 0.0095, "min_temperature": 1.33, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0222i": {"learning_rate": 0.0095, "min_temperature": 2.33, "max_iterations": 20000, "distance": 'euclidean', "temp_mode": 'constant'},
 
+    "set0222j": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 20000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0222k": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0222l": {"learning_rate": 0.0075, "min_temperature": 2.33, "max_iterations": 20000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0222m": {"learning_rate": 0.0075, "min_temperature": 2.33, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
+
+    "set0222n": {"learning_rate": 0.0055, "min_temperature": 1.33, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0222o": {"learning_rate": 0.0075, "min_temperature": .3, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0222p": {"learning_rate": 0.0075, "min_temperature": .75, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0222q": {"learning_rate": 0.0075, "min_temperature": .75, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0222r": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 18000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0222s": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0307": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'constant'},
     "set0307b": {"learning_rate": 0.003, "min_temperature": 1.16, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
