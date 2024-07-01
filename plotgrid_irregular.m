@@ -59,7 +59,9 @@ cmax = max(V);
 
 % Set caxis to expand the lower value range
 %caxis([cmin, cmax + (cmax - cmin) * 0.2]);  % Extend the maximum limit
-caxis([cmin *.65, cmax])
+%caxis([cmin *.65, cmax]) %for pos decoding
+caxis([cmin*1.1, cmax *1]) %for cond decoding
+caxis([cmin*1.23, cmax *1.005]) %for cond decoding rat 0307
 
 % Alternatively, focus more sharply on lower values
 %focus_factor = 0.3;  % Adjust this factor to change the focus range

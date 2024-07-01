@@ -30,9 +30,13 @@ from cond_compare_iterations5 import cond_compare_iterations5
 # python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 5 0 --iterations 11 --parameter_set_name test
 
 # Define parameter sets
-parameter_sets = {
+parameter_sets = parameter_sets = {
     "set0222": {"learning_rate": 0.0055, "min_temperature": 1.33, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307i": {"learning_rate": 0.008, "min_temperature": 4, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307": {"learning_rate": 0.008, "min_temperature": 4, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+
+    "set0307b": {"learning_rate": 0.045, "min_temperature": .84, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0307c": {"learning_rate": 0.045, "min_temperature": .84, "max_iterations": 28000, "distance": 'cosine', "temp_mode": 'constant'},
+
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
@@ -40,6 +44,7 @@ parameter_sets = {
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
 }
+
 
 # Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
