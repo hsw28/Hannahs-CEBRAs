@@ -128,7 +128,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
                                 device='cuda_if_available',
                                 num_hidden_units=32,
                                 time_offsets=1,
-                                verbose=True)
+                                verbose=False)
 
     elif temp_mode == 'constant':
         cebra_loc_model = CEBRA(model_architecture='offset10-model',
@@ -143,7 +143,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
                                 device='cuda_if_available',
                                 num_hidden_units=32,
                                 time_offsets=1,
-                                verbose=True)
+                                verbose=False)
 
 
     # Load data from file paths provided in arguments
