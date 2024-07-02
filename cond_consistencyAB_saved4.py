@@ -17,6 +17,8 @@ from cebra import CEBRA
 from hold_out import hold_out
 from CSUS_score import CSUS_score
 from consistency import consistency
+import datetime
+
 # Adding library paths
 sys.path.extend([
     '/home/hsw967/Programming/Hannahs-CEBRAs',
@@ -27,7 +29,7 @@ sys.path.extend([
 
 
 #ex
-##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
+##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB1.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkBn.mat 2 0 --iterations 1 --parameter_set_name test
 
 # This function measures consistency across environments for the same rat
 
@@ -90,7 +92,14 @@ def calculate_all_models_consistency(model_data_pairs):
 
 
 # Function to save results to a CSV file
-def save_results(results, filename):
+def save_results(results, base_filename):
+    # Get the current date and time
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")  # Formats the datetime as Year-Month-Day_Hour-Minute-Second
+
+    # Construct the filename with the current date and time
+    filename = f"{base_filename}_{formatted_time}.csv"
+
     with open(filename, 'w') as f:
         for score, pair, id in results:
             f.write(f"{score},{pair},{id}\n")
@@ -177,7 +186,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled", iterations)
 
     shuffled_index_B = np.random.permutation(traceB2_data.shape[0])
-    cell_train_controlB_shuffled = traceBn_data[shuffled_index_B, :]
+    cell_train_controlB_shuffled = traceB2_data[shuffled_index_B, :]
     model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled", iterations)
 
 
@@ -199,11 +208,12 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     ] + [
         (filename, traceB1_data) for filename, _ in model_data_pairs_B1_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceAn_data) for filename, _ in model_data_pairs_B2_shuff  # Shuffled models evaluated on non-shuffled data
+        (filename, traceB2_data) for filename, _ in model_data_pairs_B2_shuff  # Shuffled models evaluated on non-shuffled data
     ]
 
     consistency_results_all = calculate_all_models_consistency(all_model_pairs)
-    save_results(consistency_results_all, "consistency_results_all.csv")
+
+    save_results(consistency_results_all, 'consistency_results_all')
 
     # Cleanup model files
     delete_model_files([pair[0] for pair in all_model_pairs])

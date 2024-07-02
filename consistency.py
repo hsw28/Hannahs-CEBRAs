@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
+import datetime
 
 
 def consistency(models):
@@ -28,7 +29,8 @@ def consistency(models):
     # Truncate all models to the length of the shortest model
     models = [model[:min_length] for model in models]
 
-    embeddings_datasets, ids, modellabels = [], [], []
+    embeddings_datasets, ids, labels = [], [], []
+
 
     # Add truncated models to the embeddings_datasets
     embeddings_datasets.extend(models)
@@ -67,8 +69,15 @@ def consistency(models):
         title="Between-runs consistencies"
     )
 
-    fig.savefig("consistency_plot.svg", format='svg')
-    plt.show()
 
+    # Get the current date and time
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")  # Formats the datetime as Year-Month-Day_Hour-Minute-Second
+
+    # Construct the filename with the current date and time
+    filename = f"consistency_plot_{formatted_time}.svg"
+
+    # Save the figure with the dynamically generated filename
+    fig.savefig(filename, format='svg')
 
     return scores_runs, pairs_runs, ids_runs
