@@ -52,7 +52,7 @@ def consistency(models):
 
 
     # Plotting
-    '''
+
     fig = plt.figure(figsize=(10,4))
 
     ax1 = fig.add_subplot(121)
@@ -68,6 +68,6 @@ def consistency(models):
     )
 
     plt.show()
-    '''
+
 
     return scores_runs, pairs_runs, ids_runs

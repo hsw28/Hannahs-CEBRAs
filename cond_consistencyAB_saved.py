@@ -106,18 +106,24 @@ def delete_model_files(model_filenames):
 
 
 # Function to calculate consistency across all pairs of models
-def calculate_all_pairs_consistency(model_data_pairs):
+def calculate_all_models_consistency(model_data_pairs):
+    loaded_models = []
+    transformations = []
     results = []
-    for i, (filename1, data1) in enumerate(model_data_pairs):
-        model1 = CEBRA.load(filename1)
-        for j, (filename2, data2) in enumerate(model_data_pairs):
-            if i != j:
-                model2 = CEBRA.load(filename2)
-                mod1results = model1.transform(data1)  # Ensure data is passed here
-                mod2results = model2.transform(data2)
-                scores, pairs, ids = consistency([mod1results, mod2results])
-                results.append((scores, pairs, ids))
+
+    # Load all models and transform data
+    for filename, data in model_data_pairs:
+        model = CEBRA.load(filename)
+        transformations.append(model.transform(data))
+
+    # Calculate consistency across all transformed data
+    if transformations:
+        scores, pairs, ids = consistency(transformations)
+        results.append((scores, pairs, ids))
+        print(f"Calculated consistency across all models with results: {scores}")
+
     return results
+
 
 
 
@@ -200,24 +206,10 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
     model_data_pairs_B_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, eyeblink_train_controlB, "modelB_shuffled", iterations)
 
 
-    # Combine all pairs
-    all_model_pairs = model_data_pairs_A + model_data_pairs_B
-
-
-    # Calculate and save consistency results
-    consistency_results = calculate_all_pairs_consistency(all_model_pairs)
-    save_results(consistency_results, "consistency_results.csv")
-
 
     # Combine all pairs
-    all_model_pairs_shuff = model_data_pairs_A_shuff + model_data_pairs_B_shuff
-    # Calculate and save consistency results
-    consistency_results_shuff = calculate_all_pairs_consistency(all_model_pairs)
-    save_results(consistency_results_shuff, "consistency_results.csv")
-
-
     all_model_pairs = model_data_pairs_A + model_data_pairs_B + model_data_pairs_A_shuff + model_data_pairs_B_shuff
-    consistency_results_all = calculate_all_pairs_consistency(all_model_pairs)
+    consistency_results_all = calculate_all_models_consistency(all_model_pairs)
     save_results(consistency_results_all, "consistency_results_all.csv")
 
     # Cleanup model files
