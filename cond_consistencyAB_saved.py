@@ -77,15 +77,17 @@ def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, mo
     models = []
     losses = []
     model_data_pairs = []
+    model_filenames = []
 
     for i in range(iterations):
         model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
         loss = model.state_dict_['loss'][-1]  # Assuming you have access to this method
         filename = f"{model_prefix}_{i}.pt"
         model.save(filename)  # Assuming `model.save()` is a valid method for CEBRA
+        model_filenames.append(filename)
         model_data_pairs.append((filename, cell_train_data))
 
-    return model_data_pairs
+    return model_data_pairs, model_filenames
 
 
 
@@ -194,25 +196,33 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
 
 
     # Evaluate and save models for non-shuffled data
-    model_data_pairs_A = evaluate_and_save_models(cebra_loc_model, cell_train_controlA, eyeblink_train_controlA, "modelA", iterations)
-    model_data_pairs_B = evaluate_and_save_models(cebra_loc_model, cell_train_controlB, eyeblink_train_controlB, "modelB", iterations)
+    model_data_pairs_A, model_filenames_A = evaluate_and_save_models(cebra_loc_model, cell_train_controlA, eyeblink_train_controlA, "modelA", iterations)
+    model_data_pairs_B, model_filenames_B = evaluate_and_save_models(cebra_loc_model, cell_train_controlB, eyeblink_train_controlB, "modelB", iterations)
 
     # Evaluate and save models for shuffled data
     shuffled_index_A = np.random.permutation(cell_train_controlA.shape[0])
-    envA_cell_train_shuffled = cell_train_controlA[shuffled_index_A, :]
-    print(envA_cell_train_shuffled)
-    print('train 2')
-    print(cell_train_controlA)
-    model_data_pairs_A_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, eyeblink_train_controlA, "modelA_shuffled", iterations)
+    cell_train_controlA_shuffled = cell_train_controlA[shuffled_index_A, :]
+    model_data_pairs_A_shuff, shuffled_filenames_A = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, eyeblink_train_controlA, "modelA_shuffled", iterations)
 
     shuffled_index_B = np.random.permutation(cell_train_controlB.shape[0])
-    envB_cell_train_shuffled = cell_train_controlB[shuffled_index_B, :]
-    model_data_pairs_B_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, eyeblink_train_controlB, "modelB_shuffled", iterations)
+    cell_train_controlB_shuffled = cell_train_controlB[shuffled_index_B, :]
+    model_data_pairs_B_shuff, shuffled_filenames_B = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, eyeblink_train_controlB, "modelB_shuffled", iterations)
 
 
 
     # Combine all pairs
-    all_model_pairs = model_data_pairs_A + model_data_pairs_B + model_data_pairs_A_shuff + model_data_pairs_B_shuff
+    #all_model_pairs = model_data_pairs_A + model_data_pairs_B + model_data_pairs_A_shuff + model_data_pairs_B_shuff
+
+    all_model_pairs = [
+        (filename, cell_train_controlA) for filename in model_filenames_A  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, cell_train_controlB) for filename in model_filenames_B  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, cell_train_controlA) for filename, _ in model_data_pairs_A_shuff  # Shuffled models evaluated on non-shuffled data
+    ] + [
+        (filename, cell_train_controlB) for filename, _ in model_data_pairs_B_shuff  # Shuffled models evaluated on non-shuffled data
+    ]
+
     consistency_results_all = calculate_all_models_consistency(all_model_pairs)
     save_results(consistency_results_all, "consistency_results_all.csv")
 
