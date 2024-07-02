@@ -67,6 +67,7 @@ def consistency(models):
         title="Between-runs consistencies"
     )
 
+    fig.savefig("consistency_plot.svg", format='svg')
     plt.show()
 
 

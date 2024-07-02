@@ -114,6 +114,7 @@ def calculate_all_models_consistency(model_data_pairs):
     # Load all models and transform data
     for filename, data in model_data_pairs:
         model = CEBRA.load(filename)
+        print(filename)
         transformations.append(model.transform(data))
 
     # Calculate consistency across all transformed data
@@ -199,6 +200,9 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
     # Evaluate and save models for shuffled data
     shuffled_index_A = np.random.permutation(cell_train_controlA.shape[0])
     envA_cell_train_shuffled = cell_train_controlA[shuffled_index_A, :]
+    print(envA_cell_train_shuffled)
+    print('train 2')
+    print(cell_train_controlA)
     model_data_pairs_A_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, eyeblink_train_controlA, "modelA_shuffled", iterations)
 
     shuffled_index_B = np.random.permutation(cell_train_controlB.shape[0])
