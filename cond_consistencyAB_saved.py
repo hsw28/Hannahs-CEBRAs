@@ -1,75 +1,36 @@
 import sys
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs')
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
-sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs')
-sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
-
+import os
 import numpy as np
 import pandas as pd
 import torch
 import random
-import os
-
+from datetime import datetime
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from scipy import stats
-from datetime import datetime
+import gc
+import argparse
+import joblib as jl
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from cebra import CEBRA
 from hold_out import hold_out
 from CSUS_score import CSUS_score
-import gc
-import argparse
-import cebra.helper as cebra_helper
 from consistency import consistency
-import matplotlib.pyplot as plt
-import joblib as jl
-from matplotlib.collections import LineCollection
+# Adding library paths
+sys.path.extend([
+    '/home/hsw967/Programming/Hannahs-CEBRAs',
+    '/home/hsw967/Programming/Hannahs-CEBRAs/scripts',
+    '/Users/Hannah/Programming/Hannahs-CEBRAs',
+    '/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra'
+])
 
-#ex
-##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
-
-
-# This function measures consistency across environments for the same rat
-import numpy as np
-import torch
-from datetime import datetime
-import joblib as jl
-
-import sys
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs')
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
-sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs')
-sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
-
-import numpy as np
-import pandas as pd
-import torch
-import random
-import os
-
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.metrics import r2_score
-from scipy import stats
-from datetime import datetime
-from cebra import CEBRA
-from hold_out import hold_out
-from CSUS_score import CSUS_score
-import gc
-import argparse
-import cebra.helper as cebra_helper
-from consistency import consistency
-import matplotlib.pyplot as plt
-import joblib as jl
-from matplotlib.collections import LineCollection
 
 #ex
 ##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
 
 # This function measures consistency across environments for the same rat
-import numpy as np
-import torch
-from datetime import datetime
-import joblib as jl
+
 
 
 # Function to handle the fitting and evaluation of models, and saving the top 5%
@@ -193,6 +154,7 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
     else:
         eyeblink_train_controlA, eyeblink_train_controlB = envA_eyeblink, envB_eyeblink
         cell_train_controlA, cell_train_controlB = envA_cell_train, envB_cell_train
+
 
 
     # Evaluate and save models for non-shuffled data

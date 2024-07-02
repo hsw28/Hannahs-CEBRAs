@@ -1,89 +1,65 @@
 import sys
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs')
-sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
-sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs')
-sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
-
+import os
 import numpy as np
 import pandas as pd
 import torch
 import random
-import os
-
+from datetime import datetime
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from scipy import stats
-from datetime import datetime
+import gc
+import argparse
+import joblib as jl
+import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from cebra import CEBRA
 from hold_out import hold_out
 from CSUS_score import CSUS_score
-import gc
-import argparse
-import cebra.helper as cebra_helper
 from consistency import consistency
-import matplotlib.pyplot as plt
-import joblib as jl
-from matplotlib.collections import LineCollection
+# Adding library paths
+sys.path.extend([
+    '/home/hsw967/Programming/Hannahs-CEBRAs',
+    '/home/hsw967/Programming/Hannahs-CEBRAs/scripts',
+    '/Users/Hannah/Programming/Hannahs-CEBRAs',
+    '/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra'
+])
+
+
+#ex
+##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
+
 # This function measures consistency across environments for the same rat
-import numpy as np
-import torch
-from datetime import datetime
-import joblib as jl
-
-#ex:
-#python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 2 --parameter_set_name test
 
 
 
-
-def prepare_model_data_and_identifiers(cebra_loc_model, cell_train_datas, eyeblink_datas, iterations):
-    all_models = []
-    all_filenames = []
-    identifiers = []
-    transform_data = []
-
-    for i, (cell_train, eyeblink) in enumerate(zip(cell_train_datas, eyeblink_datas)):
-        model_prefix = f"model_{i}"
-        top_models, model_filenames = evaluate_and_save_models(cebra_loc_model, cell_train, eyeblink, model_prefix, iterations)
-        all_models.extend(top_models)
-        all_filenames.extend(model_filenames)
-        identifiers.extend([model_prefix] * len(top_models))
-        transform_data.extend([cell_train] * len(top_models))  # Storing data for transformation
-
-        # Shuffling
-        shuffled_index = np.random.permutation(cell_train.shape[0])
-        cell_train_shuffled = cell_train[shuffled_index, :]
-        shuffled_prefix = f"{model_prefix}_shuff"
-        top_models_shuff, model_filenames_shuff = evaluate_and_save_models(cebra_loc_model, cell_train_shuffled, eyeblink, shuffled_prefix, iterations)
-        all_models.extend(top_models_shuff)
-        all_filenames.extend(model_filenames_shuff)
-        identifiers.extend([shuffled_prefix] * len(top_models_shuff))
-        transform_data.extend([cell_train_shuffled] * len(top_models_shuff))  # Storing shuffled data for transformation
-
-    return all_models, all_filenames, identifiers, transform_data
-
-def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, model_prefix, iterations=50):
+# Function to handle the fitting and evaluation of models, and saving the top 5%
+def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, model_prefix, iterations=2):
     models = []
     losses = []
+    model_data_pairs = []
     model_filenames = []
 
     for i in range(iterations):
         model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
-        loss = model.state_dict_['loss'][-1]
-        models.append(model)
-        losses.append(loss)
-        print(f"Iteration {i+1}, Loss: {loss}")
-
-    sorted_models_with_losses = sorted(zip(models, losses), key=lambda x: x[1])
-    cutoff_index = max(1, int(len(models) * 0.05))
-    selected_models = [model for model, loss in sorted_models_with_losses if loss <= sorted_models_with_losses[cutoff_index - 1][1]][:cutoff_index]
-
-    for i, model in enumerate(selected_models):
+        loss = model.state_dict_['loss'][-1]  # Assuming you have access to this method
         filename = f"{model_prefix}_{i}.pt"
-        model.save(filename)
+        model.save(filename)  # Assuming `model.save()` is a valid method for CEBRA
         model_filenames.append(filename)
+        model_data_pairs.append((filename, cell_train_data))
 
-    return selected_models, model_filenames
+    return model_data_pairs, model_filenames
+
+
+
+
+def load_model(filename):
+    # Load a model from the current working directory
+    model = torch.load(filename)
+    return model
+
+
+
 
 def delete_model_files(model_filenames):
     for filename in model_filenames:
@@ -91,30 +67,35 @@ def delete_model_files(model_filenames):
         print(f"Deleted {filename}")
 
 
-def calculate_all_pairs_consistency(models, identifiers, data):
+
+# Function to calculate consistency across all pairs of models
+def calculate_all_models_consistency(model_data_pairs):
+    loaded_models = []
+    transformations = []
     results = []
-    for i, model1 in enumerate(models):
-        for j, model2 in enumerate(models):
-            if i != j:  # Ensuring not to compare the model with itself
-                mod1results = model1.transform(data[i])  # Transform data using model1
-                mod2results = model2.transform(data[j])  # Transform data using model2
-                scores, pairs, ids = consistency([mod1results, mod2results])
-                results.append({
-                    "pair": f"{identifiers[i]} vs {identifiers[j]}",
-                    "scores": scores,
-                    "pairs": pairs,
-                    "ids": ids
-                })
+
+    # Load all models and transform data
+    for filename, data in model_data_pairs:
+        model = CEBRA.load(filename)
+        print(filename)
+        transformations.append(model.transform(data))
+
+    # Calculate consistency across all transformed data
+    if transformations:
+        scores, pairs, ids = consistency(transformations)
+        results.append((scores, pairs, ids))
+        print(f"Calculated consistency across all models with results: {scores}")
+
     return results
 
+
+# Function to save results to a CSV file
 def save_results(results, filename):
     with open(filename, 'w') as f:
-        for result in results:
-            score_str = ','.join(map(str, result["scores"]))
-            pair_str = ','.join(map(str, result["pairs"]))
-            id_str = ','.join(map(str, result["ids"]))
-            f.write(f"{result['pair']},{score_str},{pair_str},{id_str}\n")
+        for score, pair, id in results:
+            f.write(f"{score},{pair},{id}\n")
     print(f"Results saved to {filename}")
+
 
 # Main function to orchestrate the modeling and saving process
 def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, iterations, parameter_set):
@@ -156,19 +137,76 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
                                 verbose=True)
 
 
-    cell_train_datas = [traceA1, traceAn, traceB1, traceB2]
-    eyeblink_datas = [trainingA1, trainingAn, trainingB1, trainingB2]
-    
-    # Prepare model data and identifiers
-    all_models, all_filenames, identifiers, transform_data = prepare_model_data_and_identifiers(
-        cebra_loc_model, cell_train_datas, eyeblink_datas, iterations
-    )
+    # Load data from file paths provided in arguments
+    traceA1_data = (traceA1)
+    traceAn_data = (traceAn)
+    traceB1_data = (traceB1)
+    traceB2_data = (traceB2)
+    trainingA1_data = (trainingA1)
+    trainingAn_data = (trainingAn)
+    trainingB1_data = (trainingB1)
+    trainingB2_data = (trainingB2)
 
-    # Calculate and save consistency results
-    consistency_results = calculate_all_pairs_consistency(all_models, identifiers, transform_data)
-    save_results(consistency_results, "consistency_results.csv")
-    delete_model_files(all_filenames)
+    envs_cell_train = [traceA1_data, traceAn_data, traceB1_data, traceB2_data]
+    envs_eyeblink = [trainingA1_data, trainingAn_data, trainingB1_data, trainingB2_data]
 
+    # Ensure eyeblink data is of equal length AND CONTENT before processing
+    min_length = min(min(len(eyeblink) for eyeblink in envs_eyeblink), min(len(cell) for cell in envs_cell_train))
+    for i in range(4):
+        if not np.array_equal(envs_eyeblink[i][:10], envs_eyeblink[(i+1) % 4][:10]):
+            envs_eyeblink[i] = envs_eyeblink[i][:min_length]
+            envs_cell_train[i] = envs_cell_train[i][:min_length]
+
+    # Evaluate and save models for non-shuffled data
+    model_data_pairs_A, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, "modelA1", iterations)
+    model_data_pairs_A, model_filenames_An = evaluate_and_save_models(cebra_loc_model, traceAn_data, trainingAn_data, "modelAn", iterations)
+    model_data_pairs_B, model_filenames_B1 = evaluate_and_save_models(cebra_loc_model, traceB1_data, trainingB1_data, "modelB1", iterations)
+    model_data_pairs_B, model_filenames_B2 = evaluate_and_save_models(cebra_loc_model, traceB2_data, trainingB2_data, "modelB2", iterations)
+
+    # Evaluate and save models for shuffled data
+    shuffled_index_A = np.random.permutation(traceA1_data.shape[0])
+    cell_train_controlA_shuffled = traceA1_data[shuffled_index_A, :]
+    model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, "modelA1_shuffled", iterations)
+
+    shuffled_index_A = np.random.permutation(traceAn_data.shape[0])
+    cell_train_controlA_shuffled = traceAn_data[shuffled_index_A, :]
+    model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, "modelAn_shuffled", iterations)
+
+    shuffled_index_B = np.random.permutation(traceB1_data.shape[0])
+    cell_train_controlB_shuffled = traceB1_data[shuffled_index_B, :]
+    model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled", iterations)
+
+    shuffled_index_B = np.random.permutation(traceB2_data.shape[0])
+    cell_train_controlB_shuffled = traceBn_data[shuffled_index_B, :]
+    model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled", iterations)
+
+
+    # Combine all pairs
+    #all_model_pairs = model_data_pairs_A + model_data_pairs_B + model_data_pairs_A_shuff + model_data_pairs_B_shuff
+
+    all_model_pairs = [
+        (filename, traceA1_data) for filename in model_filenames_A1  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, traceAn_data) for filename in model_filenames_An  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, traceB1_data) for filename in model_filenames_B1  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, traceB2_data) for filename in model_filenames_B2  # Non-shuffled models evaluated on shuffled data
+    ] + [
+        (filename, traceA1_data) for filename, _ in model_data_pairs_A1_shuff  # Shuffled models evaluated on non-shuffled data
+    ] + [
+        (filename, traceAn_data) for filename, _ in model_data_pairs_An_shuff  # Shuffled models evaluated on non-shuffled data
+    ] + [
+        (filename, traceB1_data) for filename, _ in model_data_pairs_B1_shuff  # Shuffled models evaluated on non-shuffled data
+    ] + [
+        (filename, traceAn_data) for filename, _ in model_data_pairs_B2_shuff  # Shuffled models evaluated on non-shuffled data
+    ]
+
+    consistency_results_all = calculate_all_models_consistency(all_model_pairs)
+    save_results(consistency_results_all, "consistency_results_all.csv")
+
+    # Cleanup model files
+    delete_model_files([pair[0] for pair in all_model_pairs])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the CEBRA model evaluation.")
