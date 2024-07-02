@@ -35,43 +35,67 @@ import torch
 from datetime import datetime
 import joblib as jl
 
+import sys
+sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs')
+sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
+sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs')
+sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
+
+import numpy as np
+import pandas as pd
+import torch
+import random
+import os
+
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.metrics import r2_score
+from scipy import stats
+from datetime import datetime
+from cebra import CEBRA
+from hold_out import hold_out
+from CSUS_score import CSUS_score
+import gc
+import argparse
+import cebra.helper as cebra_helper
+from consistency import consistency
+import matplotlib.pyplot as plt
+import joblib as jl
+from matplotlib.collections import LineCollection
+
+#ex
+##python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --iterations 2 --parameter_set_name test
+
+# This function measures consistency across environments for the same rat
+import numpy as np
+import torch
+from datetime import datetime
+import joblib as jl
+
 
 # Function to handle the fitting and evaluation of models, and saving the top 5%
 def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, model_prefix, iterations=2):
     models = []
     losses = []
-    model_filenames = []  # List to store filenames of saved models
+    model_data_pairs = []
 
-    # Fit models and collect losses
     for i in range(iterations):
         model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
-        loss = model.state_dict_['loss'][-1]
-        models.append(model)
-        losses.append(loss)
-        print(f"Iteration {i+1}, Loss: {loss}")
-
-    # Sort models by their losses
-    sorted_models_with_losses = sorted(zip(models, losses), key=lambda x: x[1])
-
-    # Determine the 5% cutoff index
-    cutoff_index = max(1, int(len(models) * 0.05))  # Ensure at least one model is chosen
-
-    # Select models up to the 5% threshold, handling ties at the boundary
-    selected_models = []
-    last_accepted_loss = sorted_models_with_losses[cutoff_index - 1][1]
-    for model, loss in sorted_models_with_losses:
-        if loss <= last_accepted_loss:
-            selected_models.append(model)
-        if len(selected_models) >= cutoff_index:
-            break
-
-    # Save the top models within the 5% cutoff, handling ties at the boundary
-    for i, model in enumerate(selected_models):
+        loss = model.state_dict_['loss'][-1]  # Assuming you have access to this method
         filename = f"{model_prefix}_{i}.pt"
-        model.save(filename)
-        model_filenames.append(filename)  # Save the filename for later deletion
+        model.save(filename)  # Assuming `model.save()` is a valid method for CEBRA
+        model_data_pairs.append((filename, cell_train_data))
 
-    return selected_models, model_filenames  # Return models and their file names
+    return model_data_pairs
+
+
+
+
+def load_model(filename):
+    # Load a model from the current working directory
+    model = torch.load(filename)
+    return model
+
+
 
 
 def delete_model_files(model_filenames):
@@ -80,19 +104,24 @@ def delete_model_files(model_filenames):
         print(f"Deleted {filename}")
 
 
+
 # Function to calculate consistency across all pairs of models
-def calculate_all_pairs_consistency(models1, models2, transform1, transform2):
+def calculate_all_pairs_consistency(model_data_pairs):
     results = []
-    for model1 in models1:
-        for model2 in models2:
-
-            mod1results = model1.transform(transform1)
-            mod2results = model2.transform(transform2)
-            print('trans done')
-
-            scores, pairs, ids = consistency([mod1results, mod2results])
-            results.append((scores, pairs, ids))
+    for i, (filename1, data1) in enumerate(model_data_pairs):
+        model1 = CEBRA.load(filename1)
+        for j, (filename2, data2) in enumerate(model_data_pairs):
+            if i != j:
+                model2 = CEBRA.load(filename2)
+                mod1results = model1.transform(data1)  # Ensure data is passed here
+                mod2results = model2.transform(data2)
+                scores, pairs, ids = consistency([mod1results, mod2results])
+                results.append((scores, pairs, ids))
     return results
+
+
+
+
 
 # Function to save results to a CSV file
 def save_results(results, filename):
@@ -158,31 +187,42 @@ def main(traceA, traceB, trainingA, trainingB, iterations, parameter_set):
 
 
     # Evaluate and save models for non-shuffled data
-    top_models_A, model_filenamesA = evaluate_and_save_models(cebra_loc_model, cell_train_controlA, eyeblink_train_controlA, "model1")
-    top_models_B, model_filenamesB = evaluate_and_save_models(cebra_loc_model, cell_train_controlB, eyeblink_train_controlB, "model2")
+    model_data_pairs_A = evaluate_and_save_models(cebra_loc_model, cell_train_controlA, eyeblink_train_controlA, "modelA", iterations)
+    model_data_pairs_B = evaluate_and_save_models(cebra_loc_model, cell_train_controlB, eyeblink_train_controlB, "modelB", iterations)
 
     # Evaluate and save models for shuffled data
     shuffled_index_A = np.random.permutation(cell_train_controlA.shape[0])
     envA_cell_train_shuffled = cell_train_controlA[shuffled_index_A, :]
-    top_models_A_shuff, model_filenamesA_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, eyeblink_train_controlA, "model1_shuff")
+    model_data_pairs_A_shuff = evaluate_and_save_models(cebra_loc_model, envA_cell_train_shuffled, eyeblink_train_controlA, "modelA_shuffled", iterations)
 
     shuffled_index_B = np.random.permutation(cell_train_controlB.shape[0])
     envB_cell_train_shuffled = cell_train_controlB[shuffled_index_B, :]
-    top_models_B_shuff, model_filenamesB_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, eyeblink_train_controlB, "model2_shuff")
+    model_data_pairs_B_shuff = evaluate_and_save_models(cebra_loc_model, envB_cell_train_shuffled, eyeblink_train_controlB, "modelB_shuffled", iterations)
 
 
-    # Calculate consistency for non-shuffled models
-    consistency_results = calculate_all_pairs_consistency(top_models_A, top_models_B, cell_train_controlA, cell_train_controlB)
+    # Combine all pairs
+    all_model_pairs = model_data_pairs_A + model_data_pairs_B
+
+
+    # Calculate and save consistency results
+    consistency_results = calculate_all_pairs_consistency(all_model_pairs)
     save_results(consistency_results, "consistency_results.csv")
 
-    # Calculate consistency for shuffled models
-    consistency_results_shuff = calculate_all_pairs_consistency(top_models_A_shuff, top_models_B_shuff, envA_cell_train_shuffled, envB_cell_train_shuffled)
-    save_results(consistency_results_shuff, "consistency_results_shuff.csv")
 
-    delete_model_files(model_filenamesA)
-    delete_model_files(model_filenamesB)
-    delete_model_files(model_filenamesA_shuff)
-    delete_model_files(model_filenamesB_shuff)
+    # Combine all pairs
+    all_model_pairs_shuff = model_data_pairs_A_shuff + model_data_pairs_B_shuff
+    # Calculate and save consistency results
+    consistency_results_shuff = calculate_all_pairs_consistency(all_model_pairs)
+    save_results(consistency_results_shuff, "consistency_results.csv")
+
+
+    all_model_pairs = model_data_pairs_A + model_data_pairs_B + model_data_pairs_A_shuff + model_data_pairs_B_shuff
+    consistency_results_all = calculate_all_pairs_consistency(all_model_pairs)
+    save_results(consistency_results_all, "consistency_results_all.csv")
+
+    # Cleanup model files
+    delete_model_files([pair[0] for pair in all_model_pairs])
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the CEBRA model evaluation.")

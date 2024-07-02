@@ -42,6 +42,7 @@ parameter_sets = {
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
 }
+
 # Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
 parser.add_argument("traceA", type=str, help="Path to the traceAnB1_An data file.")

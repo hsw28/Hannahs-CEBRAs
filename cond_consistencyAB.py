@@ -92,6 +92,7 @@ def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
         model1 = cebra_loc_model.fit(envA_cell_train, envA_eyeblink).transform(cell_train_controlA)
         model2 = cebra_loc_model.fit(envB_cell_train, envB_eyeblink).transform(cell_train_controlB)
 
+
         scores_runs, pairs_runs, ids_runs = consistency([model1, model2])
 
         # Now shuffled
