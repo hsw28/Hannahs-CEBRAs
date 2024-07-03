@@ -167,10 +167,10 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
             envs_cell_train[i] = envs_cell_train[i][:min_length]
 
     # Evaluate and save models for non-shuffled data
-    model_data_pairs_A, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, "modelA1", iterations)
-    model_data_pairs_A, model_filenames_An = evaluate_and_save_models(cebra_loc_model, traceAn_data, trainingAn_data, "modelAn", iterations)
-    model_data_pairs_B, model_filenames_B1 = evaluate_and_save_models(cebra_loc_model, traceB1_data, trainingB1_data, "modelB1", iterations)
-    model_data_pairs_B, model_filenames_B2 = evaluate_and_save_models(cebra_loc_model, traceB2_data, trainingB2_data, "modelB2", iterations)
+    model_data_pairs_A1, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, "modelA1", iterations)
+    model_data_pairs_An, model_filenames_An = evaluate_and_save_models(cebra_loc_model, traceAn_data, trainingAn_data, "modelAn", iterations)
+    model_data_pairs_B1, model_filenames_B1 = evaluate_and_save_models(cebra_loc_model, traceB1_data, trainingB1_data, "modelB1", iterations)
+    model_data_pairs_B2, model_filenames_B2 = evaluate_and_save_models(cebra_loc_model, traceB2_data, trainingB2_data, "modelB2", iterations)
 
     # Evaluate and save models for shuffled data
     shuffled_index_A = np.random.permutation(traceA1_data.shape[0])
@@ -202,13 +202,13 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     ] + [
         (filename, traceB2_data) for filename in model_filenames_B2  # Non-shuffled models evaluated on shuffled data
     ] + [
-        (filename, traceA1_data) for filename, _ in model_data_pairs_A1_shuff  # Shuffled models evaluated on non-shuffled data
+        (filename, traceA1_data) for filename, _ in shuffled_filenames_A1  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceAn_data) for filename, _ in model_data_pairs_An_shuff  # Shuffled models evaluated on non-shuffled data
+        (filename, traceAn_data) for filename, _ in shuffled_filenames_An  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceB1_data) for filename, _ in model_data_pairs_B1_shuff  # Shuffled models evaluated on non-shuffled data
+        (filename, traceB1_data) for filename, _ in shuffled_filenames_B1  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceB2_data) for filename, _ in model_data_pairs_B2_shuff  # Shuffled models evaluated on non-shuffled data
+        (filename, traceB2_data) for filename, _ in shuffled_filenames_B2  # Shuffled models evaluated on non-shuffled data
     ]
 
     consistency_results_all = calculate_all_models_consistency(all_model_pairs)

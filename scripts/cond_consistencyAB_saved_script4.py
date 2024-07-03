@@ -128,9 +128,9 @@ if how_many_divisions == 2:
     trainingB1[trainingB1 > 6] = 2
     trainingB1[trainingB1 == -1] = 0
 
-    trainingB1[(trainingB1 > 0) & (trainingB1 <= 6)]  = 1
-    trainingB1[trainingB1 > 6] = 2
-    trainingB1[trainingB1 == -1] = 0
+    trainingB1[(trainingB2 > 0) & (trainingB2 <= 6)]  = 1
+    trainingB1[trainingB2 > 6] = 2
+    trainingB1[trainingB2 == -1] = 0
 
 elif how_many_divisions == 5:
     trainingA1[(trainingA1 > 0) & (trainingA1 <= 2)]  = 1
