@@ -47,6 +47,8 @@ parameter_sets = parameter_sets = {
     "set0222l": {"learning_rate": 0.0065, "min_temperature": 1.33, "max_iterations": 23000, "distance": 'cosine', "temp_mode": 'constant'},
     "set0222m": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 27000, "distance": 'cosine', "temp_mode": 'constant'},
 
+    "set0222n": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
+
 
 
 
