@@ -213,16 +213,17 @@ def main(traceR1, traceR2, traceR3, traceR4, traceR5, trainingR1, trainingR2, tr
     ] + [
         (filename, traceR5_data) for filename in model_filenames_R5  # Non-shuffled models evaluated on shuffled data
     ] + [
-        (filename, traceR1_data) for filename, _ in shuffled_filenames_R1  # Shuffled models evaluated on non-shuffled data
+        (filename, traceR1_data) for filename, _ in model_data_pairs_R1_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceR2_data) for filename, _ in shuffled_filenames_R2  # Shuffled models evaluated on non-shuffled data
+        (filename, traceR2_data) for filename, _ in model_data_pairs_R2_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceR3_data) for filename, _ in shuffled_filenames_R3  # Shuffled models evaluated on non-shuffled data
+        (filename, traceR3_data) for filename, _ in model_data_pairs_R3_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceR4_data) for filename, _ in shuffled_filenames_R4  # Shuffled models evaluated on non-shuffled data
+        (filename, traceR4_data) for filename, _ in model_data_pairs_R4_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceR5_data) for filename, _ in shuffled_filenames_R5  # Shuffled models evaluated on non-shuffled data
+        (filename, traceR5_data) for filename, _ in model_data_pairs_R5_shuff  # Shuffled models evaluated on non-shuffled data
     ]
+
 
     consistency_results_all = calculate_all_models_consistency(all_model_pairs)
 
@@ -274,7 +275,7 @@ if __name__ == "__main__":
     parser.add_argument("--max_iterationsR5", type=int, default=100, help="Maximum iterations for the model.")
     parser.add_argument("--distanceR5", default="euclidean", help="Distance measure for the model.")
     parser.add_argument("--temp_modeR5", default="auto", help="Temperature mode for the model.")
-    
+
     args = parser.parse_args()
 
     main(args.traceR1, args.traceR2, args.traceR3, args.traceR4, args.traceR5, args.trainingR1, args.trainingR2, args.trainingR3, args.trainingR4, args.trainingR5, args.iterations, args.parameter_setR1, args.parameter_setR2, args.parameter_setR3, args.parameter_setR4, args.parameter_setR5)

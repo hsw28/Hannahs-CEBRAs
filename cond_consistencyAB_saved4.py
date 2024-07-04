@@ -202,13 +202,13 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     ] + [
         (filename, traceB2_data) for filename in model_filenames_B2  # Non-shuffled models evaluated on shuffled data
     ] + [
-        (filename, traceA1_data) for filename, _ in shuffled_filenames_A1  # Shuffled models evaluated on non-shuffled data
+        (filename, traceA1_data) for filename, _ in model_data_pairs_A1_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceAn_data) for filename, _ in shuffled_filenames_An  # Shuffled models evaluated on non-shuffled data
+        (filename, traceAn_data) for filename, _ in model_data_pairs_An_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceB1_data) for filename, _ in shuffled_filenames_B1  # Shuffled models evaluated on non-shuffled data
+        (filename, traceB1_data) for filename, _ in model_data_pairs_B1_shuff  # Shuffled models evaluated on non-shuffled data
     ] + [
-        (filename, traceB2_data) for filename, _ in shuffled_filenames_B2  # Shuffled models evaluated on non-shuffled data
+        (filename, traceB2_data) for filename, _ in model_data_pairs_B2_shuff  # Shuffled models evaluated on non-shuffled data
     ]
 
     consistency_results_all = calculate_all_models_consistency(all_model_pairs)
