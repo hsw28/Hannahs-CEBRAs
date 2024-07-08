@@ -55,7 +55,7 @@ def consistency(models):
 
     # Plotting
 
-    fig = plt.figure(figsize=(100,40))
+    fig = plt.figure(figsize=(30,12))
 
     ax1 = fig.add_subplot(121)
 
