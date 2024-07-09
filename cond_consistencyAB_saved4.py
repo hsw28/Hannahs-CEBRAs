@@ -54,10 +54,13 @@ def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, mo
     # Determine cutoff for top 5%
     top_5_percent_index = max(1, int(len(sorted_models) * 0.05))  # Ensure at least one model is selected
 
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")  # Formats the datetime as Year-Month-Day_Hour-Minute-Second
+
     # Save only the top 5% of models
     for i in range(top_5_percent_index):
         model, loss = sorted_models[i]
-        filename = f"{model_prefix}_{i}.pt"
+        filename = f"{model_prefix}_{i}_{formatted_time}.pt"
         model.save(filename)  # Save the model
         model_filenames.append(filename)
         model_data_pairs.append((filename, cell_train_data))  # Store filename with its data

@@ -42,17 +42,30 @@ def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, mo
     model_data_pairs = []
     model_filenames = []
 
+    # Train models and collect their losses
     for i in range(iterations):
         model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
-        loss = model.state_dict_['loss'][-1]  # Assuming you have access to this method
-        filename = f"{model_prefix}_{i}.pt"
-        model.save(filename)  # Assuming `model.save()` is a valid method for CEBRA
+        loss = model.state_dict_['loss'][-1]  # Retrieve the last recorded loss
+        models.append((model, loss))  # Append both model and loss
+
+    # Sort models by loss in ascending order
+    sorted_models = sorted(models, key=lambda x: x[1])
+
+    # Determine cutoff for top 5%
+    top_5_percent_index = max(1, int(len(sorted_models) * 0.05))  # Ensure at least one model is selected
+
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")  # Formats the datetime as Year-Month-Day_Hour-Minute-Second
+
+    # Save only the top 5% of models
+    for i in range(top_5_percent_index):
+        model, loss = sorted_models[i]
+        filename = f"{model_prefix}_{i}_{formatted_time}.pt"
+        model.save(filename)  # Save the model
         model_filenames.append(filename)
-        model_data_pairs.append((filename, cell_train_data))
+        model_data_pairs.append((filename, cell_train_data))  # Store filename with its data
 
     return model_data_pairs, model_filenames
-
-
 
 
 def load_model(filename):
