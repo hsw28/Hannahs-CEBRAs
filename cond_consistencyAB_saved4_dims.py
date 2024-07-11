@@ -107,13 +107,19 @@ def calculate_all_models_consistency(model_data_pairs):
 
 # Function to save results to a CSV file
 
-def save_results(results, base_filename, parameter_set_name):
+def save_results(results, base_filename, parameter_set_name, trainingA1_data):
+    # Check if '3' is in trainingA1_data
+    if 3 in trainingA1_data:
+        suffix = "5"  # Append '5' if a '3' is found in trainingA1_data
+    else:
+        suffix = ""
+
     # Get the current date and time
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d_%H-%M-%S")  # Formats the datetime as Year-Month-Day_Hour-Minute-Second
 
-    # Construct the filename with the current date and time, and parameter set name
-    filename = f"{base_filename}_{parameter_set_name}_{formatted_time}.csv"
+    # Construct the filename with the current date and time and conditionally added suffix
+    filename = f"{base_filename}_{parameter_set_name}_dim{suffix}_{formatted_time}.csv"
 
     with open(filename, 'w') as f:
         for score, pair, id in results:
@@ -230,7 +236,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         ]
 
         consistency_results_all = calculate_all_models_consistency(all_model_pairs)
-        save_results(consistency_results_all, f'consistency_results_all_dim{output_dim}', parameter_set_name)
+        save_results(consistency_results_all, 'consistency_results_all', parameter_set_name, trainingA1_data)
 
         delete_model_files([pair[0] for pair in all_model_pairs])
 
