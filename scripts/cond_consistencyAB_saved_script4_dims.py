@@ -21,7 +21,7 @@ from cebra import CEBRA
 import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
-import cond_consistencyAB_saved4
+import cond_consistencyAB_saved4_dims
 import warnings
 
 #ex
@@ -183,4 +183,4 @@ elif how_many_divisions == 5:
 
 
 parameter_set = parameter_sets[args.parameter_set_name]
-cond_consistencyAB_saved4.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set)
+cond_consistencyAB_saved4_dims.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set, parameter_set)
