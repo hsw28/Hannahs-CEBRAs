@@ -30,13 +30,13 @@ parameter_sets = {
     "set0313c": {"learning_rate": 0.0000000005, "min_temperature": 0.75, "max_iterations": 35000},
     "set0313d": {"learning_rate": 0.0000000005, "min_temperature": 0.75, "max_iterations": 25000},
     "set0313e": {"learning_rate": 0.000000001, "min_temperature": 0.75, "max_iterations": 40000},
-    "set0313f": {"learning_rate": 0.00000004, "min_temperature": 0.1, "max_iterations": 20000},
-    "set0313g": {"learning_rate": 0.00000001, "min_temperature": .000000001, "max_iterations": 20000},
+
+    "set0313f": {"learning_rate": .0000000001, "min_temperature": 0.75, "max_iterations": 40000},
+    "set0313g": {"learning_rate": .00000000001, "min_temperature": .1, "max_iterations": 40000},
 
 
 
-    "set0313c": {"learning_rate": 0.00055, "min_temperature": 0.75, "max_iterations": 20000},
-    "set0313d": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 30000},
+
     #"set0314": {"learning_rate": 0.001, "min_temperature": 0.05, "max_iterations": 30000},
     "set0314": {"learning_rate": 0.001, "min_temperature": 0.000000001, "max_iterations": 30000},
     "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000}
