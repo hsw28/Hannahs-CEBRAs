@@ -21,12 +21,11 @@ from cebra import CEBRA
 import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
-import cond_consistencyAB_saved4
+import cond_consistencyAB_noshuff
 import warnings
 
 #ex
-#python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 2 --parameter_set_name test
-
+# python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 5 0 --iterations 3 --parameter_set_name test1
 
 # Define parameter sets
 #a is best for all
@@ -56,10 +55,20 @@ parameter_sets = {
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 10, "distance": 'cosine', "temp_mode": 'auto'},
 
     "test1": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "test2": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
-    "test3": {"learning_rate": .000005, "min_temperature": 1, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "test4": {"learning_rate": .000005, "min_temperature": .74, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "test5": {"learning_rate": .001, "min_temperature": 1, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
+    "test2": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'}, ##ok8 ##ok3
+    "test3": {"learning_rate": .000005, "min_temperature": 1, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'}, ##XXX8 XXX3
+    "test4": {"learning_rate": .000005, "min_temperature": .74, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'}, ##XXX8 XXX3
+    "test5": {"learning_rate": .001, "min_temperature": 1, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'}, ##ok8
+
+    "test6": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'}, ###******
+    "test7": {"learning_rate": .000005, "min_temperature": .74, "max_iterations": 5000, "distance": 'euclidean', "temp_mode": 'auto'}, ##XXX3
+
+    "test8": {"learning_rate": .00086, "min_temperature": .5, "max_iterations": 5500, "distance": 'euclidean', "temp_mode": 'auto'}, ##mehok3
+    "test9": {"learning_rate": .00086, "min_temperature": .5, "max_iterations": 7000, "distance": 'euclidean', "temp_mode": 'auto'},
+    "test10": {"learning_rate": .00086, "min_temperature": .5, "max_iterations": 7000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "test11": {"learning_rate": .00086, "min_temperature": .7, "max_iterations": 7200, "distance": 'euclidean', "temp_mode": 'constant'},
+
+
 
 
 
@@ -147,9 +156,9 @@ if how_many_divisions == 2:
     trainingB1[trainingB1 > 6] = 2
     trainingB1[trainingB1 == -1] = 0
 
-    trainingB1[(trainingB2 > 0) & (trainingB2 <= 6)]  = 1
-    trainingB1[trainingB2 > 6] = 2
-    trainingB1[trainingB2 == -1] = 0
+    trainingB2[(trainingB2 > 0) & (trainingB2 <= 6)]  = 1
+    trainingB2[trainingB2 > 6] = 2
+    trainingB2[trainingB2 == -1] = 0
 
 elif how_many_divisions == 5:
     trainingA1[(trainingA1 > 0) & (trainingA1 <= 2)]  = 1
@@ -183,4 +192,4 @@ elif how_many_divisions == 5:
 
 
 parameter_set = parameter_sets[args.parameter_set_name]
-cond_consistencyAB_saved4.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set)
+cond_consistencyAB_noshuff.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set)
