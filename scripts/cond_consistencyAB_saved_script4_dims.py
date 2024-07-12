@@ -78,7 +78,8 @@ parser.add_argument("trainingB2", type=str, help="Path to the CSUSB1 data file."
 parser.add_argument("how_many_divisions", type=int, help="Number of divisions for categorizing data.")
 parser.add_argument("pretrial_y_or_n", type=int, choices=[0, 1], help="Pretrial flag (0 or 1).")
 parser.add_argument("--iterations", type=int, default=100, help="Number of iterations to run.")
-parser.add_argument("--parameter_set_name", type=str, default="set0222", help="Name of the parameter set to use.")
+parser.add_argument("--parameter_set_name", type=str, required=True, help="Name of the parameter set to use.")
+
 args = parser.parse_args()
 
 
@@ -181,6 +182,13 @@ elif how_many_divisions == 5:
     trainingB2[trainingB2 > 8] = 5
     trainingB2[trainingB2 == -1] = 0
 
+# Correctly retrieve the parameter set using the name
+parameter_set = parameter_sets[args.parameter_set_name]
+
+# Check what you are actually getting in parameter_set_name
+print(f"Parameter set name provided: {args.parameter_set_name}")  # This should be something like 'set0313'
+print(f"Parameters used: {parameter_set}")  # This will display the dictionary
+
 
 parameter_set = parameter_sets[args.parameter_set_name]
-cond_consistencyAB_saved4_dims.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set, parameter_set)
+cond_consistencyAB_saved4_dims.main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, args.iterations, parameter_set, args.parameter_set_name)

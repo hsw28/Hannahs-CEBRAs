@@ -11,6 +11,9 @@ import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
 import datetime
+from sklearn.metrics import confusion_matrix
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 
 
 def consistency(models):
@@ -66,9 +69,19 @@ def consistency(models):
         vmin=0,
         vmax=100,
         ax=ax1,
-        title="Between-runs consistencies"
+        title="Between-runs consistencies",
+        cmap="Blues"
     )
 
+    # Get the current figure and axis
+    fig = ax1.get_figure()
+
+    # Loop through all images in the axis and set their colormap
+    for im in ax1.get_images():
+        im.set_cmap(cm.Blues)
+
+    # Update the plot
+    plt.draw()
 
     # Get the current date and time
     current_time = datetime.datetime.now()
@@ -79,5 +92,7 @@ def consistency(models):
 
     # Save the figure with the dynamically generated filename
     fig.savefig(filename, format='svg')
+
+
 
     return scores_runs, pairs_runs, ids_runs
