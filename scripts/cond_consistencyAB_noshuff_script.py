@@ -69,9 +69,6 @@ parameter_sets = {
     "test11": {"learning_rate": .00086, "min_temperature": .7, "max_iterations": 7200, "distance": 'euclidean', "temp_mode": 'constant'},
 
 
-
-
-
 }
 
 # Setup argparse for command line arguments
