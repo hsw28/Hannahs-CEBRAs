@@ -21,18 +21,14 @@ parameter_sets = {
     #"set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
     #"set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 8000},
     "set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 12000},
-    #"set0313": {"learning_rate": 0.001, "min_temperature": 0.4, "max_iterations": 10000},
-    #"set0313": {"learning_rate": 0.0006625, "min_temperature": 0.000000001, "max_iterations": 22500},
-    #"set0313": {"learning_rate": 0.00055, "min_temperature": 0.25, "max_iterations": 20000},
-    "set0313": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 30000},
-    "set0313b": {"learning_rate": 0.00055, "min_temperature": 0.1, "max_iterations": 25000},
 
-    "set0313c": {"learning_rate": 0.0000000005, "min_temperature": 0.75, "max_iterations": 35000},
-    "set0313d": {"learning_rate": 0.0000000005, "min_temperature": 0.75, "max_iterations": 25000},
-    "set0313e": {"learning_rate": 0.000000001, "min_temperature": 0.75, "max_iterations": 40000},
-
-    "set0313f": {"learning_rate": .0000000001, "min_temperature": 0.75, "max_iterations": 40000},
-    "set0313g": {"learning_rate": .00000000001, "min_temperature": .1, "max_iterations": 40000},
+    "set0313": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 32500},
+    "set0313b": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 35000},
+    "set0313c": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 40000},
+    "set0313d": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 27000},
+    "set0313e": {"learning_rate": 0.00055, "min_temperature": 1, "max_iterations": 25000},
+    "set0313f": {"learning_rate": 0.00055, "min_temperature": 0.75, "max_iterations": 30000},
+    "set0313g": {"learning_rate": 0.00055, "min_temperature": 1.25, "max_iterations": 30000},
 
 
 
