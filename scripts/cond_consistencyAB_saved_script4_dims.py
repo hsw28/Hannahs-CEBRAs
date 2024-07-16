@@ -34,6 +34,8 @@ import warnings
 #c is lowest loss
 parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 45000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0222b": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
+
 
     "set0307": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'constant'},
 
