@@ -131,7 +131,7 @@ def save_results(results, base_filename, parameter_set_name, trainingA1_data, ou
 def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1, trainingB2, iterations, parameter_set, parameter_set_name):
     print(f"About to save results for parameter set: {parameter_set_name}")  # This should be a simple string like "test"
 
-    output_dimensions = [2,3, 5, 7, 10]
+    output_dimensions = [2,3]
     for output_dim in output_dimensions:
 
         learning_rate = parameter_set["learning_rate"]
