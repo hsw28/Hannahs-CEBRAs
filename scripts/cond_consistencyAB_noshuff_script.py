@@ -48,23 +48,24 @@ parameter_sets = {
     "set0314c": {"learning_rate": 0.0075, "min_temperature": .1, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'auto'},
 
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816b": {"learning_rate": 0.0045, "min_temperature": .2, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816b": {"learning_rate": 0.0045, "min_temperature": .2, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'}, #bad
     "set0816c": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 9000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816d": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816d": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.24675807 0.24770568 0.03503873 0.25429014 0.62559619 0.11513096 0.21182717 0.63089705 0.51730605 0.06069476 0.1643732  0.30014319]
+    #but also with more iterations for d: [0.10715794 0.18825693 0.14526935 0.06162055 0.22639298 0.59769222 0.18255839 0.4070102  0.74612539 0.11673978 0.64271329 0.51549466]
     "set0816e": {"learning_rate": 0.05, "min_temperature": 3.5, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'auto'},
 
 
-    "set0816f": {"learning_rate": 0.00086, "min_temperature": .7, "max_iterations": 7200, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0816g": {"learning_rate": 0.00086, "min_temperature": .74, "max_iterations": 5000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "set0816h": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816i": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816j": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816f": {"learning_rate": 0.00086, "min_temperature": .7, "max_iterations": 7200, "distance": 'euclidean', "temp_mode": 'constant'}, #[[0.16593151 0.1525695  0.05680225 0.16273091 0.54943466 0.09240806 0.14207631 0.55106061 0.11837323 0.16236491 0.23837709 0.37452608]]
+    "set0816g": {"learning_rate": 0.00086, "min_temperature": .74, "max_iterations": 5000, "distance": 'euclidean', "temp_mode": 'auto'}, #[[0.0892105  0.17153262 0.12574811 0.06683539 0.37133999 0.12130795 0.24978671 0.33045152 0.23717003 0.073379   0.18293555 0.29789285]]
+    "set0816h": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'}, #bad
+    "set0816i": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.00578065 0.01222403 0.00795762 0.00553178 0.1745801  0.22526923 0.00883073 0.18593308 0.31236373 0.007227   0.20759701 0.27560603]]
+    "set0816j": {"learning_rate": 0.00086, "min_temperature": 1, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'}, #terrible
 
-    "set0816k": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816l": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816m": {"learning_rate": 0.001, "min_temperature": 1, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816n": {"learning_rate": 0.001, "min_temperature": 1, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816o": {"learning_rate": 0.00086, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816k": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.11192379 0.11839122 0.13268556 0.05693796 0.59490168 0.05458965 0.11742325 0.61725592 0.20965973 0.11878072 0.21930372 0.37057744]]
+    "set0816l": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'}, #[[0.37661366 0.5623859  0.52342416 0.30840054 0.46741079 0.58945768 0.50091561 0.46524328 0.83695982 0.48295703 0.59031957 0.82525234]]
+    "set0816m": {"learning_rate": 0.001, "min_temperature": 1, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'}, #terrible
+    "set0816n": {"learning_rate": 0.001, "min_temperature": 1, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.00096704 0.00485586 0.00398391 0.00098474 0.39948335 0.42877118 0.00461371 0.40019488 0.42981838 0.004488   0.37001123 0.34979176]
+    "set0816o": {"learning_rate": 0.00086, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.32207543 0.30897155 0.06464475 0.33064195 0.41114369 0.24554461 0.29825052 0.38273915 0.32544856 0.22922413 0.32956466 0.64561002]
 
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 10, "distance": 'cosine', "temp_mode": 'auto'},

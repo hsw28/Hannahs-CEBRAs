@@ -43,9 +43,14 @@ parameter_sets = {
 
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
 
+
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0816b": {"learning_rate": 0.0045, "min_temperature": .2, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816c": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816c": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 9000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816d": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816e": {"learning_rate": 0.05, "min_temperature": 3.5, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'auto'},
+    "set0816f": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816g": {"learning_rate": 0.00086, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
 
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 10, "distance": 'cosine', "temp_mode": 'auto'},
