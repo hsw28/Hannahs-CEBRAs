@@ -24,6 +24,6 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_cos_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.045,0.001 --min_temperature 0.75,0.84,1 --max_iterations 8000,12000,17000,20000,22000,28000,35000
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_cos_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.000045,0.0002,0.0035,0.0075,0.0095,0.045 --min_temperature .3,0.75,1,1.33,1.67,2,2.33,2.66,3 --max_iterations 8000,10000,13000,17000,20000,25000
 
 #python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_cos_constant.py ./traceA1An_An.mat ./traceA1An_A1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat 2 0 --learning_rate 0.0035,0.0055,0.0075,0.0095,0.05 --min_temperature 0.3,0.75,1.0,1.33,1.67,2.0,2.33,2.5,2.66,3.0,3.5,4.0,4.5 --max_iterations 5000,6500,8000,9000,10000,11000,13000,16000,18000,20000,25000

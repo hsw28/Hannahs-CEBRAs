@@ -26,4 +26,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 #python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_auto.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.05,0.02,0.0095,.0055,.0035,.0002 --min_temperature 0.3,0.66,1,1.33,1.67,2,2.33,2.66,3,3.5 --max_iterations 9000,10000,13000,16000,18000,20000,25000
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_auto.py ./traceA1An_An.mat ./traceA1An_A1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat 2 0 --learning_rate 0.0035,0.0075,0.0095,0.02,0.05 --min_temperature 1.33,2,2.33,2.66,3,3.5 --max_iterations 6000,7500,8000,10000,18000,20000,25000
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_auto.py ./traceA1An_An.mat ./traceA1An_A1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat 2 0 --learning_rate 0.000045,0.0002,0.0035,0.0075,0.0095,0.045 --min_temperature .3,0.75,1,1.33,1.67,2,2.33,2.66,3 --max_iterations 8000,10000,13000,17000,20000,25000

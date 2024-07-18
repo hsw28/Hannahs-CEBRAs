@@ -182,7 +182,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         envB_eyeblink = envs_eyeblink[1]
 
         # Loop to run the batch of code 50 times
-        for i in range(3):
+        for i in range(2):
 
 
 
