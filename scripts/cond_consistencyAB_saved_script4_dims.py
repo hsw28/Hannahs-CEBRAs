@@ -52,7 +52,6 @@ parameter_sets = {
     "set0816f": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0816g": {"learning_rate": 0.00086, "min_temperature": .2, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
 
-
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 10, "distance": 'cosine', "temp_mode": 'auto'},
 
     "test1": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},

@@ -173,12 +173,31 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     envs_cell_train = [traceA1_data, traceAn_data, traceB1_data, traceB2_data]
     envs_eyeblink = [trainingA1_data, trainingAn_data, trainingB1_data, trainingB2_data]
 
-    # Ensure eyeblink data is of equal length AND CONTENT before processing
-    min_length = min(min(len(eyeblink) for eyeblink in envs_eyeblink), min(len(cell) for cell in envs_cell_train))
-    for i in range(4):
-        if not np.array_equal(envs_eyeblink[i][:10], envs_eyeblink[(i+1) % 4][:10]):
-            envs_eyeblink[i] = envs_eyeblink[i][:min_length]
-            envs_cell_train[i] = envs_cell_train[i][:min_length]
+    min_length = min(len(data) for data in envs_eyeblink)
+    if min_length % 10 == 9:
+        envs_eyeblink = [data[9:] for data in envs_eyeblink]
+        envs_cell_train = [data[9:] for data in envs_cell_train]
+    # First, ensure the first 10 elements are the same
+    reference_first_10 = envs_eyeblink[0][:10]  # Using the first dataset as the reference
+    for i in range(1, len(envs_eyeblink)):
+        while not np.array_equal(reference_first_10, envs_eyeblink[i][:10]):
+            envs_eyeblink[i] = envs_eyeblink[i][1:]  # Remove the first element until the first 10 match
+            envs_cell_train[i] = envs_cell_train[i][1:]
+    # After aligning the first 10 elements, find the minimum length
+    min_length = min(len(data) for data in envs_eyeblink)
+    # Truncate all datasets to the minimum length
+    envs_eyeblink = [data[:min_length] for data in envs_eyeblink]
+    envs_cell_train = [data[:min_length] for data in envs_cell_train]
+
+    traceA1_data = envs_cell_train[0]
+    traceAn_data = envs_cell_train[1]
+    traceB1_data = envs_cell_train[2]
+    traceB2_data = envs_cell_train[3]
+
+    trainingA1_data = envs_eyeblink[0]
+    trainingAn_data = envs_eyeblink[1]
+    trainingB1_data = envs_eyeblink[2]
+    trainingB2_data = envs_eyeblink[3]
 
     # Evaluate and save models for non-shuffled data
     model_data_pairs_A1, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, "modelA1", iterations)

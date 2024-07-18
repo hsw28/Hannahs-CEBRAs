@@ -174,12 +174,33 @@ def main(traceR1, traceR2, traceR3, traceR4, traceR5, trainingR1, trainingR2, tr
     envs_cell_train = [traceR1_data, traceR2_data, traceR3_data, traceR4_data, traceR5_data]
     envs_eyeblink = [trainingR1_data, trainingR2_data, trainingR3_data, trainingR4_data, trainingR5_data]
 
-    # Ensure eyeblink data is of equal length AND CONTENT before processing
-    min_length = min(min(len(eyeblink) for eyeblink in envs_eyeblink), min(len(cell) for cell in envs_cell_train))
-    for i in range(4):
-        if not np.array_equal(envs_eyeblink[i][:10], envs_eyeblink[(i+1) % 4][:10]):
-            envs_eyeblink[i] = envs_eyeblink[i][:min_length]
-            envs_cell_train[i] = envs_cell_train[i][:min_length]
+    min_length = min(len(data) for data in envs_eyeblink)
+    if min_length % 10 == 9:
+        envs_eyeblink = [data[9:] for data in envs_eyeblink]
+        envs_cell_train = [data[9:] for data in envs_cell_train]
+    # First, ensure the first 10 elements are the same
+    reference_first_10 = envs_eyeblink[0][:10]  # Using the first dataset as the reference
+    for i in range(1, len(envs_eyeblink)):
+        while not np.array_equal(reference_first_10, envs_eyeblink[i][:10]):
+            envs_eyeblink[i] = envs_eyeblink[i][1:]  # Remove the first element until the first 10 match
+            envs_cell_train[i] = envs_cell_train[i][1:]
+    # After aligning the first 10 elements, find the minimum length
+    min_length = min(len(data) for data in envs_eyeblink)
+    # Truncate all datasets to the minimum length
+    envs_eyeblink = [data[:min_length] for data in envs_eyeblink]
+    envs_cell_train = [data[:min_length] for data in envs_cell_train]
+
+
+    ############FIX THIS
+    traceA1_data = envs_cell_train[0]
+    traceAn_data = envs_cell_train[1]
+    traceB1_data = envs_cell_train[2]
+    traceB2_data = envs_cell_train[3]
+    trainingA1_data = envs_eyeblink[0]
+    trainingAn_data = envs_eyeblink[1]
+    trainingB1_data = envs_eyeblink[2]
+    trainingB2_data = envs_eyeblink[3]
+    ###########
 
     #call models with cebra_models['modelR1']
     # Evaluate and save models for non-shuffled data
