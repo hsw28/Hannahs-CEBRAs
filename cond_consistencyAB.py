@@ -71,6 +71,19 @@ def cond_consistencyAB(envA_cell_train, envB_cell_train, envA_eyeblink, envB_eye
     fract_control_all = []
     fract_test_all = []
 
+    envs_cell_train = [envA_cell_train, envB_cell_train]
+    envs_eyeblink = [envA_eyeblink, envB_eyeblink]
+
+    min_length = min(len(data) for data in envs_eyeblink)
+    if min_length % 10 == 9:
+        envs_eyeblink = [data[9:] for data in envs_eyeblink]
+        envs_cell_train = [data[9:] for data in envs_cell_train]
+
+    envA_cell_train = envs_cell_train[0]
+    envB_cell_train = envs_cell_train[1]
+    envA_eyeblink = envs_eyeblink[0]
+    envB_eyeblink = envs_eyeblink[1]
+
     for i in range(iterations):
         print(i)
         # First unshuffled
