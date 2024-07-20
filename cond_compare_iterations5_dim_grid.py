@@ -90,6 +90,17 @@ def cond_compare_iterations5_dim_grid(traceA1An_An, traceAnB1_An, traceA1An_A1, 
 
         results = np.zeros((iterations, 41))  # Each iteration results in 8 outputs
 
+        min_length = min(len(CSUSAn))
+        if min_length % 10 == 9:
+            CSUSAn = [CSUSAn[9:] for data in envs_eyeblink]
+            traceA1An_An = [traceA1An_An[9:] for data in envs_cell_train]
+            traceAnB1_An = [traceAnB1_An[9:] for data in envs_cell_train]
+
+        min_length = min(len(CSUSB1))
+        if min_length % 10 == 9:
+            CSUSB1 = [CSUSB1[9:] for data in envs_eyeblink]
+            traceAnB1_B1 = [traceAnB1_B1[9:] for data in envs_cell_train]
+
 
         for i in range(iterations):
 
