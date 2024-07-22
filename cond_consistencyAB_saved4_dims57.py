@@ -71,6 +71,7 @@ def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, mo
     for i in range(top_5_percent_index):
         model, loss = sorted_models[i]
         filename = f"{model_prefix}_{i}_{formatted_time}_div{suffix}.pt"
+        print(filename)
         model.save(filename)  # Save the model
         model_filenames.append(filename)
         model_data_pairs.append((filename, cell_train_data))  # Store filename with its data
@@ -216,25 +217,32 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         trainingB2_data = envs_eyeblink[3]
 
         # Evaluate and save models for non-shuffled data
-
+        print("eval 1")
         model_data_pairs_A1, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, f"modelA1_dim{output_dim}", iterations, suffix)
+        print("eval 2")
         model_data_pairs_An, model_filenames_An = evaluate_and_save_models(cebra_loc_model, traceAn_data, trainingAn_data, f"modelAn_dim{output_dim}", iterations, suffix)
+        print("eval 3")
         model_data_pairs_B1, model_filenames_B1 = evaluate_and_save_models(cebra_loc_model, traceB1_data, trainingB1_data, f"modelB1_dim{output_dim}", iterations, suffix)
+        print("eval 4")
         model_data_pairs_B2, model_filenames_B2 = evaluate_and_save_models(cebra_loc_model, traceB2_data, trainingB2_data, f"modelB2_dim{output_dim}", iterations, suffix)
 
         # Evaluate and save models for shuffled data
+        print("eval 5")
         shuffled_index_A = np.random.permutation(traceA1_data.shape[0])
         cell_train_controlA_shuffled = traceA1_data[shuffled_index_A, :]
         model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, "modelA1_shuffled", iterations, suffix)
 
+        print("eval 6")
         shuffled_index_A = np.random.permutation(traceAn_data.shape[0])
         cell_train_controlA_shuffled = traceAn_data[shuffled_index_A, :]
         model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, "modelAn_shuffled", iterations, suffix)
 
+        print("eval 7")
         shuffled_index_B = np.random.permutation(traceB1_data.shape[0])
         cell_train_controlB_shuffled = traceB1_data[shuffled_index_B, :]
         model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled", iterations, suffix)
 
+        print("eval 8")
         shuffled_index_B = np.random.permutation(traceB2_data.shape[0])
         cell_train_controlB_shuffled = traceB2_data[shuffled_index_B, :]
         model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled", iterations, suffix)
@@ -289,6 +297,7 @@ if __name__ == "__main__":
     # Print debugging information
     print(f"Using parameter set name: {args.parameter_set_name}")
     print(f"Using parameters: {parameter_set}")
+
 
     # Call the main function with the appropriate arguments
     main(args.traceA1, args.traceAn, args.traceB1, args.traceB2, args.trainingA1, args.trainingAn, args.trainingB1, args.trainingB2, args.iterations, parameter_set, args.parameter_set_name)
