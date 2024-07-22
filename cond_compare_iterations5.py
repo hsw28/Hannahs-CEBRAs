@@ -89,16 +89,17 @@ def cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1
 
 
     results = np.zeros((iterations, 40))  # Each iteration results in 8 outputs
+
     min_length = (len(CSUSAn))
     if min_length % 10 == 9:
-        CSUSAn = [CSUSAn[9:] for data in envs_eyeblink]
-        traceA1An_An = [traceA1An_An[9:] for data in envs_cell_train]
-        traceAnB1_An = [traceAnB1_An[9:] for data in envs_cell_train]
+        CSUSAn = CSUSAn[9:]
+        traceA1An_An = traceA1An_An[9:]
+        traceAnB1_An = traceAnB1_An[9:]
 
     min_length = (len(CSUSB1))
     if min_length % 10 == 9:
-        CSUSB1 = [CSUSB1[9:] for data in envs_eyeblink]
-        traceAnB1_B1 = [traceAnB1_B1[9:] for data in envs_cell_train]
+        CSUSB1 = CSUSB1[9:]
+        traceAnB1_B1 = traceAnB1_B1[9:]
 
     try:
         for i in range(iterations):
