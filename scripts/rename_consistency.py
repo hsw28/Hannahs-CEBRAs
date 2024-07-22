@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 
 # Directory containing the files
-directory = "/Users/Hannah/Programming/data_eyeblink/rat0222/cebra_variables"
+directory = "/Users/Hannah/Programming/data_eyeblink/rat0816/cebra_variables"
 
 # Function to extract datetime from filename using regex
 def parse_datetime_from_filename(filename):

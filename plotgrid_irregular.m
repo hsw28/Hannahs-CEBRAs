@@ -62,7 +62,8 @@ cmax = max(V);
 %caxis([cmin *.65, cmax]) %for pos decoding
 caxis([cmin*1.1, cmax *1]) %for cond decoding
 caxis([cmin*1.23, cmax *1.002]) %for cond decoding rat 0307
-%caxis([cmin*1.1, cmax *.9]) %for cond decoding rat 0222
+caxis([cmin*1.1, cmax *.9]) %for cond decoding rat 0222
+caxis([cmin*1.25, cmax *1.04]) %for cond decoding rat 0816
 
 % Alternatively, focus more sharply on lower values
 %focus_factor = 0.3;  % Adjust this factor to change the focus range

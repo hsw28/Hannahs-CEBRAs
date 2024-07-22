@@ -31,8 +31,8 @@ for i = 1:length(unique_groups)
 end
 
 % Plotting
-errorbar(unique_groups, (means), std_errors);
+errorbar(unique_groups, (1-(means))*100, std_errors*100);
 hold on
-errorbar(unique_groups, (means_shuff), std_errors_shuff);
+errorbar(unique_groups, (1-(means_shuff))*100, std_errors_shuff*100);
 xlabel('Number of Latents');
 ylabel('Percent Incorrect');
