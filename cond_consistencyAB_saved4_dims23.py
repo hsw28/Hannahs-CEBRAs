@@ -216,7 +216,6 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         trainingB2_data = envs_eyeblink[3]
 
         # Evaluate and save models for non-shuffled data
-
         model_data_pairs_A1, model_filenames_A1 = evaluate_and_save_models(cebra_loc_model, traceA1_data, trainingA1_data, f"modelA1_dim{output_dim}", iterations, suffix)
         model_data_pairs_An, model_filenames_An = evaluate_and_save_models(cebra_loc_model, traceAn_data, trainingAn_data, f"modelAn_dim{output_dim}", iterations, suffix)
         model_data_pairs_B1, model_filenames_B1 = evaluate_and_save_models(cebra_loc_model, traceB1_data, trainingB1_data, f"modelB1_dim{output_dim}", iterations, suffix)
@@ -225,19 +224,19 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         # Evaluate and save models for shuffled data
         shuffled_index_A = np.random.permutation(traceA1_data.shape[0])
         cell_train_controlA_shuffled = traceA1_data[shuffled_index_A, :]
-        model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, "modelA1_shuffled", iterations, suffix)
+        model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, "modelA1_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_A = np.random.permutation(traceAn_data.shape[0])
         cell_train_controlA_shuffled = traceAn_data[shuffled_index_A, :]
-        model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, "modelAn_shuffled", iterations, suffix)
+        model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, "modelAn_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_B = np.random.permutation(traceB1_data.shape[0])
         cell_train_controlB_shuffled = traceB1_data[shuffled_index_B, :]
-        model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled", iterations, suffix)
+        model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_B = np.random.permutation(traceB2_data.shape[0])
         cell_train_controlB_shuffled = traceB2_data[shuffled_index_B, :]
-        model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled", iterations, suffix)
+        model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled_dim{output_dim}", iterations, suffix)
 
 
         # Combine all pairs
@@ -266,7 +265,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         consistency_results_all = calculate_all_models_consistency(all_model_pairs)
         save_results(consistency_results_all, 'consistency_results_all', parameter_set_name, trainingA1_data, output_dim)
 
-        delete_model_files([pair[0] for pair in all_model_pairs])
+        #delete_model_files([pair[0] for pair in all_model_pairs])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the CEBRA model evaluation.")

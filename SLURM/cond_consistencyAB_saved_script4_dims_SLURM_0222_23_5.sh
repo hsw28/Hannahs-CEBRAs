@@ -21,4 +21,4 @@ source activate ratinabox
 export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs"
 export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts"
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4_dims.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 20 --parameter_set_name set0313b
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4_dims23.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 5 0 --iterations 20 --parameter_set_name set0222

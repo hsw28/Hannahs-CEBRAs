@@ -28,42 +28,36 @@ import warnings
 #python /Users/Hannah/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_saved_script4.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 2 --parameter_set_name test
 
 
-# Define parameter sets
-#a is best for all
-#b is optimal decoding
-#c is lowest loss
-parameter_sets = {
-    #"set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 45000, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0222b": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
+
+parameter_sets = parameter_sets = {
+    "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
 
 
-    "set0307": {"learning_rate": 0.0055, "min_temperature": 1, "max_iterations": 14000, "distance": 'cosine', "temp_mode": 'constant'},
+    #"set0307": {"learning_rate": 0.003, "min_temperature": 1.16, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
+    #"set0307": {"learning_rate": 0.008, "min_temperature": 4, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307": {"learning_rate": 0.008, "min_temperature": 1.5, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307b": {"learning_rate": 0.008, "min_temperature": 1.5, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307c": {"learning_rate": 0.008, "min_temperature": 1.75, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307d": {"learning_rate": 0.004, "min_temperature": 3, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307e": {"learning_rate": 0.006, "min_temperature": 3, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307f": {"learning_rate": 0.008, "min_temperature": 1.75, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307g": {"learning_rate": 0.004, "min_temperature": 3, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307h": {"learning_rate": 0.006, "min_temperature": 3, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307i": {"learning_rate": 0.006, "min_temperature": 2, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307j": {"learning_rate": 0.008, "min_temperature": 2, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307k": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 6000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307l": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 6000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307m": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 5500, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
-
-    "set0816": {"learning_rate": 0.0075, "min_temperature": .3, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816b": {"learning_rate": 0.0075, "min_temperature": 1.33, "max_iterations": 10000, "distance": 'cosine', "temp_mode": 'auto'},
-    #"set0816c": {"learning_rate": 0.0095, "min_temperature": .3, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'auto'},
-    #"set0816d": {"learning_rate": 0.0095, "min_temperature": 1, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0816e": {"learning_rate": 0.045, "min_temperature": 2.33, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    #"set0816f": {"learning_rate": 0.0095, "min_temperature": 2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0816g": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    #"set0816h": {"learning_rate": 0.0095, "min_temperature": 2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0816": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
 
 
-    "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 10, "distance": 'cosine', "temp_mode": 'auto'},
-
-    "test1": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "test2": {"learning_rate": .00086, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'},
-    "test3": {"learning_rate": .000005, "min_temperature": 1, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "test4": {"learning_rate": .000005, "min_temperature": .74, "max_iterations": 8000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "test5": {"learning_rate": .001, "min_temperature": 1, "max_iterations": 15000, "distance": 'cosine', "temp_mode": 'auto'},
-
-
-
+    "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
 }
+
+
 
 # Setup argparse for command line arguments
 parser = argparse.ArgumentParser(description="Run decoding with CEBRA.")
