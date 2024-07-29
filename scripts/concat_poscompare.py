@@ -6,13 +6,13 @@ import os
 
 # List of CSV files
 csv_files = [
-    'cond_lr0.004_mt3_mi5000_dcosine_modeconstant_2024-07-26_18-25-41.csv',
-    'cond_lr0.004_mt3_mi5000_dcosine_modeconstant_2024-07-26_18-22-00.csv',
-    'cond_lr0.004_mt3_mi5000_dcosine_modeconstant_2024-07-26_18-18-40.csv',
-    'cond_lr0.004_mt3_mi5000_dcosine_modeconstant_2024-07-26_18-09-21.csv'
+    'cond_lr0.006_mt2_mi6500_dcosine_modeconstant_2024-07-26_20-23-37.csv',
+    'cond_lr0.006_mt2_mi6500_dcosine_modeconstant_2024-07-27_06-47-47.csv',
+    'cond_lr0.006_mt2_mi6500_dcosine_modeconstant_2024-07-27_05-11-30.csv',
+    'cond_lr0.006_mt2_mi6500_dcosine_modeconstant_2024-07-26_21-24-12.csv'
 
-    #'cond_lr0.008_mt3.33_mi6500_dcosine_modeconstant_2024-07-24_06-40-53.csv'
-    #'cond_lr0.008_mt3_mi8000_dcosine_modeconstant_2024-07-24_07-07-09.csv'
+
+    #'cond_lr0.008_mt1.75_mi7000_dcosine_modeauto_2024-07-27_11-31-44.csv'
         #ex
     #'path/to/csv_files/pos_compare_lr0.00775_mt0.25_mi15000_deuclidean_2024-05-13_20-11-37.csv',
     #'path/to/csv_files/pos_compare_lr0.00775_mt0.25_mi15000_deuclidean_2024-05-15_15-37-10.csv'
