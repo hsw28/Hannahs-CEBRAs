@@ -34,14 +34,12 @@ import warnings
 parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
 
-    "set0307e": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
     "set0307l": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 6000, "distance": 'cosine', "temp_mode": 'constant'},
 
-
-    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    "set0313b": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "set0313c": {"learning_rate": 0.0035, "min_temperature": .66, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-
+    "set0307b": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307c": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 7500, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307f": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 7500, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307g": {"learning_rate": 0.007, "min_temperature": 1.5, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0314b": {"learning_rate": 0.05, "min_temperature": .66, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},

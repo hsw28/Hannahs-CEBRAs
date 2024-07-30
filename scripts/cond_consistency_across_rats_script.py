@@ -71,17 +71,19 @@ for i in range(len(training_data_a)):
     training_data_b[i] = training_data_b[i][mask_b]
     trace_data_B[i] = trace_data_B[i][mask_b]
 
-# Apply the specific trimming logic based on the length of the data
-min_length_a = min(len(data) for data in training_data_a)
-min_length_b = min(len(data) for data in training_data_b)
 
-if min_length_a % 10 == 9:
-    training_data_a = [data[9:] for data in training_data_a]
-    trace_data_A = [data[9:] for data in trace_data_A]
+# Update training_data_a and trace_data_A based on individual conditions
+for i, data in enumerate(training_data_a):
+    if len(data) % 10 == 9:
+        training_data_a[i] = data[9:]  # Modify only this specific dataset
+        trace_data_A[i] = trace_data_A[i][9:]  # Assuming trace_data_A aligns with training_data_a
 
-if min_length_b % 10 == 9:
-    training_data_b = [data[9:] for data in training_data_b]
-    trace_data_B = [data[9:] for data in trace_data_B]
+# Update training_data_b and trace_data_B based on individual conditions
+for i, data in enumerate(training_data_b):
+    if len(data) % 10 == 9:
+        training_data_b[i] = data[9:]  # Modify only this specific dataset
+        trace_data_B[i] = trace_data_B[i][9:]  # Assuming trace_data_B aligns with training_data_b
+
 
 # Run the consistency analysis
-cond_consistency_across_rats.main(training_data_a, training_data_b)
+cond_consistency_across_rats.main(trace_data_A, trace_data_B)

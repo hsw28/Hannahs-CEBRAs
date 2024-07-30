@@ -55,7 +55,6 @@ def load_files(model_pattern, dimension, base_dir, divisor):
     for rat_id in rat_ids:
         path_pattern = f"{base_dir}/rat{rat_id}/cebra_variables/models/{model_pattern}{dimension}_*_{divisor}.pt"
         matched_files = glob.glob(path_pattern)
-        print(f"Searching in: {path_pattern}, found files: {matched_files}")
         files.extend(matched_files)
     return files
 
@@ -86,6 +85,9 @@ def main(trace_data_A, trace_data_B):
             files = load_files(model_pattern, dimension, base_dir, divisor)
             if files:
                 model_data_pairs = [(file, data) for file in files for data in (trace_data_A + trace_data_B)]
+                print("List of model-data pairs:")
+                for index, (file, data) in enumerate(model_data_pairs):
+                    print(f"Pair {index + 1}: Model file - {file}, Data - {data}")
                 results = calculate_all_models_consistency(model_data_pairs)
                 if results:
                     save_results(results, f"consistency_results_all_dim{dimension}")
