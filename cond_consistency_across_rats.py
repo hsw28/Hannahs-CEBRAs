@@ -64,6 +64,7 @@ def load_files(model_pattern, dimension, base_dir, divisor):
         files.extend(matched_files)
     return files
 
+
 def calculate_all_models_consistency(model_data_pairs):
     """ Calculate consistency for all model-data pairs. """
     transformations = []
@@ -120,6 +121,44 @@ def main(trace_data_A, trace_data_B):
         else:
             print(f"No model-data pairs to process for dimension {dimension}.")
 
+
+    model_patterns = ["modelAn_dim", "modelB1_dim", "modelAn_shuffled_dim", "modelB1_shuffled_dim"]
+    dimensions = ["2", "3", "5", "7", "10"]
+    divisor = "div5"
+
+    for dimension in dimensions:
+        all_model_data_pairs = []  # Initialize list to collect all pairs for the current dimension
+
+        for model_pattern in model_patterns:
+            files = load_files(model_pattern, dimension, base_dir, divisor)
+            if files:
+                for file in files:
+                    # Extract rat_id from file path
+                    rat_id = file.split('/rat')[1].split('/')[0]
+                    index = rat_ids.index(rat_id)
+
+                    # Select data based on model pattern
+                    if "An" in model_pattern:
+                        data_list = [trace_data_A[index]]  # Select corresponding A data
+                    elif "B1" in model_pattern:
+                        data_list = [trace_data_B[index]]  # Select corresponding B data
+                    else:
+                        continue  # Adjust as necessary for other patterns
+
+                    # Append to all_model_data_pairs for the current dimension
+                    all_model_data_pairs.extend([(file, data) for data in data_list])
+            else:
+                print(f"No files loaded for pattern {model_pattern} and dimension {dimension}.")
+
+        # After collecting all model-data pairs for the current dimension, process them
+        if all_model_data_pairs:
+            results = calculate_all_models_consistency(all_model_data_pairs)
+            if results:
+                save_results(results, f"{dimension}_{divisor}")
+            else:
+                print("No results to save for dimension {}.".format(dimension))
+        else:
+            print(f"No model-data pairs to process for dimension {dimension}.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the CEBRA model evaluation.")
