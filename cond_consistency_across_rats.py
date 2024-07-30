@@ -80,21 +80,35 @@ def main(trace_data_A, trace_data_B):
     dimensions = ["2", "3", "5", "7", "10"]
     divisor = "div2"
 
+    # Assuming trace_data_A and trace_data_B are lists containing data for each rat ID in order
     for dimension in dimensions:
         for model_pattern in model_patterns:
             files = load_files(model_pattern, dimension, base_dir, divisor)
             if files:
-                model_data_pairs = [(file, data) for file in files for data in (trace_data_A + trace_data_B)]
-                print("List of model-data pairs:")
-                for index, (file, data) in enumerate(model_data_pairs):
-                    print(f"Pair {index + 1}: Model file - {file}, Data - {data}")
-                results = calculate_all_models_consistency(model_data_pairs)
-                if results:
-                    save_results(results, f"consistency_results_all_dim{dimension}")
-                else:
-                    print("No results to save.")
+                for file in files:
+                    # Extract rat_id from file path
+                    rat_id = file.split('/rat')[1].split('/')[0]
+                    index = rat_ids.index(rat_id)
+
+                    # Select data based on model pattern
+                    if "An" in model_pattern:
+                        data_list = [trace_data_A[index]]  # Select corresponding A data
+                    elif "B1" in model_pattern:
+                        data_list = [trace_data_B[index]]  # Select corresponding B data
+                    else:
+                        continue  # Adjust as necessary for other patterns
+
+                    # Create model-data pairs for the current file with the appropriate data list
+                    model_data_pairs = [(file, data) for data in data_list]
+
+                    results = calculate_all_models_consistency(model_data_pairs)
+                    if results:
+                        save_results(results, f"{model_pattern}{dimension}_{divisor}")
+                    else:
+                        print("No results to save.")
             else:
                 print(f"No files loaded for pattern {model_pattern} and dimension {dimension}.")
+
 
 
 if __name__ == "__main__":
