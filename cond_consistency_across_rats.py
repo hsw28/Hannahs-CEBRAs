@@ -42,7 +42,7 @@ def save_results(results, base_filename):
     """ Save results to a CSV file. """
     scores_runs, pairs_runs, ids_runs = results  # Unpack the three arrays
 
-    current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"{base_filename}_{current_time}.csv"
 
     with open(filename, 'w') as f:
