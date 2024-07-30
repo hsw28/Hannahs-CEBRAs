@@ -37,13 +37,19 @@ rat_ids = ['0222', '0313', '314', '0816']
 #rat_ids = ['0222', '0307', '0313', '314', '0816']
 
 
+
 def save_results(results, base_filename):
     """ Save results to a CSV file. """
-    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    scores_runs, pairs_runs, ids_runs = results  # Unpack the three arrays
+
+    current_time = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     filename = f"{base_filename}_{current_time}.csv"
+
     with open(filename, 'w') as f:
-        for score, pair, id in results:
-            f.write(f"{score},{pair},{id}\n")
+        for score, pair in zip(scores_runs, pairs_runs):
+            pair_str = '-'.join(map(str, pair))  # Convert tuple to string
+            f.write(f"{pair_str},{score}\n")
+
     print(f"Results saved to {filename}")
 
 
