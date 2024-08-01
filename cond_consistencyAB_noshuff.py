@@ -228,7 +228,7 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
     save_results(consistency_results_all, 'consistency_results_all')
 
     # Cleanup model files
-    delete_model_files([pair[0] for pair in all_model_pairs])
+    #delete_model_files([pair[0] for pair in all_model_pairs])
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run the CEBRA model evaluation.")
