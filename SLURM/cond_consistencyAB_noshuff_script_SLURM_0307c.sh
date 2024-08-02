@@ -4,9 +4,9 @@
 #SBATCH --gres=gpu:a100:1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0-9 ## number of jobs to run "in parallel"
+#SBATCH --array=0 ## number of jobs to run "in parallel"
 #SBATCH --mem=15GB
-#SBATCH --time=3:00:00
+#SBATCH --time=6:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
 #SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -21,4 +21,13 @@ source activate ratinabox
 export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs"
 export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts"
 
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
 python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_consistencyAB_noshuff_script.py ./traceA1.mat ./traceAn.mat ./traceB1.mat ./traceB2.mat ./eyeblinkA1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat ./eyeblinkB2.mat 2 0 --iterations 1 --parameter_set_name set0307c
