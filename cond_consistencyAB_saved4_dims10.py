@@ -225,19 +225,19 @@ def main(traceA1, traceAn, traceB1, traceB2, trainingA1, trainingAn, trainingB1,
         # Evaluate and save models for shuffled data
         shuffled_index_A = np.random.permutation(traceA1_data.shape[0])
         cell_train_controlA_shuffled = traceA1_data[shuffled_index_A, :]
-        model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, "modelA1_shuffled_dim{output_dim}", iterations, suffix)
+        model_data_pairs_A1_shuff, shuffled_filenames_A1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingA1_data, f"modelA1_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_A = np.random.permutation(traceAn_data.shape[0])
         cell_train_controlA_shuffled = traceAn_data[shuffled_index_A, :]
-        model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, "modelAn_shuffled_dim{output_dim}", iterations, suffix)
+        model_data_pairs_An_shuff, shuffled_filenames_An = evaluate_and_save_models(cebra_loc_model, cell_train_controlA_shuffled, trainingAn_data, f"modelAn_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_B = np.random.permutation(traceB1_data.shape[0])
         cell_train_controlB_shuffled = traceB1_data[shuffled_index_B, :]
-        model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, "modelB1_shuffled_dim{output_dim}", iterations, suffix)
+        model_data_pairs_B1_shuff, shuffled_filenames_B1 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB1_data, f"modelB1_shuffled_dim{output_dim}", iterations, suffix)
 
         shuffled_index_B = np.random.permutation(traceB2_data.shape[0])
         cell_train_controlB_shuffled = traceB2_data[shuffled_index_B, :]
-        model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, "modelB2_shuffled_dim{output_dim}", iterations, suffix)
+        model_data_pairs_B2_shuff, shuffled_filenames_B2 = evaluate_and_save_models(cebra_loc_model, cell_train_controlB_shuffled, trainingB2_data, f"modelB2_shuffled_dim{output_dim}", iterations, suffix)
 
 
         # Combine all pairs
