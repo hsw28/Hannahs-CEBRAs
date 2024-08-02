@@ -21,7 +21,7 @@ from cebra import CEBRA
 import cebra.helper as cebra_helper
 from CSUS_score import CSUS_score
 from hold_out import hold_out
-import cond_consistency_across_rats
+import cond_consistency_across_rats_all
 import warnings
 import glob
 import os
