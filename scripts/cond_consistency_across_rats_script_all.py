@@ -119,4 +119,4 @@ for i, data in enumerate(training_data_b2):
 
 
 # Run the consistency analysis
-cond_consistency_across_rats.main(trace_data_A1, trace_data_An, trace_data_B1, trace_data_B2)
+cond_consistency_across_rats_all.main(trace_data_A1, trace_data_An, trace_data_B1, trace_data_B2)
