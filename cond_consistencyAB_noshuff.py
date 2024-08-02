@@ -43,10 +43,21 @@ def evaluate_and_save_models(cebra_loc_model, cell_train_data, eyeblink_data, mo
     model_filenames = []
 
     # Train models and collect their losses
+    #for i in range(iterations):
+        #model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
+        #loss = model.state_dict_['loss'][-1]  # Retrieve the last recorded loss
+        #models.append((model, loss))  # Append both model and loss
+
     for i in range(iterations):
-        model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
-        loss = model.state_dict_['loss'][-1]  # Retrieve the last recorded loss
-        models.append((model, loss))  # Append both model and loss
+        while True:  # Start an infinite loop that will keep trying until break
+            model = cebra_loc_model.fit(cell_train_data, eyeblink_data)
+            loss = model.state_dict_['loss'][-1]  # Retrieve the last recorded loss
+            if loss < 6:
+                models.append((model, loss))  # Append both model and loss
+                break  # Break the infinite loop if loss is less than 6
+            # If loss is not less than 6, the loop will repeat, refitting the model
+
+
 
     # Sort models by loss in ascending order
     sorted_models = sorted(models, key=lambda x: x[1])
