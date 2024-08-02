@@ -82,8 +82,8 @@ for i in range(len(training_data_an)):
     mask_b1 = training_data_b1[i] > 0
     mask_b2 = training_data_b2[i] > 0
 
-    training_data_a1[i] = training_data_a1[i][mask_an]
-    trace_data_A1[i] = trace_data_A1[i][mask_an]
+    training_data_a1[i] = training_data_a1[i][mask_a1]
+    trace_data_A1[i] = trace_data_A1[i][mask_a1]
 
     training_data_an[i] = training_data_an[i][mask_an]
     trace_data_An[i] = trace_data_An[i][mask_an]
