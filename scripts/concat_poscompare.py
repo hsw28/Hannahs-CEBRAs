@@ -6,10 +6,16 @@ import os
 
 # List of CSV files
 csv_files = [
-    'cond_lr0.006_mt1.75_mi6500_dcosine_modeconstant_2024-07-30_06-08-39.csv',
-    'cond_lr0.006_mt1.75_mi6500_dcosine_modeconstant_2024-07-30_05-09-36.csv',
-    'cond_lr0.006_mt1.75_mi6500_dcosine_modeconstant_2024-07-30_04-46-10.csv',
-    'cond_lr0.006_mt1.75_mi6500_dcosine_modeconstant_2024-07-30_04-20-25.csv'
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-12-11.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-32-08.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-28-51.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-26-17.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-17-33.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-16-16.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-15-02.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-13-37.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-13-10.csv',
+    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-12-17.csv'
 
 
     #'cond_lr0.008_mt1.75_mi7000_dcosine_modeauto_2024-07-27_11-31-44.csv'

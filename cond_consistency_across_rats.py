@@ -33,8 +33,8 @@ sys.path.extend([
 # This function measures consistency across environments for the same rat
 
 # Global rat IDs
-rat_ids = ['0222', '0313', '314', '0816']
-#rat_ids = ['0222', '0307', '0313', '314', '0816']
+#rat_ids = ['0222', '0313', '314', '0816']
+rat_ids = ['0222', '0307', '0313', '314', '0816']
 
 
 

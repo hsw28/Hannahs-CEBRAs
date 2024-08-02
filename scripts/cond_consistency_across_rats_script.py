@@ -38,8 +38,8 @@ sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
 base_dir = os.getcwd()
 
 # File path configuration
-#rat_ids = ['0222', '0307', '0313', '314', '0816']
-rat_ids = ['0222', '0313', '314', '0816']
+rat_ids = ['0222', '0307', '0313', '314', '0816']
+#rat_ids = ['0222', '0313', '314', '0816']
 trace_paths_a = [f"{base_dir}/rat{rat_id}/cebra_variables/traceAn.mat" for rat_id in rat_ids]
 trace_paths_b = [f"{base_dir}/rat{rat_id}/cebra_variables/traceB1.mat" for rat_id in rat_ids]
 training_paths_a = [f"{base_dir}/rat{rat_id}/cebra_variables/eyeblinkAn.mat" for rat_id in rat_ids]
