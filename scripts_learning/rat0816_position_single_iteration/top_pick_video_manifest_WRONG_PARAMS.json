@@ -1,0 +1,47 @@
+{
+  "renderer": "/Users/Hannah/Programming/Hannahs-CEBRAs/scripts_learning/rat0816_position_single_iteration/render_perimeter_progress_paths.py",
+  "bins": 12,
+  "band_fraction": 0.3,
+  "fps": 20,
+  "dpi": 180,
+  "elev": 21.0,
+  "azim": 318.0,
+  "runs": [
+    {
+      "label": "rat5_seed2",
+      "run_dir": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2",
+      "video_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2/perimeter_progress_paths.mp4",
+      "preview_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2/perimeter_progress_paths_preview.png",
+      "static_svg": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2/perimeter_progress_static.svg",
+      "static_png": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2/perimeter_progress_static.png",
+      "summary_json": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-15_00-05-49_seed2/perimeter_progress_summary.json"
+    },
+    {
+      "label": "rat5_seed1",
+      "run_dir": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1",
+      "video_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1/perimeter_progress_paths.mp4",
+      "preview_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1/perimeter_progress_paths_preview.png",
+      "static_svg": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1/perimeter_progress_static.svg",
+      "static_png": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1/perimeter_progress_static.png",
+      "summary_json": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0816_position_verbose_batch/rat5_position_verbose_rerun_2026-04-14_23-58-58_seed1/perimeter_progress_summary.json"
+    },
+    {
+      "label": "rat4_seed1",
+      "run_dir": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1",
+      "video_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1/perimeter_progress_paths.mp4",
+      "preview_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1/perimeter_progress_paths_preview.png",
+      "static_svg": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1/perimeter_progress_static.svg",
+      "static_png": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1/perimeter_progress_static.png",
+      "summary_json": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-29-04_seed1/perimeter_progress_summary.json"
+    },
+    {
+      "label": "rat4_seed3",
+      "run_dir": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3",
+      "video_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3/perimeter_progress_paths.mp4",
+      "preview_path": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3/perimeter_progress_paths_preview.png",
+      "static_svg": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3/perimeter_progress_static.svg",
+      "static_png": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3/perimeter_progress_static.png",
+      "summary_json": "/Users/Hannah/Programming/Hannahs-CEBRAs/outputs/rat0314_position_verbose_batch/rat4_position_verbose_rerun_2026-04-15_00-49-28_seed3/perimeter_progress_summary.json"
+    }
+  ]
+}

@@ -18,15 +18,15 @@ from ca_velocity import ca_velocity
 # Define parameter sets
 parameter_sets = {
     "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000},
-    #"set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
+    "set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
     #"set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 8000},
-    "set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 12000},
+    #"set0307": {"learning_rate": 0.00055, "min_temperature": 1.5, "max_iterations": 12000},
 
     "set0313": {"learning_rate": 0.00055, "min_temperature": .95, "max_iterations": 26500},
-    "set0313b": {"learning_rate": 0.00055, "min_temperature": .94, "max_iterations": 26500}, #
-    "set0313c": {"learning_rate": 0.00055, "min_temperature": .93, "max_iterations": 26500}, #
-    "set0313d": {"learning_rate": 0.00055, "min_temperature": .95, "max_iterations": 26000}, #
-    "set0313e": {"learning_rate": 0.00055, "min_temperature": .95, "max_iterations": 27000}, #
+    #"set0313b": {"learning_rate": 0.00055, "min_temperature": .94, "max_iterations": 26500}, #
+    #"set0313c": {"learning_rate": 0.00055, "min_temperature": .93, "max_iterations": 26500}, #
+    #"set0313d": {"learning_rate": 0.00055, "min_temperature": .95, "max_iterations": 26000}, #
+    #"set0313e": {"learning_rate": 0.00055, "min_temperature": .95, "max_iterations": 27000}, #
 
 
 
