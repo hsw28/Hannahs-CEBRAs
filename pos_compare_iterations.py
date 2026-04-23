@@ -14,6 +14,7 @@ from scipy import stats
 from pos_score import pos_score
 from datetime import datetime
 from hold_out import hold_out
+from hold_out_middle import hold_out_middle
 
 
 #does not make figures
@@ -84,15 +85,21 @@ def pos_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B
     try:
         for i in range(iterations):
             print(i)
-            traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
-            posAn_train, posAn_test = hold_out(posAn, 75)
-            traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
-            posAnB1_train, posAnB1_test = hold_out(posAn, 75)
+            #traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, 75)
+            #posAn_train, posAn_test = hold_out(posAn, 75)
+            #traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
+            #posAnB1_train, posAnB1_test = hold_out(posAn, 75)
+
+            traceA1An_An_train, traceA1An_An_test = hold_out_middle(traceA1An_An, 75)
+            posAn_train, posAn_test = hold_out_middle(posAn, 75)
+            traceAnB1_An_train, traceAnB1_An_test = hold_out_middle(traceAnB1_An, 75)
+            posAnB1_train, posAnB1_test = hold_out_middle(posAn, 75)
 
             indices = np.random.permutation(posAn.shape[0])  # Get a permutation of the row indices
             posAn_shuffled = posAn[indices, :]  # Apply and shuffle
 
-            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
+            #posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
+            posAn_train_shuffled, posAn_test_shuffled = hold_out_middle(posAn_shuffled, 75)
 
             regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
             shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)
