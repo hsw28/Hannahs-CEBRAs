@@ -6,16 +6,12 @@ import os
 
 # List of CSV files
 csv_files = [
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-12-11.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-32-08.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-28-51.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-26-17.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-17-33.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-16-16.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-15-02.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-13-37.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-13-10.csv',
-    'cond5_lr0.007_mt1.75_mi7500_dcosine_modeconstant_2024-08-01_22-12-17.csv'
+    'pos_compare_lr5.5e-05_mt1e-09_mi25000_dcosine_2026-04-24_17-31-10.csv',
+    'pos_compare_lr5.5e-05_mt1e-09_mi25000_dcosine_2026-04-25_21-17-57.csv',
+    'pos_compare_lr5.5e-05_mt1e-09_mi25000_dcosine_2026-04-25_21-30-53.csv',
+    'pos_compare_lr5.5e-05_mt1e-09_mi25000_dcosine_2026-04-24_20-00-33.csv',
+    'pos_compare_lr5.5e-05_mt1e-09_mi25000_dcosine_2026-04-25_20-34-25.csv'
+
 
 
     #'cond_lr0.008_mt1.75_mi7000_dcosine_modeauto_2024-07-27_11-31-44.csv'
@@ -26,7 +22,7 @@ csv_files = [
 ]
 
 # Extract the common prefix using regex
-pattern = r'^(.*?_lr[\d\.e-]+_mt[\d\.e-]+_mi\d+_d\w+)_2024.*\.csv'
+pattern = r'^(.*?_lr[\d\.e-]+_mt[\d\.e-]+_mi\d+_d\w+)_2026.*\.csv'
 common_prefix = None
 for file in csv_files:
     match = re.match(pattern, os.path.basename(file))

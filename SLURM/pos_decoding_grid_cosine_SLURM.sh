@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --account=p32072
+#SBATCH --account=p32472
 #SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
 #SBATCH --nodes=1
@@ -24,4 +24,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/pos_decoding_AvsB_grid.py ./traceA1An_An.mat ./traceA1An_A1.mat ./posAn.mat ./posA1.mat --learning_rate 0.0000000001,0.00000000005,0.00000000001,0.000000000005,0.00000000001 --min_temperature .1,.5,.75 --max_iterations 25000,30000,35000,40000
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/pos_decoding_AvsB_grid.py ./traceA1An_An.mat ./traceA1An_A1.mat ./posAn.mat ./posA1.mat --learning_rate 0.001, 0.000811, 0.000622, 0.000433, 0.000244, .000055 --min_temperature 0.0000000010,.33,.66,1,1.33  --max_iterations 13000,17000,21000,25000,30000
