@@ -32,9 +32,12 @@ from cond_compare_iterations5 import cond_compare_iterations5
 # Define parameter sets
 parameter_sets = parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
-
-
     "set0307": {"learning_rate": 0.0025, "min_temperature": 2.5, "max_iterations": 21000, "distance": 'euclidean', "temp_mode": 'auto'},
+    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0314": {"learning_rate": 0.0045, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0314": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
+
+
 
 
     "test": {"learning_rate": 0.02, "min_temperature": .02, "max_iterations": 100, "distance": 'cosine', "temp_mode": 'auto'}
@@ -135,6 +138,11 @@ elif how_many_divisions == 5:
     CSUSB1[CSUSB1 > 8] = 5
     CSUSB1[CSUSB1 == -1] = 0
 
+elif how_many_divisions == 10:
+    CSUSAn[CSUSAn == -1] = 0
+    CSUSA1[CSUSA1 == -1] = 0
+    CSUSB1[CSUSB1 == -1] = 0
+
 dimensions = how_many_divisions + args.pretrial_y_or_n
 
 parameter_set = parameter_sets[args.parameter_set_name]
@@ -144,3 +152,5 @@ if how_many_divisions == 2:
     cond_compare_iterations(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
 elif how_many_divisions == 5:
     cond_compare_iterations5(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
+elif how_many_divisions == 10:
+    cond_compare_iterations10(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, CSUSAn, CSUSA1, CSUSB1, dimensions, args.iterations, parameter_set)
