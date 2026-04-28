@@ -1,1 +1,12 @@
 *.pyc
+*.svg
+*.pt
+*.png
+*.npz
+*.json
+*seed*/
+set*/
+rat*/
+raw2_gif*/
+*.gif
+*.log
