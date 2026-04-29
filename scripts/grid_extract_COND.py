@@ -33,12 +33,10 @@ def grid_extract_POS(input_file):
 
     writer = csv.writer(sys.stdout)
     writer.writerow([
-        "KNN_err_train",
-        "KNN_err_test",
-        "med_control",
-        "mead_test",
-        "shuff_minus_not",
-        "shuf_med",
+        "mean_control",
+        "mean_test",
+        "mean_loss",
+        "mean_std_loss",
         "",
         "learning_rate",
         "min_temp",
@@ -48,12 +46,10 @@ def grid_extract_POS(input_file):
     for key in sorted(unique_rows):
         record = unique_rows[key]
         writer.writerow([
-            record["KNN_err_train"],
-            record["KNN_err_test"],
-            record["med_control"],
-            record["mead_test"],
-            record["shuff_minus_not"],
-            record["shuf_med"],
+            record["mean_control"],
+            record["mean_test"],
+            record["mean_loss"],
+            record["std_loss"],
             "",
             record["learn_rate"],
             record["min_temp"],
@@ -63,7 +59,7 @@ def grid_extract_POS(input_file):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Print deduplicated POS grid-search results as CSV."
+        description="Print deduplicated grid-search results as CSV."
     )
     parser.add_argument("input_file", help="SLURM output file to parse")
     args = parser.parse_args()
