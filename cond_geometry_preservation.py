@@ -312,6 +312,8 @@ def run_geometry_preservation(
     real_scores = np.zeros(iterations)
     shuffle_scores = np.zeros(iterations)
     shuffle_scores_all = np.zeros((iterations, shuffles))
+    z_a_runs = None
+    z_b_runs = None
     summary_rows = []
     shuffle_rows = []
 
@@ -329,14 +331,19 @@ def run_geometry_preservation(
 
         z_a = bin_mean_embedding(embedding_a, CSUSA1, bins)
         z_b = bin_mean_embedding(embedding_b, CSUSB1, bins)
+        if z_a_runs is None:
+            z_a_runs = np.zeros((iterations, z_a.shape[0], z_a.shape[1]))
+            z_b_runs = np.zeros((iterations, z_b.shape[0], z_b.shape[1]))
+        z_a_runs[run_idx] = z_a
+        z_b_runs[run_idx] = z_b
 
         run_geometry = compute_geometry_preservation_run(z_a, z_b, n_shuff=shuffles, rng=rng)
         real_score = run_geometry["rReal"]
         shuff_score = run_geometry["rShuff"]
-        shuff_scores_all = run_geometry["rShuffAll"]
+        run_shuff_scores = run_geometry["rShuffAll"]
         real_scores[run_idx] = real_score
         shuffle_scores[run_idx] = shuff_score
-        shuffle_scores_all[run_idx] = shuff_scores_all
+        shuffle_scores_all[run_idx] = run_shuff_scores
 
         summary_rows.append(
             {
@@ -355,7 +362,7 @@ def run_geometry_preservation(
                 "shuffle_score": shuff_score,
             }
         )
-        for shuffle_idx, shuffle_score in enumerate(shuff_scores_all):
+        for shuffle_idx, shuffle_score in enumerate(run_shuff_scores):
             shuffle_rows.append(
                 {
                     "rat_id": rat_id,
@@ -392,6 +399,8 @@ def run_geometry_preservation(
         rReal=real_scores,
         rShuff=shuffle_scores,
         rShuffAll=shuffle_scores_all,
+        zA_runs=z_a_runs,
+        zB_runs=z_b_runs,
         bins=bins,
         parameter_set_name=parameter_set_name,
         output_dimension=output_dimension,
