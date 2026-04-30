@@ -5,8 +5,8 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --array=0 ## number of jobs to run "in parallel"
-#SBATCH --mem=16GB
-#SBATCH --time=6:00:00
+#SBATCH --mem=8GB
+#SBATCH --time=3:00:00
 #SBATCH --job-name="geom_0307_${SLURM_ARRAY_TASK_ID}"
 #SBATCH --output=geometry_preservation_0307.%A_%a.out
 #SBATCH --mail-type=BEGIN,END,FAIL
