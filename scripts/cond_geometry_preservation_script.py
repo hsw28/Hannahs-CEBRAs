@@ -14,7 +14,7 @@ from cond_geometry_preservation import run_geometry_preservation
 
 parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
-    "set0307": {"learning_rate": 0.0025, "min_temperature": 2.5, "max_iterations": 21000, "distance": "euclidean", "temp_mode": "auto"},
+    "set0307": {"learning_rate": 0.0025, "min_temperature": 1.5, "max_iterations": 30000, "distance": "cosine", "temp_mode": "constant"},
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": "cosine", "temp_mode": "auto"},
     "set0314": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},
     "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": "cosine", "temp_mode": "auto"},

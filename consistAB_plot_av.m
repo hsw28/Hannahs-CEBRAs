@@ -20,6 +20,7 @@ combined_data(:, 1:8, :) = combined_data(:, [1, 5, 2, 6, 3, 7, 4, 8], :);
 %% Reshape the data for plotting
 data_combined = [];
 for cond = 1:5
+%for cond = [1,3,5]
     data_cond = [combined_data(1, :, cond)]';
   %data_cond = reshape(data_cond', 1, []);
     data_combined = [data_combined, data_cond];
@@ -57,20 +58,21 @@ end
 
 hold on
 %ylim([0 10])
-xlabel('Condition');
-ylabel('Animal Index');
+xlabel('# of Latents');
+ylabel('Comparision');
 zlabel('Consistency Value');
 title('3D Bar Graph of Test and Control Data per Animal and Condition with Standard Deviations');
 grid on;
 view(3); % Set view to 3D
 
 
-
+%{
 combined_std(:, 1:8, :) = combined_std(:, [1, 5, 2, 6, 3, 7, 4, 8], :);
 
 %% Reshape the data for plotting
 std_combined = [];
-for cond = 1:5
+%for cond = 1:5
+for cond = [1,3,5]
     std_cond = [combined_std(1, :, cond)]';
   %data_cond = reshape(data_cond', 1, []);
     std_combined = [std_combined, std_cond];
@@ -79,4 +81,7 @@ end
 
 ThreeDBarWithErrorBars(data_combined, std_combined);
 grid on;
+
 view(3); % Set view to 3D
+
+%}
