@@ -19,8 +19,8 @@ combined_data(:, 1:8, :) = combined_data(:, [1, 5, 2, 6, 3, 7, 4, 8], :);
 
 %% Reshape the data for plotting
 data_combined = [];
-for cond = 1:5
-%for cond = [1,3,5]
+%for cond = 1:5
+for cond = [1,3,5]
     data_cond = [combined_data(1, :, cond)]';
   %data_cond = reshape(data_cond', 1, []);
     data_combined = [data_combined, data_cond];
@@ -36,7 +36,16 @@ h = bar3(x, data_combined, 1);
 
 
 % Assign colors to the bars correctly
-colors2 = [0, 0, 0.8; 0.3, 0.6, 1; 0.4, 0.8, 0.4; 1, 0.7, 0.4; 0.9, 0.3, 0.3]; % Dark Blue, Light Blue, Green, Orange, Red
+%colors2 = [0, 0, 0.8; 0.3, 0.6, 1; 0.4, 0.8, 0.4; 1, 0.7, 0.4; 0.9, 0.3, 0.3]; % Dark Blue, Light Blue, Green, Orange, Red
+colors2 = [
+
+    0.1647, 0.1843, 0.4902;
+
+    0.8941, 0.7216, 0.1529;
+
+    0.7569, 0.1529, 0.1765
+
+];
 
 for k = 1:length(h)
     zdata = get(h(k), 'ZData');
@@ -66,7 +75,7 @@ grid on;
 view(3); % Set view to 3D
 
 
-%{
+
 combined_std(:, 1:8, :) = combined_std(:, [1, 5, 2, 6, 3, 7, 4, 8], :);
 
 %% Reshape the data for plotting
@@ -83,5 +92,3 @@ ThreeDBarWithErrorBars(data_combined, std_combined);
 grid on;
 
 view(3); % Set view to 3D
-
-%}
