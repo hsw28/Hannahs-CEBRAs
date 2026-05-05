@@ -1,4 +1,6 @@
 import sys
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
 sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs/')
 sys.path.append('/Users/Hannah/anaconda3/envs/CEBRA/lib/python3.8/site-packages/cebra')
 import argparse
@@ -265,7 +267,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
             'mean_test': mean_test         # Correctly calculated mean
         })
 
-        print(results)
+        print(results, flush=True)
     return results
 
 if __name__ == "__main__":
