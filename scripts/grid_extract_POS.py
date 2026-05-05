@@ -4,6 +4,8 @@ import csv
 import sys
 from pathlib import Path
 
+#python3 ~/Programming/Hannahs-CEBRAs/scripts/grid_extract_POS.py ~/Programming/data_eyeblink/rat0307/cebra_variables/AM_SLURM_out.6645262_0.out
+
 
 def grid_extract_POS(input_file):
     input_file = Path(input_file).expanduser()

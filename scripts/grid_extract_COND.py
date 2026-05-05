@@ -4,8 +4,10 @@ import csv
 import sys
 from pathlib import Path
 
+# ex:
+#python3 ~/Programming/Hannahs-CEBRAs/scripts/grid_extract_COND.py ~/Programming/data_eyeblink/rat0307/cebra_variables/AM_SLURM_out.6645262_0.out
 
-def grid_extract_POS(input_file):
+def grid_extract_COND(input_file):
     input_file = Path(input_file).expanduser()
     unique_rows = {}
 

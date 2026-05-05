@@ -121,7 +121,7 @@ def main():
         trainingA[trainingA > 8] = 5
         trainingA[trainingA == -1] = 0
 
-        training[(trainingB > 0) & (trainingB <= 2)]  = 1
+        trainingB[(trainingB > 0) & (trainingB <= 2)]  = 1
         trainingB[(trainingB > 2) & (trainingB <= 4)] = 2
         trainingB[(trainingB > 4) & (trainingB <= 6)] = 3
         trainingB[(trainingB > 6) & (trainingB <= 8)] = 4
@@ -184,7 +184,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         envB_eyeblink = envs_eyeblink[1]
 
         # Loop to run the batch of code 50 times
-        for i in range(2):
+        for i in range(5):
 
 
 
