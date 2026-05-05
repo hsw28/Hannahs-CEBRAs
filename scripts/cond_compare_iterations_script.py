@@ -32,7 +32,7 @@ from cond_compare_iterations5 import cond_compare_iterations5
 # Define parameter sets
 parameter_sets = parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0307": {"learning_rate": 0.005, "min_temperature": 1, "max_iterations": 21000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307": {"learning_rate": 0.005, "min_temperature": .5, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
     "set0307b": {"learning_rate": 0.005, "min_temperature": .75, "max_iterations": 35000, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
