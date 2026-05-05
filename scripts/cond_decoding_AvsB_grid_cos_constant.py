@@ -234,6 +234,8 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
               fract_control_all.append(fract_controlA)
               fract_test_all.append(fract_testB)
 
+              if fract_testB < .35:
+                  break
 
               del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
               gc.collect()
@@ -242,10 +244,11 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
               #print((fract_test_all))
 
         # Calculate mean of all fractions
-        mean_control = np.mean(fract_control_all)
-        mean_test = np.mean(fract_test_all)  # Corrected to use fract_test_all
-        mean_loss = np.mean(loss_all)
-        std_loss = np.std(loss_all)
+        mean_control = np.mean(fract_control_all) if len(fract_control_all) > 0 else np.nan
+        mean_test = np.mean(fract_test_all) if len(fract_test_all) > 0 else np.nan
+        mean_loss = np.mean(loss_all) if len(loss_all) > 0 else np.nan
+        std_loss = np.std(loss_all) if len(loss_all) > 0 else np.nan
+
 
 
         # Round the mean values
