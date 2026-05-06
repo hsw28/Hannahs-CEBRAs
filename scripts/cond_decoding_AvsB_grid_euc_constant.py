@@ -234,7 +234,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
               fract_control_all.append(fract_controlA)
               fract_test_all.append(fract_testB)
 
-              if fract_testB < .35:
+              if fract_testB < .3:
                   break
 
               del cebra_loc_modelpos, cebra_loc_train22, cebra_loc_test22
