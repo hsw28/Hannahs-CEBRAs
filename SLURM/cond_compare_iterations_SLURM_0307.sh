@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --account=p32072
-#SBATCH --partition=p32072
+#SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
