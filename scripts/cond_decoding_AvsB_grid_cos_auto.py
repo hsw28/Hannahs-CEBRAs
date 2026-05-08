@@ -247,7 +247,7 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         mean_test = np.mean(fract_test_all) if len(fract_test_all) > 0 else np.nan
         mean_loss = np.mean(loss_all) if len(loss_all) > 0 else np.nan
         std_loss = np.std(loss_all) if len(loss_all) > 0 else np.nan
-
+        std_test = np.std(fract_test_all) if len(fract_test_all) > 0 else np.nan
 
 
         # Round the mean values
@@ -255,7 +255,8 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         mean_test = round(mean_test, 3)
         mean_loss = round(mean_loss,3)
         std_loss = round(std_loss,3)
-
+        std_test = round(std_test,3)
+        
         # Append the correctly calculated means to the results
         results.append({
             'learn_rate': lr,
@@ -265,9 +266,12 @@ def cond_decoding_AvsB_grid_cebra(envA_cell_train, envB_cell_train, envA_eyeblin
         #    'fract_test': fract_test_all,
             'mean_loss': mean_loss,
             'std_loss': std_loss,
+            'test_std':std_test,
             'mean_control': mean_control,  # Correctly calculated mean
-            'mean_test': mean_test         # Correctly calculated mean
+            'mean_test': mean_test,         # Correctly calculated mean
+            'n_runs': len(fract_test_all),
         })
+
 
         print(results, flush=True)
     return results
