@@ -35,7 +35,7 @@ parameter_sets = parameter_sets = {
 
     "set0307": {"learning_rate": 0.005, "min_temperature": 2.5, "max_iterations": 30000, "distance": 'euclidean', "temp_mode": 'auto'},
     "set0307b": {"learning_rate": 0.0025, "min_temperature": 1.5, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "set0307c": {"learning_rate": 0.0075, "min_temperature": 1.75, "max_iterations": 13000, "distance": 'euclidean', "temp_mode": 'auto'},
+    "set0307c": {"learning_rate": 0.0025, "min_temperature": 2, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
     "set0307d": {"learning_rate": 0.0075, "min_temperature": 1.75, "max_iterations": 40000, "distance": 'euclidean', "temp_mode": 'auto'},
 
     "set0307e": {"learning_rate": 0.0025, "min_temperature": 2.75, "max_iterations": 30000, "distance": 'cosine', "temp_mode": 'constant'},
