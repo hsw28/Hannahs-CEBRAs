@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.linalg import orthogonal_procrustes
+from scipy.spatial import procrustes
 
 
 def load_mean_embeddings(npz_path):
@@ -74,19 +75,58 @@ def align_embedding(source, target, method):
     raise ValueError(f"Unknown alignment method: {method}")
 
 
-def build_aligned_table(rat_files, reference_index=0, reference_env="A", method="similarity", zscore_before_align=True):
+def alignment_metrics(source, target, aligned):
+    source = np.asarray(source, dtype=float)
+    target = np.asarray(target, dtype=float)
+    aligned = np.asarray(aligned, dtype=float)
+
+    _, _, disparity = procrustes(target, source)
+    residual = aligned - target
+    aligned_sse = np.sum(residual ** 2)
+    aligned_rmse = np.sqrt(np.mean(residual ** 2))
+    target_centered = target - np.mean(target, axis=0, keepdims=True)
+    target_total_ss = np.sum(target_centered ** 2)
+    if target_total_ss > 0:
+        aligned_sse_over_target_ss = aligned_sse / target_total_ss
+    else:
+        aligned_sse_over_target_ss = np.nan
+
+    return {
+        "n_points": target.shape[0],
+        "n_dimensions": target.shape[1],
+        "procrustes_disparity": disparity,
+        "aligned_sse": aligned_sse,
+        "aligned_rmse": aligned_rmse,
+        "target_total_ss": target_total_ss,
+        "aligned_sse_over_target_ss": aligned_sse_over_target_ss,
+    }
+
+
+def build_aligned_outputs(rat_files, reference_index=0, reference_env="A", method="similarity", zscore_before_align=True):
     rats = [load_mean_embeddings(path) for path in rat_files]
     reference = rats[reference_index][reference_env]
     if zscore_before_align:
         reference = zscore_columns(reference)
 
     rows = []
+    metric_rows = []
     for rat in rats:
         for env in ["A", "B"]:
             embedding = rat[env]
             if zscore_before_align:
                 embedding = zscore_columns(embedding)
             aligned = align_embedding(embedding, reference, method)
+            metric_rows.append(
+                {
+                    "rat_id": rat["rat_id"],
+                    "environment": env,
+                    "reference_rat_id": rats[reference_index]["rat_id"],
+                    "reference_env": reference_env,
+                    "alignment_method": method,
+                    "zscore_before_align": zscore_before_align,
+                    **alignment_metrics(embedding, reference, aligned),
+                }
+            )
 
             for bin_value, coords in zip(rat["bins"], aligned):
                 row = {
@@ -101,7 +141,18 @@ def build_aligned_table(rat_files, reference_index=0, reference_env="A", method=
                     row[f"dim{dim_idx + 1}"] = value
                 rows.append(row)
 
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows), pd.DataFrame(metric_rows)
+
+
+def build_aligned_table(rat_files, reference_index=0, reference_env="A", method="similarity", zscore_before_align=True):
+    aligned, _ = build_aligned_outputs(
+        rat_files,
+        reference_index=reference_index,
+        reference_env=reference_env,
+        method=method,
+        zscore_before_align=zscore_before_align,
+    )
+    return aligned
 
 
 def plot_aligned_embeddings(aligned_table, output_path, title=None):
@@ -177,7 +228,7 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    aligned = build_aligned_table(
+    aligned, metrics = build_aligned_outputs(
         args.rat_npz,
         reference_index=args.reference_index,
         reference_env=args.reference_env,
@@ -186,15 +237,18 @@ def main():
     )
 
     csv_path = os.path.join(args.output_dir, f"aligned_cross_rat_embeddings_{args.method}_{timestamp}.csv")
+    metrics_path = os.path.join(args.output_dir, f"aligned_cross_rat_embeddings_{args.method}_disparity_{timestamp}.csv")
     png_path = os.path.join(args.output_dir, f"aligned_cross_rat_embeddings_{args.method}_{timestamp}.png")
     svg_path = os.path.join(args.output_dir, f"aligned_cross_rat_embeddings_{args.method}_{timestamp}.svg")
 
     aligned.to_csv(csv_path, index=False)
+    metrics.to_csv(metrics_path, index=False)
     title = f"Aligned Cross-Rat CEBRA Task Embeddings ({args.method})"
     plot_aligned_embeddings(aligned, png_path, title=title)
     plot_aligned_embeddings(aligned, svg_path, title=title)
 
     print(f"Aligned coordinates saved to {csv_path}")
+    print(f"Alignment disparity metrics saved to {metrics_path}")
     print(f"Aligned PNG saved to {png_path}")
     print(f"Aligned SVG saved to {svg_path}")
     print("Solid lines are environment A; dashed lines are environment B.")

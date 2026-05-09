@@ -33,21 +33,10 @@ from cond_compare_iterations5 import cond_compare_iterations5
 parameter_sets = parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": 'euclidean', "temp_mode": 'constant'},
 
-    "set0307": {"learning_rate": 0.005, "min_temperature": 2.5, "max_iterations": 30000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "set0307b": {"learning_rate": 0.0025, "min_temperature": 1.5, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'auto'},
-    "set0307c": {"learning_rate": 0.0025, "min_temperature": 2, "max_iterations": 25000, "distance": 'euclidean', "temp_mode": 'constant'},
-    "set0307d": {"learning_rate": 0.0075, "min_temperature": 1.75, "max_iterations": 40000, "distance": 'euclidean', "temp_mode": 'auto'},
+    "set0307": {"learning_rate": 0.0075, "min_temperature": 1.75, "max_iterations": 40000, "distance": 'euclidean', "temp_mode": 'auto'}, ##YES
+    "set0307b": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": 'cosine', "temp_mode": 'constant'},
+    "set0307c": {"learning_rate": 0.0015, "min_temperature": 3, "max_iterations": 50000, "distance": 'cosine', "temp_mode": 'auto'},
 
-    "set0307e": {"learning_rate": 0.0025, "min_temperature": 2.75, "max_iterations": 30000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307f": {"learning_rate": 0.005, "min_temperature": .75, "max_iterations": 35000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307g": {"learning_rate": 0.0025, "min_temperature": .75, "max_iterations": 35000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307h": {"learning_rate": 0.0025, "min_temperature": 2.25, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-
-    "set0307i": {"learning_rate": 0.0099, "min_temperature": 2.25, "max_iterations": 21000, "distance": 'euclidean', "temp_mode": 'auto'},
-
-    "set0307j": {"learning_rate": 0.005, "min_temperature": 2.75, "max_iterations": 30000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307k": {"learning_rate": 0.0075, "min_temperature": 2.25, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
-    "set0307l": {"learning_rate": 0.0075, "min_temperature": 3, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'constant'},
 
 
 

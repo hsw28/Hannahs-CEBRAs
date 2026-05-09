@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.linalg import orthogonal_procrustes
+from scipy.spatial import procrustes
 
 
 def load_mean_embeddings(npz_path):
@@ -58,8 +59,36 @@ def procrustes_align(source, target):
     return aligned + target_center
 
 
-def build_within_rat_table(rat_files, zscore_before_align=True):
+def procrustes_alignment_metrics(source, target, aligned):
+    source = np.asarray(source, dtype=float)
+    target = np.asarray(target, dtype=float)
+    aligned = np.asarray(aligned, dtype=float)
+
+    _, _, disparity = procrustes(target, source)
+    residual = aligned - target
+    aligned_sse = np.sum(residual ** 2)
+    aligned_rmse = np.sqrt(np.mean(residual ** 2))
+    target_centered = target - np.mean(target, axis=0, keepdims=True)
+    target_total_ss = np.sum(target_centered ** 2)
+    if target_total_ss > 0:
+        aligned_sse_over_target_ss = aligned_sse / target_total_ss
+    else:
+        aligned_sse_over_target_ss = np.nan
+
+    return {
+        "n_points": target.shape[0],
+        "n_dimensions": target.shape[1],
+        "procrustes_disparity": disparity,
+        "aligned_sse": aligned_sse,
+        "aligned_rmse": aligned_rmse,
+        "target_total_ss": target_total_ss,
+        "aligned_sse_over_target_ss": aligned_sse_over_target_ss,
+    }
+
+
+def build_within_rat_outputs(rat_files, zscore_before_align=True):
     rows = []
+    metric_rows = []
     for path in rat_files:
         rat = load_mean_embeddings(path)
         z_a = rat["A"]
@@ -69,6 +98,15 @@ def build_within_rat_table(rat_files, zscore_before_align=True):
             z_b = zscore_columns(z_b)
 
         z_b_aligned = procrustes_align(z_b, z_a)
+        metric_rows.append(
+            {
+                "rat_id": rat["rat_id"],
+                "source_npz": path,
+                "comparison": "B_to_A",
+                "zscore_before_align": zscore_before_align,
+                **procrustes_alignment_metrics(z_b, z_a, z_b_aligned),
+            }
+        )
 
         for env, embedding in [("A_reference", z_a), ("B_procrustes_to_A", z_b_aligned)]:
             for bin_value, coords in zip(rat["bins"], embedding):
@@ -83,7 +121,12 @@ def build_within_rat_table(rat_files, zscore_before_align=True):
                 for dim_idx, value in enumerate(coords):
                     row[f"dim{dim_idx + 1}"] = value
                 rows.append(row)
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows), pd.DataFrame(metric_rows)
+
+
+def build_within_rat_table(rat_files, zscore_before_align=True):
+    aligned, _ = build_within_rat_outputs(rat_files, zscore_before_align=zscore_before_align)
+    return aligned
 
 
 def set_equal_2d_limits(ax, points):
@@ -230,14 +273,17 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    aligned = build_within_rat_table(args.rat_npz, zscore_before_align=not args.no_zscore)
+    aligned, metrics = build_within_rat_outputs(args.rat_npz, zscore_before_align=not args.no_zscore)
 
     csv_path = os.path.join(args.output_dir, f"within_rat_procrustes_aligned_{timestamp}.csv")
+    metrics_path = os.path.join(args.output_dir, f"within_rat_procrustes_disparity_{timestamp}.csv")
     aligned.to_csv(csv_path, index=False)
+    metrics.to_csv(metrics_path, index=False)
     individual_paths = save_individual_plots(aligned, args.output_dir, timestamp)
     combined_svg, combined_png = save_combined_plot(aligned, args.output_dir, timestamp)
 
     print(f"Aligned coordinates saved to {csv_path}")
+    print(f"Procrustes disparity metrics saved to {metrics_path}")
     print(f"Combined SVG saved to {combined_svg}")
     print(f"Combined PNG saved to {combined_png}")
     for svg_path, png_path, pdf_path in individual_paths:

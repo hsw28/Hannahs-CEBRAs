@@ -2,11 +2,12 @@
 #SBATCH --account=p32072
 #SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
+#SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0 ## number of jobs to run "in parallel"
+#SBATCH --array=0-3%2 ## number of jobs to run "in parallel"
 #SBATCH --mem=10GB
-#SBATCH --time=26:00:00
+#SBATCH --time=38:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
 #SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
 #SBATCH --mail-type=BEGIN,END,FAIL

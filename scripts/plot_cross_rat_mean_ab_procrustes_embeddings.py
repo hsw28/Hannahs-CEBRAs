@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.linalg import orthogonal_procrustes
+from scipy.spatial import procrustes
 
 
 def load_mean_embeddings(npz_path):
@@ -57,9 +58,37 @@ def procrustes_align(source, target):
     return aligned + target_center
 
 
-def build_rat_mean_trajectories(rat_files, reference_index=0, zscore_before_align=True):
+def procrustes_alignment_metrics(source, target, aligned):
+    source = np.asarray(source, dtype=float)
+    target = np.asarray(target, dtype=float)
+    aligned = np.asarray(aligned, dtype=float)
+
+    _, _, disparity = procrustes(target, source)
+    residual = aligned - target
+    aligned_sse = np.sum(residual ** 2)
+    aligned_rmse = np.sqrt(np.mean(residual ** 2))
+    target_centered = target - np.mean(target, axis=0, keepdims=True)
+    target_total_ss = np.sum(target_centered ** 2)
+    if target_total_ss > 0:
+        aligned_sse_over_target_ss = aligned_sse / target_total_ss
+    else:
+        aligned_sse_over_target_ss = np.nan
+
+    return {
+        "n_points": target.shape[0],
+        "n_dimensions": target.shape[1],
+        "procrustes_disparity": disparity,
+        "aligned_sse": aligned_sse,
+        "aligned_rmse": aligned_rmse,
+        "target_total_ss": target_total_ss,
+        "aligned_sse_over_target_ss": aligned_sse_over_target_ss,
+    }
+
+
+def build_rat_mean_trajectory_outputs(rat_files, reference_index=0, zscore_before_align=True):
     rats = [load_mean_embeddings(path) for path in rat_files]
     rat_trajectories = []
+    metric_rows = []
 
     for rat in rats:
         z_a = rat["A"]
@@ -70,15 +99,34 @@ def build_rat_mean_trajectories(rat_files, reference_index=0, zscore_before_alig
 
         z_b_aligned = procrustes_align(z_b, z_a)
         mean_ab = (z_a + z_b_aligned) / 2.0
+        metric_rows.append(
+            {
+                "rat_id": rat["rat_id"],
+                "comparison": "within_rat_B_to_A",
+                "reference_rat_id": rat["rat_id"],
+                "zscore_before_align": zscore_before_align,
+                **procrustes_alignment_metrics(z_b, z_a, z_b_aligned),
+            }
+        )
         rat_trajectories.append({**rat, "mean_ab": mean_ab})
 
     reference = rat_trajectories[reference_index]["mean_ab"]
+    reference_rat_id = rat_trajectories[reference_index]["rat_id"]
     rows = []
     for rat in rat_trajectories:
         if rat is rat_trajectories[reference_index]:
             aligned = rat["mean_ab"]
         else:
             aligned = procrustes_align(rat["mean_ab"], reference)
+        metric_rows.append(
+            {
+                "rat_id": rat["rat_id"],
+                "comparison": "cross_rat_mean_ab_to_reference",
+                "reference_rat_id": reference_rat_id,
+                "zscore_before_align": zscore_before_align,
+                **procrustes_alignment_metrics(rat["mean_ab"], reference, aligned),
+            }
+        )
 
         for bin_value, coords in zip(rat["bins"], aligned):
             row = {
@@ -92,7 +140,16 @@ def build_rat_mean_trajectories(rat_files, reference_index=0, zscore_before_alig
                 row[f"dim{dim_idx + 1}"] = value
             rows.append(row)
 
-    return pd.DataFrame(rows)
+    return pd.DataFrame(rows), pd.DataFrame(metric_rows)
+
+
+def build_rat_mean_trajectories(rat_files, reference_index=0, zscore_before_align=True):
+    aligned, _ = build_rat_mean_trajectory_outputs(
+        rat_files,
+        reference_index=reference_index,
+        zscore_before_align=zscore_before_align,
+    )
+    return aligned
 
 
 def save_figure(fig, output_path):
@@ -278,13 +335,14 @@ def main():
 
     os.makedirs(args.output_dir, exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    aligned = build_rat_mean_trajectories(
+    aligned, metrics = build_rat_mean_trajectory_outputs(
         args.rat_npz,
         reference_index=args.reference_index,
         zscore_before_align=not args.no_zscore,
     )
 
     csv_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_{timestamp}.csv")
+    metrics_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_disparity_{timestamp}.csv")
     png3d_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_group_mean_3d_{timestamp}.png")
     svg3d_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_group_mean_3d_{timestamp}.svg")
     pdf3d_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_group_mean_3d_{timestamp}.pdf")
@@ -295,6 +353,7 @@ def main():
     pca_info_path = os.path.join(args.output_dir, f"cross_rat_mean_ab_procrustes_pca2d_info_{timestamp}.csv")
 
     aligned.to_csv(csv_path, index=False)
+    metrics.to_csv(metrics_path, index=False)
     plot_group_mean_3d(aligned, png3d_path, label_bins=args.label_bins)
     plot_group_mean_3d(aligned, svg3d_path, label_bins=args.label_bins)
     plot_group_mean_3d(aligned, pdf3d_path, label_bins=args.label_bins)
@@ -313,6 +372,7 @@ def main():
     plot_group_mean_2d(projected, mean_traj, explained, pdf2d_path, label_bins=args.label_bins)
 
     print(f"Aligned mean A/B coordinates saved to {csv_path}")
+    print(f"Procrustes disparity metrics saved to {metrics_path}")
     print(f"3D PNG saved to {png3d_path}")
     print(f"3D SVG saved to {svg3d_path}")
     print(f"3D PDF saved to {pdf3d_path}")
