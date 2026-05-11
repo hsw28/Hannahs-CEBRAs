@@ -27,6 +27,6 @@ export PYTHONUNBUFFERED=1
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
 
-python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.0005,0.001,0.0025 --min_temperature 3.5,4,5 --max_iterations 50000,70000
+python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate 0.0015,.0025,.0035,.0045  --min_temperature 3.5,4,5 --max_iterations 50000,60000,70000,77000
 
 #python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_constant.py ./traceA1An_An.mat ./traceA1An_A1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat 2 0 --learning_rate 0.000045,0.0002,0.0035,0.0075,0.0095,0.045 --min_temperature .3,0.75,1,1.33,1.67,2,2.33,2.66,3 --max_iterations 8000,10000,13000,17000,20000,25000
