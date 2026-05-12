@@ -2,16 +2,16 @@
 #SBATCH --account=p32072
 #SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
+#SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0 ## number of jobs to run "in parallel"
-#SBATCH --mem=12GB
-#SBATCH --time=40:00:00
+#SBATCH --array=0 ## number of jobs to run "in parallel", 0-9%2 would be 10 jobs 2 in parallel
+#SBATCH --mem=16GB
+#SBATCH --time=30:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
 #SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=hsw@northwestern.edu  ## your email
-
 
 module purge
 eval "$(conda shell.bash hook)"
