@@ -32,7 +32,7 @@ import warnings
 #b is optimal decoding
 #c is lowest loss
 parameter_sets = {
-    "set0222": {"learning_rate": 0.0035, "min_temperature": 2, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
 
     "set0307l": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 6000, "distance": 'cosine', "temp_mode": 'constant'},
 
@@ -41,11 +41,11 @@ parameter_sets = {
     "set0307f": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 7500, "distance": 'cosine', "temp_mode": 'constant'},
     "set0307g": {"learning_rate": 0.007, "min_temperature": 1.5, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
 
-    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": 'euclidean', "temp_mode": 'constant'},
+    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": "euclidean", "temp_mode": "constant"},
     "set0314b": {"learning_rate": 0.05, "min_temperature": .66, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0314c": {"learning_rate": 0.0075, "min_temperature": .1, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'auto'},
 
-    "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": 'cosine', "temp_mode": 'auto'},
+    "set0816": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},
     "set0816b": {"learning_rate": 0.0045, "min_temperature": .2, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'}, #bad
     "set0816c": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 9000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0816d": {"learning_rate": 0.001, "min_temperature": .2, "max_iterations": 8000, "distance": 'cosine', "temp_mode": 'auto'}, #[0.24675807 0.24770568 0.03503873 0.25429014 0.62559619 0.11513096 0.21182717 0.63089705 0.51730605 0.06069476 0.1643732  0.30014319]

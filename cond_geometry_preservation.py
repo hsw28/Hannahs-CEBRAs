@@ -48,6 +48,16 @@ def trim_mod10_if_needed(traces, labels):
     return traces, labels
 
 
+def trim_mod10_with_optional_ids(traces, labels, trial_ids=None):
+    min_length = len(labels)
+    if min_length % 10 == 9:
+        traces = traces[9:]
+        labels = labels[9:]
+        if trial_ids is not None:
+            trial_ids = np.asarray(trial_ids)[9:]
+    return traces, labels, trial_ids
+
+
 def common_bins(labels_a, labels_b):
     bins = np.intersect1d(np.unique(labels_a), np.unique(labels_b))
     bins = bins[bins != 0]
@@ -297,6 +307,8 @@ def run_geometry_preservation(
     rat_id=None,
     session_id=None,
     random_seed=None,
+    CSUSA1_trial_ids=None,
+    CSUSB1_trial_ids=None,
 ):
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_seed)
@@ -305,8 +317,12 @@ def run_geometry_preservation(
         CSUSAn = CSUSAn[9:]
         traceA1An_An = traceA1An_An[9:]
         traceAnB1_An = traceAnB1_An[9:]
-    traceA1An_A1, CSUSA1 = trim_mod10_if_needed(traceA1An_A1, CSUSA1)
-    traceAnB1_B1, CSUSB1 = trim_mod10_if_needed(traceAnB1_B1, CSUSB1)
+    traceA1An_A1, CSUSA1, CSUSA1_trial_ids = trim_mod10_with_optional_ids(traceA1An_A1, CSUSA1, CSUSA1_trial_ids)
+    traceAnB1_B1, CSUSB1, CSUSB1_trial_ids = trim_mod10_with_optional_ids(traceAnB1_B1, CSUSB1, CSUSB1_trial_ids)
+    if CSUSA1_trial_ids is not None and len(CSUSA1_trial_ids) != len(CSUSA1):
+        raise ValueError("CSUSA1_trial_ids must match CSUSA1 length after trimming/filtering.")
+    if CSUSB1_trial_ids is not None and len(CSUSB1_trial_ids) != len(CSUSB1):
+        raise ValueError("CSUSB1_trial_ids must match CSUSB1 length after trimming/filtering.")
 
     bins = common_bins(CSUSA1, CSUSB1)
     real_scores = np.zeros(iterations)
@@ -314,6 +330,8 @@ def run_geometry_preservation(
     shuffle_scores_all = np.zeros((iterations, shuffles))
     z_a_runs = None
     z_b_runs = None
+    embedding_a_runs = None
+    embedding_b_runs = None
     summary_rows = []
     shuffle_rows = []
 
@@ -334,8 +352,12 @@ def run_geometry_preservation(
         if z_a_runs is None:
             z_a_runs = np.zeros((iterations, z_a.shape[0], z_a.shape[1]))
             z_b_runs = np.zeros((iterations, z_b.shape[0], z_b.shape[1]))
+            embedding_a_runs = np.zeros((iterations, embedding_a.shape[0], embedding_a.shape[1]))
+            embedding_b_runs = np.zeros((iterations, embedding_b.shape[0], embedding_b.shape[1]))
         z_a_runs[run_idx] = z_a
         z_b_runs[run_idx] = z_b
+        embedding_a_runs[run_idx] = embedding_a
+        embedding_b_runs[run_idx] = embedding_b
 
         run_geometry = compute_geometry_preservation_run(z_a, z_b, n_shuff=shuffles, rng=rng)
         real_score = run_geometry["rReal"]
@@ -401,6 +423,18 @@ def run_geometry_preservation(
         rShuffAll=shuffle_scores_all,
         zA_runs=z_a_runs,
         zB_runs=z_b_runs,
+        # Per-sample CEBRA latent coordinates for downstream decoding.
+        # These preserve the no-shared-neuron setup: each environment/rat is
+        # transformed by its own fitted CEBRA model, and cross-animal transfer
+        # should happen only after latent-space alignment.
+        embeddingA_runs=embedding_a_runs,
+        embeddingB_runs=embedding_b_runs,
+        labelsA=CSUSA1,
+        labelsB=CSUSB1,
+        sample_indicesA=np.arange(len(CSUSA1)),
+        sample_indicesB=np.arange(len(CSUSB1)),
+        trial_idsA=CSUSA1_trial_ids if CSUSA1_trial_ids is not None else np.array([]),
+        trial_idsB=CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),
         bins=bins,
         parameter_set_name=parameter_set_name,
         output_dimension=output_dimension,

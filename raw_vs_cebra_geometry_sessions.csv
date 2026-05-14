@@ -1,0 +1,6 @@
+rat_name,date_str,session_name,animal_mat,npz_path
+rat0222,2023_05_09,2023_05_09,/Users/Hannah/Programming/data_eyeblink/tebc_paper/paperdata.mat,/Users/Hannah/Programming/data_eyeblink/geometry_preservation_outputs/geometry_preservation_rat0222_set0222_dim3_bins5_2026-04-29_08-40-29.npz
+rat0307,2023_06_05,2023_06_05,/Users/Hannah/Programming/data_eyeblink/tebc_paper/paperdata.mat,/Users/Hannah/Programming/data_eyeblink/geometry_preservation_outputs/geometry_preservation_rat0307_set0307_dim3_bins5_2026-04-30_22-51-17.npz
+rat0313,2023_05_31,2023_05_31,/Users/Hannah/Programming/data_eyeblink/tebc_paper/paperdata.mat,/Users/Hannah/Programming/data_eyeblink/geometry_preservation_outputs/geometry_preservation_rat0313_set0313_dim3_bins5_2026-04-29_07-57-35.npz
+rat0314,2023_05_22,2023_05_22,/Users/Hannah/Programming/data_eyeblink/tebc_paper/paperdata.mat,/Users/Hannah/Programming/data_eyeblink/geometry_preservation_outputs/geometry_preservation_rat0314_set0314_dim3_bins5_2026-04-29_10-24-36.npz
+rat0816,2022_11_08,2022_11_08,/Users/Hannah/Programming/data_eyeblink/tebc_paper/paperdata.mat,/Users/Hannah/Programming/data_eyeblink/geometry_preservation_outputs/geometry_preservation_rat0816_set0816_dim3_bins5_2026-04-29_09-47-24.npz

@@ -1,11 +1,12 @@
 #!/bin/bash
-#SBATCH --account=p32472
+#SBATCH --account=p32072
 #SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
+#SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --array=0 ## number of jobs to run "in parallel"
-#SBATCH --mem=18GB
+#SBATCH --mem=12GB
 #SBATCH --time=6:00:00
 #SBATCH --job-name="geom_0816_${SLURM_ARRAY_TASK_ID}"
 #SBATCH --output=geometry_preservation_0816.%A_%a.out

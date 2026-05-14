@@ -14,11 +14,16 @@ from cond_geometry_preservation import run_geometry_preservation
 
 parameter_sets = {
     "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
-    "set0307": {"learning_rate": 0.0025, "min_temperature": 1.5, "max_iterations": 30000, "distance": "cosine", "temp_mode": "constant"},
+    "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": "cosine", "temp_mode": "auto"},
-    "set0314": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},
-    "set0816": {"learning_rate": 0.0095, "min_temperature": 1.67, "max_iterations": 16000, "distance": "cosine", "temp_mode": "auto"},
+    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0816": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},
     "test": {"learning_rate": 0.02, "min_temperature": 0.02, "max_iterations": 100, "distance": "cosine", "temp_mode": "auto"},
+
+
+
+
+
 }
 
 
@@ -48,6 +53,18 @@ def filter_pretrial(trace, labels, pretrial_y_or_n):
     return trace[labels != 0], labels[labels != 0]
 
 
+def filter_pretrial_optional_ids(trace, labels, trial_ids, pretrial_y_or_n):
+    if pretrial_y_or_n == 0:
+        mask = labels > 0
+    else:
+        mask = labels != 0
+    if trial_ids is None:
+        return trace[mask], labels[mask], None
+    if len(trial_ids) != len(labels):
+        raise ValueError(f"trial_ids length {len(trial_ids)} does not match label length {len(labels)}.")
+    return trace[mask], labels[mask], np.asarray(trial_ids)[mask]
+
+
 def filter_paired_training_traces(trace_a, trace_b, labels, pretrial_y_or_n):
     if pretrial_y_or_n == 0:
         mask = labels > 0
@@ -74,6 +91,8 @@ parser.add_argument("--output_dir", type=str, default="geometry_preservation_out
 parser.add_argument("--rat_id", type=str, default=None, help="Optional rat/session label for saved outputs and plots.")
 parser.add_argument("--session_id", type=str, default=None, help="Optional session label for saved outputs.")
 parser.add_argument("--random_seed", type=int, default=None, help="Optional random seed for shuffle controls.")
+parser.add_argument("--trial_ids_A1", type=str, default=None, help="Optional trial IDs for traceA1An_A1 samples.")
+parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional trial IDs for traceAnB1_B1 samples.")
 args = parser.parse_args()
 
 
@@ -85,6 +104,8 @@ traceAnB1_B1 = np.transpose(cebra.load_data(file=args.traceAnB1_B1))
 CSUSAn = cebra.load_data(file=args.CSUSAn)[0, :].flatten()
 CSUSA1 = cebra.load_data(file=args.CSUSA1)[0, :].flatten()
 CSUSB1 = cebra.load_data(file=args.CSUSB1)[0, :].flatten()
+trial_ids_A1 = cebra.load_data(file=args.trial_ids_A1).flatten() if args.trial_ids_A1 else None
+trial_ids_B1 = cebra.load_data(file=args.trial_ids_B1).flatten() if args.trial_ids_B1 else None
 
 traceA1An_An, traceAnB1_An, CSUSAn = filter_paired_training_traces(
     traceA1An_An,
@@ -92,8 +113,18 @@ traceA1An_An, traceAnB1_An, CSUSAn = filter_paired_training_traces(
     CSUSAn,
     args.pretrial_y_or_n,
 )
-traceA1An_A1, CSUSA1 = filter_pretrial(traceA1An_A1, CSUSA1, args.pretrial_y_or_n)
-traceAnB1_B1, CSUSB1 = filter_pretrial(traceAnB1_B1, CSUSB1, args.pretrial_y_or_n)
+traceA1An_A1, CSUSA1, trial_ids_A1 = filter_pretrial_optional_ids(
+    traceA1An_A1,
+    CSUSA1,
+    trial_ids_A1,
+    args.pretrial_y_or_n,
+)
+traceAnB1_B1, CSUSB1, trial_ids_B1 = filter_pretrial_optional_ids(
+    traceAnB1_B1,
+    CSUSB1,
+    trial_ids_B1,
+    args.pretrial_y_or_n,
+)
 
 CSUSAn = bin_csus(CSUSAn, args.how_many_divisions)
 CSUSA1 = bin_csus(CSUSA1, args.how_many_divisions)
@@ -120,4 +151,6 @@ run_geometry_preservation(
     rat_id=args.rat_id,
     session_id=args.session_id,
     random_seed=args.random_seed,
+    CSUSA1_trial_ids=trial_ids_A1,
+    CSUSB1_trial_ids=trial_ids_B1,
 )
