@@ -64,6 +64,7 @@ class TrialBinDecodeOptions:
     min_neurons: int = 10
     active_threshold: float = 0.0
     active_use_zscore: bool = False
+    baseline_subtract_raw: bool = False
     include_quantiles: bool = True
     classifier: str = "logreg"
     n_shuffles: int = 500
@@ -168,6 +169,8 @@ def extract_raw_summary_features(session: SessionSpec, opts: TrialBinDecodeOptio
 
     helper_opts = helper_geometry_opts(opts)
     bin_labels_time, bin_edges, bin_names = make_task_bin_labels(aligned_ts, opts.task_scheme, helper_opts)
+    if opts.baseline_subtract_raw:
+        aligned = subtract_trial_neuron_baseline(aligned, aligned_ts, opts.pre_cs_win)
     z_aligned = zscore_neurons_over_task_samples(aligned, np.isfinite(bin_labels_time))
     activity_source = z_aligned if opts.active_use_zscore else aligned
 
@@ -251,6 +254,22 @@ def zscore_neurons_over_task_samples(aligned: np.ndarray, task_time_mask: np.nda
             sigma = 1.0
         out[:, :, neuron_idx] = (out[:, :, neuron_idx] - mu) / sigma
     return out
+
+
+def subtract_trial_neuron_baseline(
+    aligned: np.ndarray,
+    aligned_ts: np.ndarray,
+    baseline_win: Tuple[float, float],
+) -> np.ndarray:
+    """Subtract each trial x neuron's pre-CS mean before population summaries."""
+    baseline_mask = (aligned_ts >= baseline_win[0]) & (aligned_ts < baseline_win[1])
+    if np.sum(baseline_mask) == 0:
+        warnings.warn(
+            f"No baseline samples found in {baseline_win}; raw baseline subtraction was skipped."
+        )
+        return aligned
+    baseline = np.nanmean(aligned[:, baseline_mask, :], axis=1, keepdims=True)
+    return aligned - baseline
 
 
 def extract_cebra_features(session: SessionSpec, opts: TrialBinDecodeOptions) -> Dict[str, Any]:
@@ -864,6 +883,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--min-neurons", type=int, default=10)
     parser.add_argument("--active-threshold", type=float, default=0.0)
     parser.add_argument("--active-use-zscore", action="store_true")
+    parser.add_argument(
+        "--baseline-subtract-raw",
+        action="store_true",
+        help="Subtract each trial x neuron's pre-CS mean before computing population-summary features.",
+    )
     parser.add_argument("--cebra-embedding-key", default=None)
     parser.add_argument("--cebra-label-key", default=None)
     parser.add_argument("--cebra-bin-vectors-key", default=None)
@@ -889,6 +913,7 @@ def main() -> None:
         min_neurons=args.min_neurons,
         active_threshold=args.active_threshold,
         active_use_zscore=args.active_use_zscore,
+        baseline_subtract_raw=args.baseline_subtract_raw,
         output_dir=args.output_dir,
         cebra_embedding_key=args.cebra_embedding_key,
         cebra_label_key=args.cebra_label_key,
