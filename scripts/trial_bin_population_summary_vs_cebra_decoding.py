@@ -11,7 +11,8 @@ Raw calcium is collapsed across neurons into neuron-identity-free features:
 CEBRA is represented as latent samples with CSUS5 labels. For sample-level
 embeddings_and_labels.npz files, samples are embedding rows. For pre-binned
 geometry NPZ files such as zB_runs, each independent run x task bin is treated
-as one labeled latent sample.
+as one labeled latent sample. If an external cross-rat CEBRA decoder summary is
+provided, those real decoder results are used instead of re-decoding local NPZs.
 
 The central test is cross-animal decoding on matched ordered session pairs:
     train session A -> test session B, where A and B are different animals.
@@ -71,6 +72,9 @@ class TrialBinDecodeOptions:
     cebra_embedding_key: Optional[str] = None
     cebra_label_key: Optional[str] = None
     cebra_bin_vectors_key: Optional[str] = None
+    cebra_decoder_summary_csv: Optional[Path] = None
+    cebra_decoder_task_scheme: str = "CSUS5"
+    cebra_decoder_dim: int = 3
     run_within_session_cv: bool = True
 
 
@@ -95,18 +99,26 @@ def run_trial_bin_population_summary_vs_cebra_decoding(
             raw_sessions.append(extract_raw_summary_features(session, opts))
         except Exception as exc:
             warnings.warn(f"{session.key}: raw-summary feature extraction failed ({exc}); skipping.")
-        try:
-            cebra_sessions.append(extract_cebra_features(session, opts))
-        except Exception as exc:
-            warnings.warn(f"{session.key}: CEBRA feature extraction failed ({exc}); skipping.")
+        if opts.cebra_decoder_summary_csv is None:
+            try:
+                cebra_sessions.append(extract_cebra_features(session, opts))
+            except Exception as exc:
+                warnings.warn(f"{session.key}: CEBRA feature extraction failed ({exc}); skipping.")
 
-    shared = sorted(set(s["session_key"] for s in raw_sessions) & set(s["session_key"] for s in cebra_sessions))
-    raw_sessions = sorted([s for s in raw_sessions if s["session_key"] in shared], key=lambda s: s["session_key"])
-    cebra_sessions = sorted([s for s in cebra_sessions if s["session_key"] in shared], key=lambda s: s["session_key"])
+    if opts.cebra_decoder_summary_csv is None:
+        shared = sorted(set(s["session_key"] for s in raw_sessions) & set(s["session_key"] for s in cebra_sessions))
+        raw_sessions = sorted([s for s in raw_sessions if s["session_key"] in shared], key=lambda s: s["session_key"])
+        cebra_sessions = sorted([s for s in cebra_sessions if s["session_key"] in shared], key=lambda s: s["session_key"])
+    else:
+        shared = sorted(s["session_key"] for s in raw_sessions)
+        raw_sessions = sorted(raw_sessions, key=lambda s: s["session_key"])
 
     ordered_pairs = build_ordered_session_pairs(raw_sessions)
     raw_decode = decode_ordered_pairs(raw_sessions, ordered_pairs, opts, rng, feature_family="raw_summary")
-    cebra_decode = decode_ordered_pairs(cebra_sessions, ordered_pairs, opts, rng, feature_family="cebra")
+    if opts.cebra_decoder_summary_csv is None:
+        cebra_decode = decode_ordered_pairs(cebra_sessions, ordered_pairs, opts, rng, feature_family="cebra")
+    else:
+        cebra_decode = load_real_cebra_decoder_summary(opts.cebra_decoder_summary_csv, ordered_pairs, opts)
     session_similarity = compute_session_trace_and_distribution_similarity(raw_sessions, ordered_pairs, opts, rng)
     within_session = compute_within_session_controls(raw_sessions, cebra_sessions, opts) if opts.run_within_session_cv else []
     stats = paired_decode_statistics(raw_decode, cebra_decode)
@@ -374,6 +386,96 @@ def decode_ordered_pairs(
     return rows
 
 
+def load_real_cebra_decoder_summary(
+    summary_csv: Path,
+    ordered_pairs: Sequence[Mapping[str, str]],
+    opts: TrialBinDecodeOptions,
+) -> List[Dict[str, Any]]:
+    """Load real source-rat -> target-rat CEBRA decoder results.
+
+    These results come from the dedicated cross-rat latent decoder pipeline.
+    They are rat-pair summaries, so they are matched to the raw-summary decoder
+    by source rat and target rat. This keeps the comparison honest: the raw side
+    is still a neuron-identity-free population-summary decoder, while the CEBRA
+    side uses the real cross-animal latent decoder output.
+    """
+    if not summary_csv.exists():
+        raise FileNotFoundError(summary_csv)
+
+    by_rat_pair: Dict[Tuple[str, str], Dict[str, str]] = {}
+    with summary_csv.open("r", newline="") as handle:
+        reader = csv.DictReader(handle)
+        for row in reader:
+            if row.get("row_type") != "pair":
+                continue
+            if row.get("task_scheme") != opts.cebra_decoder_task_scheme:
+                continue
+            if int(float(row.get("dim", "nan"))) != int(opts.cebra_decoder_dim):
+                continue
+            if string_to_bool(row.get("is_diagonal")):
+                continue
+            by_rat_pair[(row["train_rat"], row["test_rat"])] = row
+
+    rows: List[Dict[str, Any]] = []
+    missing: List[Tuple[str, str]] = []
+    for pair in ordered_pairs:
+        rat_pair = (pair["train_animal"], pair["test_animal"])
+        source = by_rat_pair.get(rat_pair)
+        if source is None:
+            missing.append(rat_pair)
+            continue
+
+        shuffle_accuracy_std = sem_to_sd(source.get("shuffle_accuracy_sem"), source.get("n_shuffle_observations"))
+        shuffle_balanced_std = sem_to_sd(source.get("shuffle_balanced_accuracy_sem"), source.get("n_shuffle_observations"))
+        accuracy = parse_float(source.get("real_accuracy_mean"))
+        balanced_accuracy = parse_float(source.get("real_balanced_accuracy_mean"))
+        shuffle_accuracy_mean = parse_float(source.get("shuffle_accuracy_mean"))
+        shuffle_balanced_mean = parse_float(source.get("shuffle_balanced_accuracy_mean"))
+
+        rows.append(
+            {
+                **pair,
+                "feature_family": "cebra_real_decoder",
+                "accuracy": accuracy,
+                "balanced_accuracy": balanced_accuracy,
+                "shuffle_accuracy_mean": shuffle_accuracy_mean,
+                "shuffle_accuracy_std": shuffle_accuracy_std,
+                "shuffle_balanced_accuracy_mean": shuffle_balanced_mean,
+                "shuffle_balanced_accuracy_std": shuffle_balanced_std,
+                "accuracy_effect_over_shuffle": safe_effect_from_summary(
+                    accuracy, shuffle_accuracy_mean, shuffle_accuracy_std
+                ),
+                "balanced_accuracy_effect_over_shuffle": safe_effect_from_summary(
+                    balanced_accuracy, shuffle_balanced_mean, shuffle_balanced_std
+                ),
+                "accuracy_shuffle_p": np.nan,
+                "balanced_accuracy_shuffle_p": np.nan,
+                "cebra_decoder_source_csv": str(summary_csv),
+                "cebra_decoder_task_scheme": opts.cebra_decoder_task_scheme,
+                "cebra_decoder_dim": opts.cebra_decoder_dim,
+                "cebra_decoder_n_real_observations": parse_float(source.get("n_real_observations")),
+                "cebra_decoder_n_shuffle_observations": parse_float(source.get("n_shuffle_observations")),
+            }
+        )
+
+    if missing:
+        warnings.warn(
+            "Missing CEBRA decoder summary rows for rat pairs: "
+            + ", ".join(f"{a}->{b}" for a, b in missing[:10])
+            + (" ..." if len(missing) > 10 else "")
+        )
+    if not rows:
+        raise ValueError(
+            f"No matching CEBRA decoder rows found in {summary_csv} for "
+            f"{opts.cebra_decoder_task_scheme} dim {opts.cebra_decoder_dim}."
+        )
+    print(
+        f"  Loaded real CEBRA decoder summary: {len(rows)} ordered pairs "
+        f"({opts.cebra_decoder_task_scheme}, dim={opts.cebra_decoder_dim})"
+    )
+    return rows
+
+
 def fit_predict_accuracy(X_train: np.ndarray, y_train: np.ndarray, X_test: np.ndarray, y_test: np.ndarray, opts: TrialBinDecodeOptions) -> Tuple[float, float]:
     clf = classifier_factory(opts)
     clf.fit(X_train, y_train)
@@ -529,6 +631,33 @@ def safe_pearson(a: np.ndarray, b: np.ndarray) -> float:
     return float(pearsonr(a[valid], b[valid]).statistic)
 
 
+def parse_float(value: Any) -> float:
+    try:
+        if value is None or value == "":
+            return np.nan
+        return float(value)
+    except (TypeError, ValueError):
+        return np.nan
+
+
+def string_to_bool(value: Any) -> bool:
+    return str(value).strip().lower() in {"true", "1", "yes"}
+
+
+def sem_to_sd(sem_value: Any, n_value: Any) -> float:
+    sem_float = parse_float(sem_value)
+    n_float = parse_float(n_value)
+    if not np.isfinite(sem_float) or not np.isfinite(n_float) or n_float <= 0:
+        return np.nan
+    return float(sem_float * math.sqrt(n_float))
+
+
+def safe_effect_from_summary(real: float, shuffle_mean: float, shuffle_sd: float) -> float:
+    if not np.isfinite(real) or not np.isfinite(shuffle_mean) or not np.isfinite(shuffle_sd) or shuffle_sd == 0:
+        return np.nan
+    return float((real - shuffle_mean) / shuffle_sd)
+
+
 def effect_over_shuffle(real: float, shuffle_values: np.ndarray) -> float:
     shuffle_values = np.asarray(shuffle_values, dtype=float)
     shuffle_values = shuffle_values[np.isfinite(shuffle_values)]
@@ -632,7 +761,11 @@ def plot_trial_bin_decoding_results(results: Mapping[str, Any], opts: TrialBinDe
     ax_f = fig.add_subplot(gs[1, 2])
     plot_trial_distribution_similarity(ax_f, results["session_similarity"])
 
-    fig.suptitle("Single-trial population-summary calcium features vs CEBRA latent features", fontsize=13)
+    if opts.cebra_decoder_summary_csv is None:
+        title = "Single-trial population-summary calcium features vs CEBRA latent features"
+    else:
+        title = "Single-trial population-summary calcium features vs real cross-rat CEBRA decoder"
+    fig.suptitle(title, fontsize=13)
     fig.savefig(opts.output_dir / "trial_bin_population_summary_vs_cebra_decoding_figure.png", dpi=300)
     fig.savefig(opts.output_dir / "trial_bin_population_summary_vs_cebra_decoding_figure.svg")
     plt.close(fig)
@@ -676,10 +809,13 @@ def plot_cross_animal_decoding(
     shared = sorted(set(raw_by_pair) & set(cebra_by_pair))
     raw = np.asarray([raw_by_pair[p][metric] for p in shared], dtype=float)
     cebra = np.asarray([cebra_by_pair[p][metric] for p in shared], dtype=float)
+    cebra_label = "CEBRA latent features"
+    if cebra_rows and cebra_rows[0].get("feature_family") == "cebra_real_decoder":
+        cebra_label = "CEBRA latent decoder"
     for rv, cv in zip(raw, cebra):
         ax.plot([0, 1], [rv, cv], color="0.75", linewidth=0.7, zorder=0)
     ax.scatter(np.zeros_like(raw), raw, color="#4C78A8", edgecolor="white", linewidth=0.4, s=22, label="Population-summary calcium features")
-    ax.scatter(np.ones_like(cebra), cebra, color="#E45756", edgecolor="white", linewidth=0.4, s=22, label="CEBRA latent features")
+    ax.scatter(np.ones_like(cebra), cebra, color="#E45756", edgecolor="white", linewidth=0.4, s=22, label=cebra_label)
     ax.errorbar([0, 1], [np.nanmean(raw), np.nanmean(cebra)], yerr=[sem(raw), sem(cebra)], fmt="ks", capsize=4, markersize=5)
     if chance_line:
         ax.axhline(0.20, color="0.45", linestyle="--", linewidth=1)
@@ -731,6 +867,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--cebra-embedding-key", default=None)
     parser.add_argument("--cebra-label-key", default=None)
     parser.add_argument("--cebra-bin-vectors-key", default=None)
+    parser.add_argument(
+        "--cebra-decoder-summary-csv",
+        type=Path,
+        default=None,
+        help="Optional real cross-rat CEBRA decoder summary CSV. When provided, this replaces local CEBRA NPZ decoding.",
+    )
+    parser.add_argument("--cebra-decoder-task-scheme", default="CSUS5")
+    parser.add_argument("--cebra-decoder-dim", type=int, default=3)
     parser.add_argument("--skip-within-session-cv", action="store_true")
     return parser.parse_args()
 
@@ -749,6 +893,9 @@ def main() -> None:
         cebra_embedding_key=args.cebra_embedding_key,
         cebra_label_key=args.cebra_label_key,
         cebra_bin_vectors_key=args.cebra_bin_vectors_key,
+        cebra_decoder_summary_csv=args.cebra_decoder_summary_csv,
+        cebra_decoder_task_scheme=args.cebra_decoder_task_scheme,
+        cebra_decoder_dim=args.cebra_decoder_dim,
         run_within_session_cv=not args.skip_within_session_cv,
     )
     sessions = load_sessions_csv(args.session_csv)
