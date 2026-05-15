@@ -994,6 +994,27 @@ def save_mat_compatible_output(results: pd.DataFrame, summary: pd.DataFrame, out
     savemat(output_path, mat_dict, do_compression=True)
 
 
+def write_decoding_tables(
+    results: pd.DataFrame,
+    summary: pd.DataFrame,
+    confusions: Mapping[str, np.ndarray],
+    output_dir: str,
+    save_mat: bool = True,
+    write_checkpoint_marker: bool = False,
+) -> None:
+    results_path = os.path.join(output_dir, "cross_rat_decoding_results.csv")
+    summary_path = os.path.join(output_dir, "cross_rat_decoding_summary.csv")
+    confusion_path = os.path.join(output_dir, "confusion_matrices.npz")
+    results.to_csv(results_path, index=False)
+    summary.to_csv(summary_path, index=False)
+    np.savez_compressed(confusion_path, **confusions)
+    if save_mat:
+        save_mat_compatible_output(results, summary, os.path.join(output_dir, "cross_rat_decoding_results.mat"))
+    if write_checkpoint_marker:
+        with open(os.path.join(output_dir, "checkpoint_status.txt"), "w", encoding="utf-8") as handle:
+            handle.write("Partial checkpoint written during run. Final SVG plots are written after the full run completes.\n")
+
+
 def run_all_cross_rat_decoding(
     data: Mapping[str, Mapping[str, Mapping[int, Mapping[str, Any]]]],
     output_dir: str,
@@ -1005,6 +1026,8 @@ def run_all_cross_rat_decoding(
     random_state: int = 0,
     shuffle_test_labels: bool = False,
     allow_scale: bool = False,
+    include_diagonal: bool = False,
+    checkpoint: bool = True,
     save_mat: bool = True,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     os.makedirs(output_dir, exist_ok=True)
@@ -1026,6 +1049,8 @@ def run_all_cross_rat_decoding(
 
             for train_rat in available_rats:
                 for test_rat in available_rats:
+                    if train_rat == test_rat and not include_diagonal:
+                        continue
                     train_entry = data[train_rat][task_scheme][dim]
                     test_entry = data[test_rat][task_scheme][dim]
                     train_runs = train_entry.get("embedding_runs")
@@ -1062,19 +1087,22 @@ def run_all_cross_rat_decoding(
                         )
                         all_results.append(pair_results)
                         all_confusions.update(pair_confusions)
+                    if checkpoint and all_results:
+                        checkpoint_results = pd.concat(all_results, ignore_index=True)
+                        checkpoint_summary = summarize_results(checkpoint_results)
+                        write_decoding_tables(
+                            checkpoint_results,
+                            checkpoint_summary,
+                            all_confusions,
+                            output_dir,
+                            save_mat=save_mat,
+                            write_checkpoint_marker=True,
+                        )
 
     results = pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame()
     summary = summarize_results(results)
 
-    results_path = os.path.join(output_dir, "cross_rat_decoding_results.csv")
-    summary_path = os.path.join(output_dir, "cross_rat_decoding_summary.csv")
-    confusion_path = os.path.join(output_dir, "confusion_matrices.npz")
-    results.to_csv(results_path, index=False)
-    summary.to_csv(summary_path, index=False)
-    np.savez_compressed(confusion_path, **all_confusions)
-
-    if save_mat:
-        save_mat_compatible_output(results, summary, os.path.join(output_dir, "cross_rat_decoding_results.mat"))
+    write_decoding_tables(results, summary, all_confusions, output_dir, save_mat=save_mat)
 
     for task_scheme in task_schemes:
         for dim in dims:
@@ -1146,6 +1174,8 @@ def main() -> None:
     parser.add_argument("--npz_environment", choices=["A", "B"], default="A", help="For enhanced geometry .npz files, use A or B per-sample embeddings.")
     parser.add_argument("--shuffle_test_labels", action="store_true", help="Also shuffle test labels before scoring shuffle controls.")
     parser.add_argument("--allow_scale", action="store_true", help="Allow isotropic scaling after orthogonal Procrustes rotation.")
+    parser.add_argument("--include_diagonal", action="store_true", help="Also run train rat == test rat within-rat control entries.")
+    parser.add_argument("--no_checkpoint", action="store_true", help="Only write CSV/NPZ/MAT outputs after the full run completes.")
     parser.add_argument("--no_mat", action="store_true", help="Skip MAT-compatible output.")
     args = parser.parse_args()
 
@@ -1186,6 +1216,8 @@ def main() -> None:
         random_state=args.random_state,
         shuffle_test_labels=args.shuffle_test_labels,
         allow_scale=args.allow_scale,
+        include_diagonal=args.include_diagonal,
+        checkpoint=not args.no_checkpoint,
         save_mat=not args.no_mat,
     )
 
