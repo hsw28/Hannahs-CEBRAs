@@ -380,6 +380,8 @@ def cross_rat_latent_decode(
     random_state: int = 0,
     train_rat: str = "train",
     test_rat: str = "test",
+    train_environment: str = "",
+    test_environment: str = "",
     task_scheme: str = "",
     dim: Optional[int] = None,
     model_run: Optional[int] = None,
@@ -472,6 +474,8 @@ def cross_rat_latent_decode(
             {
                 "train_rat": train_rat,
                 "test_rat": test_rat,
+                "train_environment": train_environment,
+                "test_environment": test_environment,
                 "is_diagonal": train_rat == test_rat,
                 "split_number": split_idx,
                 "model_run": model_run,
@@ -525,6 +529,8 @@ def cross_rat_latent_decode(
                 {
                     "train_rat": train_rat,
                     "test_rat": test_rat,
+                    "train_environment": train_environment,
+                    "test_environment": test_environment,
                     "is_diagonal": train_rat == test_rat,
                     "split_number": split_idx,
                     "model_run": model_run,
@@ -791,6 +797,11 @@ def summarize_results(results: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame(rows)
 
     group_cols = ["task_scheme", "dim", "train_rat", "test_rat", "is_diagonal"]
+    if "train_environment" in results.columns:
+        group_cols.insert(2, "train_environment")
+    if "test_environment" in results.columns:
+        insert_at = 3 if "train_environment" in group_cols else 2
+        group_cols.insert(insert_at, "test_environment")
     real = results[results["performance_type"] == "real"]
     shuffle = results[results["performance_type"] != "real"]
     real_pair = real.groupby(group_cols, dropna=False).agg(
@@ -1020,6 +1031,7 @@ def run_all_cross_rat_decoding(
     output_dir: str,
     task_schemes: Sequence[str],
     dims: Sequence[int],
+    test_data: Optional[Mapping[str, Mapping[str, Mapping[int, Mapping[str, Any]]]]] = None,
     decoder: str = "logreg",
     n_splits: int = 20,
     n_shuffles: int = 100,
@@ -1029,30 +1041,40 @@ def run_all_cross_rat_decoding(
     include_diagonal: bool = False,
     checkpoint: bool = True,
     save_mat: bool = True,
+    train_environment: str = "",
+    test_environment: str = "",
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_state)
     all_results: List[pd.DataFrame] = []
     all_confusions: Dict[str, np.ndarray] = {}
     rats = sorted(data.keys())
+    if test_data is None:
+        test_data = data
+    test_rats = sorted(test_data.keys())
 
     for task_scheme in task_schemes:
         for dim in dims:
-            available_rats = [
+            available_train_rats = [
                 rat
                 for rat in rats
                 if task_scheme in data.get(rat, {}) and dim in data[rat].get(task_scheme, {})
             ]
-            if len(available_rats) < 2:
+            available_test_rats = [
+                rat
+                for rat in test_rats
+                if task_scheme in test_data.get(rat, {}) and dim in test_data[rat].get(task_scheme, {})
+            ]
+            if len(available_train_rats) < 1 or len(available_test_rats) < 1:
                 print(f"WARNING: Skipping {task_scheme} dim {dim}; fewer than two rats have usable entries.")
                 continue
 
-            for train_rat in available_rats:
-                for test_rat in available_rats:
+            for train_rat in available_train_rats:
+                for test_rat in available_test_rats:
                     if train_rat == test_rat and not include_diagonal:
                         continue
                     train_entry = data[train_rat][task_scheme][dim]
-                    test_entry = data[test_rat][task_scheme][dim]
+                    test_entry = test_data[test_rat][task_scheme][dim]
                     train_runs = train_entry.get("embedding_runs")
                     test_runs = test_entry.get("embedding_runs")
                     if train_runs is None:
@@ -1079,6 +1101,8 @@ def run_all_cross_rat_decoding(
                             random_state=pair_seed,
                             train_rat=train_rat,
                             test_rat=test_rat,
+                            train_environment=train_environment,
+                            test_environment=test_environment,
                             task_scheme=task_scheme,
                             dim=dim,
                             model_run=model_run,
@@ -1146,6 +1170,68 @@ def run_all_cross_rat_decoding(
     return results, summary
 
 
+def run_npz_comparison_set(
+    input_dir: str,
+    output_dir: str,
+    task_schemes: Sequence[str],
+    dims: Sequence[int],
+    comparisons: Sequence[str],
+    file_pattern: str = "*.npz",
+    **run_kwargs: Any,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    all_results = []
+    all_summaries = []
+    for comparison in comparisons:
+        if "-" not in comparison:
+            raise ValueError(f"NPZ comparison must look like A-A, B-B, or A-B; got {comparison}.")
+        train_env, test_env = [part.strip().upper() for part in comparison.split("-", 1)]
+        if train_env not in {"A", "B"} or test_env not in {"A", "B"}:
+            raise ValueError(f"NPZ comparison must use A/B environments; got {comparison}.")
+
+        comparison_output_dir = os.path.join(output_dir, f"{train_env}_to_{test_env}")
+        train_data = load_cross_rat_data_from_npz(
+            input_dir,
+            task_schemes=task_schemes,
+            dims=dims,
+            file_pattern=file_pattern,
+            environment=train_env,
+        )
+        if test_env == train_env:
+            test_data = train_data
+        else:
+            test_data = load_cross_rat_data_from_npz(
+                input_dir,
+                task_schemes=task_schemes,
+                dims=dims,
+                file_pattern=file_pattern,
+                environment=test_env,
+            )
+
+        results, summary = run_all_cross_rat_decoding(
+            train_data,
+            output_dir=comparison_output_dir,
+            task_schemes=task_schemes,
+            dims=dims,
+            test_data=test_data,
+            train_environment=train_env,
+            test_environment=test_env,
+            **run_kwargs,
+        )
+        if not results.empty:
+            results["comparison"] = f"{train_env}_to_{test_env}"
+            all_results.append(results)
+        if not summary.empty:
+            summary["comparison"] = f"{train_env}_to_{test_env}"
+            all_summaries.append(summary)
+
+    combined_results = pd.concat(all_results, ignore_index=True) if all_results else pd.DataFrame()
+    combined_summary = pd.concat(all_summaries, ignore_index=True) if all_summaries else pd.DataFrame()
+    os.makedirs(output_dir, exist_ok=True)
+    combined_results.to_csv(os.path.join(output_dir, "combined_cross_rat_decoding_results.csv"), index=False)
+    combined_summary.to_csv(os.path.join(output_dir, "combined_cross_rat_decoding_summary.csv"), index=False)
+    return combined_results, combined_summary
+
+
 def parse_csv_list(values: str, cast=str) -> List[Any]:
     return [cast(item.strip()) for item in values.split(",") if item.strip()]
 
@@ -1171,7 +1257,10 @@ def main() -> None:
     parser.add_argument("--label_key", default="labels", help="Preferred .mat key for task labels.")
     parser.add_argument("--trial_key", default="trial_ids", help="Preferred .mat key for trial IDs.")
     parser.add_argument("--file_pattern", default=None, help="Glob pattern inside input_dir. Defaults to *.mat or *.npz.")
-    parser.add_argument("--npz_environment", choices=["A", "B"], default="A", help="For enhanced geometry .npz files, use A or B per-sample embeddings.")
+    parser.add_argument("--npz_environment", choices=["A", "B"], default="A", help="For enhanced geometry .npz files, use A or B per-sample embeddings for both train and test.")
+    parser.add_argument("--train_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, train decoder from this environment.")
+    parser.add_argument("--test_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, test decoder on this environment.")
+    parser.add_argument("--npz_comparisons", default=None, help="Comma-separated NPZ environment comparisons, e.g. A-A,B-B,A-B. Writes one subdirectory per comparison.")
     parser.add_argument("--shuffle_test_labels", action="store_true", help="Also shuffle test labels before scoring shuffle controls.")
     parser.add_argument("--allow_scale", action="store_true", help="Allow isotropic scaling after orthogonal Procrustes rotation.")
     parser.add_argument("--include_diagonal", action="store_true", help="Also run train rat == test rat within-rat control entries.")
@@ -1187,15 +1276,52 @@ def main() -> None:
         has_mat = bool(glob(os.path.join(args.input_dir, args.file_pattern or "*.mat")))
         input_format = "npz" if has_npz else "mat" if has_mat else "mat"
 
+    if input_format == "npz" and args.npz_comparisons:
+        comparisons = parse_csv_list(args.npz_comparisons, str)
+        results, summary = run_npz_comparison_set(
+            args.input_dir,
+            output_dir=args.output_dir,
+            task_schemes=task_schemes,
+            dims=dims,
+            comparisons=comparisons,
+            file_pattern=args.file_pattern or "*.npz",
+            decoder=args.decoder,
+            n_splits=args.n_splits,
+            n_shuffles=args.n_shuffles,
+            random_state=args.random_state,
+            shuffle_test_labels=args.shuffle_test_labels,
+            allow_scale=args.allow_scale,
+            include_diagonal=args.include_diagonal,
+            checkpoint=not args.no_checkpoint,
+            save_mat=not args.no_mat,
+        )
+        print(f"Saved combined results to {os.path.join(args.output_dir, 'combined_cross_rat_decoding_results.csv')}")
+        print(f"Saved combined summary to {os.path.join(args.output_dir, 'combined_cross_rat_decoding_summary.csv')}")
+        return
+
     if input_format == "npz":
+        train_env = args.train_npz_environment or args.npz_environment
+        test_env = args.test_npz_environment or args.npz_environment
         data = load_cross_rat_data_from_npz(
             args.input_dir,
             task_schemes=task_schemes,
             dims=dims,
             file_pattern=args.file_pattern or "*.npz",
-            environment=args.npz_environment,
+            environment=train_env,
         )
+        if test_env == train_env:
+            test_data = data
+        else:
+            test_data = load_cross_rat_data_from_npz(
+                args.input_dir,
+                task_schemes=task_schemes,
+                dims=dims,
+                file_pattern=args.file_pattern or "*.npz",
+                environment=test_env,
+            )
     else:
+        train_env = ""
+        test_env = ""
         data = load_cross_rat_data_from_mat(
             args.input_dir,
             task_schemes=task_schemes,
@@ -1205,11 +1331,13 @@ def main() -> None:
             trial_key=args.trial_key,
             file_pattern=args.file_pattern or "*.mat",
         )
+        test_data = data
     results, summary = run_all_cross_rat_decoding(
         data,
         output_dir=args.output_dir,
         task_schemes=task_schemes,
         dims=dims,
+        test_data=test_data,
         decoder=args.decoder,
         n_splits=args.n_splits,
         n_shuffles=args.n_shuffles,
@@ -1219,6 +1347,8 @@ def main() -> None:
         include_diagonal=args.include_diagonal,
         checkpoint=not args.no_checkpoint,
         save_mat=not args.no_mat,
+        train_environment=train_env,
+        test_environment=test_env,
     )
 
     print(f"Saved results to {os.path.join(args.output_dir, 'cross_rat_decoding_results.csv')}")
