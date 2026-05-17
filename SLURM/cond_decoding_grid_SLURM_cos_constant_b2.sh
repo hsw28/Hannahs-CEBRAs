@@ -31,7 +31,7 @@ export PYTHONUNBUFFERED=1
 #python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_cos_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate .001,0.0025,.005,.0075 --min_temperature .75,1.25,1.75,2.25,2.75,3 --max_iterations 12000,17000,21000,25000,30000,35000,40000
 
 #python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_cos_constant.py ./traceAnB1_An.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkB1.mat 2 0 --learning_rate .00175,.002,.0025,.003,.0035,.004 --min_temperature 3.75,4,4.25,4.5 --max_iterations 70000,77000,84000,88000
-python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_constant_b2.py ./traceAnB1_An.mat ./traceAnB2_B2.mat ./eyeblinkAn.mat ./eyeblinkB2.mat 2 0 --learning_rate .002,.004,.006,.008  --min_temperature 1.67,2.33,2.66,3 --max_iterations 20000,40000,60000,80000
+python -u /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_decoding_AvsB_grid_euc_constant_b2.py ./traceAnB2_An.mat ./traceAnB2_B2.mat ./eyeblinkAn.mat ./eyeblinkB2.mat 2 0 --learning_rate .002,.004,.006,.008  --min_temperature 1.67,2.33,2.66,3 --max_iterations 20000,40000,60000,80000
 
 
 
