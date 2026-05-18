@@ -34,15 +34,11 @@ parameter_sets = parameter_sets = {
     ## pre may 18 2026 "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
     "set0222b": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
 
-    "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
-
-    "set0307b": {"learning_rate": 0.0025, "min_temperature": 4.25, "max_iterations": 63000, "distance": 'cosine', "temp_mode": 'constant'},
+    ## no "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
 
     "set0307c": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": 'euclidean', "temp_mode": 'constant'}, #yes
 
     "set0307d": {"learning_rate": 0.0045, "min_temperature": 3.5, "max_iterations": 77000, "distance": 'euclidean', "temp_mode": 'constant'},
-
-    "set0307e": {"learning_rate": 0.004, "min_temperature": 2.75, "max_iterations": 105000, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0307f": {"learning_rate": 0.006, "min_temperature": 3, "max_iterations": 60000, "distance": 'cosine', "temp_mode": 'constant'},
 
