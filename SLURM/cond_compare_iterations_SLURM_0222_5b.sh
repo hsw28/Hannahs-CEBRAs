@@ -5,9 +5,9 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0 ## number of jobs to run "in parallel"
+#SBATCH --array=0-8%3 ## number of jobs to run "in parallel"
 #SBATCH --mem=8GB
-#SBATCH --time=32:00:00
+#SBATCH --time=33:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
 #SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
 #SBATCH --mail-type=BEGIN,END,FAIL
