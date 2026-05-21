@@ -144,10 +144,31 @@ def set_equal_2d_limits(ax, points):
     ax.spines["right"].set_visible(False)
 
 
-def plot_one_rat(ax, subset, rat_id):
+def set_equal_3d_limits(ax, points):
+    mins = np.nanmin(points, axis=0)
+    maxs = np.nanmax(points, axis=0)
+    centers = (mins + maxs) / 2.0
+    radius = np.nanmax(maxs - mins) / 2.0
+    if not np.isfinite(radius) or radius == 0:
+        radius = 1.0
+    ax.set_xlim(centers[0] - radius, centers[0] + radius)
+    ax.set_ylim(centers[1] - radius, centers[1] + radius)
+    ax.set_zlim(centers[2] - radius, centers[2] + radius)
+    ax.set_box_aspect((1, 1, 1))
+    ax.grid(True, color="#dddddd", linewidth=0.6, alpha=0.55)
+    for axis in [ax.xaxis, ax.yaxis, ax.zaxis]:
+        axis.pane.set_facecolor((1, 1, 1, 0.0))
+        axis.pane.set_edgecolor("#eeeeee")
+
+
+def get_rat_trajectories(subset):
     a = subset[subset["environment"] == "A_reference"].sort_values("task_bin")
     b = subset[subset["environment"] == "B_procrustes_to_A"].sort_values("task_bin")
+    return a, b
 
+
+def plot_one_rat_2d(ax, subset, rat_id):
+    a, b = get_rat_trajectories(subset)
     for idx, (_, a_row) in enumerate(a.iterrows()):
         b_row = b[b["task_bin"] == a_row["task_bin"]]
         if b_row.empty:
@@ -222,22 +243,131 @@ def plot_one_rat(ax, subset, rat_id):
     ax.legend(ordered_handles, ordered_labels, frameon=False, fontsize=8, loc="best")
 
 
+def plot_one_rat_3d(ax, subset, rat_id):
+    a, b = get_rat_trajectories(subset)
+
+    for idx, (_, a_row) in enumerate(a.iterrows()):
+        b_row = b[b["task_bin"] == a_row["task_bin"]]
+        if b_row.empty:
+            continue
+        b_row = b_row.iloc[0]
+        ax.plot(
+            [a_row["x"], b_row["x"]],
+            [a_row["y"], b_row["y"]],
+            [a_row["z"], b_row["z"]],
+            color="#c7c7c7",
+            linewidth=0.8,
+            alpha=0.75,
+            label="matched task bins" if idx == 0 else None,
+        )
+
+    ax.plot(
+        a["x"],
+        a["y"],
+        a["z"],
+        color="#2563eb",
+        marker="o",
+        linestyle="-",
+        linewidth=3.0,
+        markersize=6.8,
+        markerfacecolor="#2563eb",
+        markeredgecolor="#2563eb",
+        label="A",
+    )
+    ax.plot(
+        b["x"],
+        b["y"],
+        b["z"],
+        color="#c2410c",
+        marker="o",
+        linestyle="--",
+        linewidth=3.0,
+        markersize=6.8,
+        markerfacecolor="white",
+        markeredgecolor="#c2410c",
+        markeredgewidth=1.7,
+        label="B aligned to A",
+    )
+
+    for _, row in a.iterrows():
+        ax.text(row["x"], row["y"], row["z"], f" {row['task_bin']:g}", color="#111111", fontsize=8)
+
+    if len(a) >= 2:
+        start = a.iloc[0]
+        prev = a.iloc[-2]
+        end = a.iloc[-1]
+        ax.text(start["x"], start["y"], start["z"], " start", fontsize=8, color="#111111")
+        ax.text(end["x"], end["y"], end["z"], " end", fontsize=8, color="#111111")
+        ax.quiver(
+            prev["x"],
+            prev["y"],
+            prev["z"],
+            end["x"] - prev["x"],
+            end["y"] - prev["y"],
+            end["z"] - prev["z"],
+            color="#111111",
+            linewidth=1.3,
+            arrow_length_ratio=0.25,
+            length=1.0,
+            normalize=False,
+        )
+
+    points = pd.concat([a[["x", "y", "z"]], b[["x", "y", "z"]]]).to_numpy(dtype=float)
+    set_equal_3d_limits(ax, points)
+    ax.view_init(elev=22, azim=-58)
+    ax.set_title(f"Representative within-rat Procrustes alignment\n{rat_id}")
+    ax.set_xlabel("Dim 1")
+    ax.set_ylabel("Dim 2")
+    ax.set_zlabel("Dim 3")
+    handles, labels = ax.get_legend_handles_labels()
+    order = ["A", "B aligned to A", "matched task bins"]
+    ordered_handles = []
+    ordered_labels = []
+    for wanted in order:
+        for handle, label in zip(handles, labels):
+            if label == wanted:
+                ordered_handles.append(handle)
+                ordered_labels.append(label)
+                break
+    ax.legend(ordered_handles, ordered_labels, frameon=False, fontsize=8, loc="best")
+
+
 def save_individual_plots(aligned, output_dir, timestamp):
     paths = []
     for rat_id in pd.unique(aligned["rat_id"]):
         subset = aligned[aligned["rat_id"] == rat_id]
+
         fig = plt.figure(figsize=(5.4, 4.8))
         ax = fig.add_subplot(111)
-        plot_one_rat(ax, subset, rat_id)
+        plot_one_rat_2d(ax, subset, rat_id)
         fig.tight_layout()
-        svg_path = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.svg")
-        png_path = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.png")
-        pdf_path = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.pdf")
-        fig.savefig(svg_path, bbox_inches="tight")
-        fig.savefig(png_path, dpi=300, bbox_inches="tight")
-        fig.savefig(pdf_path, bbox_inches="tight")
+        svg_2d = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.svg")
+        png_2d = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.png")
+        pdf_2d = os.path.join(output_dir, f"within_rat_procrustes_2d_{rat_id}_{timestamp}.pdf")
+        fig.savefig(svg_2d, bbox_inches="tight")
+        fig.savefig(png_2d, dpi=300, bbox_inches="tight")
+        fig.savefig(pdf_2d, bbox_inches="tight")
         plt.close(fig)
-        paths.append((svg_path, png_path, pdf_path))
+
+        fig = plt.figure(figsize=(5.8, 5.2))
+        ax = fig.add_subplot(111, projection="3d")
+        plot_one_rat_3d(ax, subset, rat_id)
+        fig.tight_layout()
+        svg_3d = os.path.join(output_dir, f"within_rat_procrustes_3d_{rat_id}_{timestamp}.svg")
+        png_3d = os.path.join(output_dir, f"within_rat_procrustes_3d_{rat_id}_{timestamp}.png")
+        pdf_3d = os.path.join(output_dir, f"within_rat_procrustes_3d_{rat_id}_{timestamp}.pdf")
+        fig.savefig(svg_3d, bbox_inches="tight")
+        fig.savefig(png_3d, dpi=300, bbox_inches="tight")
+        fig.savefig(pdf_3d, bbox_inches="tight")
+        plt.close(fig)
+
+        paths.append(
+            {
+                "rat_id": rat_id,
+                "2d": (svg_2d, png_2d, pdf_2d),
+                "3d": (svg_3d, png_3d, pdf_3d),
+            }
+        )
     return paths
 
 
@@ -250,16 +380,30 @@ def save_combined_plot(aligned, output_dir, timestamp):
     for idx, rat_id in enumerate(rats, start=1):
         ax = fig.add_subplot(n_rows, n_cols, idx)
         subset = aligned[aligned["rat_id"] == rat_id]
-        plot_one_rat(ax, subset, rat_id)
+        plot_one_rat_2d(ax, subset, rat_id)
 
     fig.suptitle("Within-Rat Procrustes Alignment: B to A (2D)", y=0.98)
     fig.tight_layout()
-    svg_path = os.path.join(output_dir, f"within_rat_procrustes_2d_combined_{timestamp}.svg")
-    png_path = os.path.join(output_dir, f"within_rat_procrustes_2d_combined_{timestamp}.png")
-    fig.savefig(svg_path, bbox_inches="tight")
-    fig.savefig(png_path, dpi=300, bbox_inches="tight")
+    svg_2d = os.path.join(output_dir, f"within_rat_procrustes_2d_combined_{timestamp}.svg")
+    png_2d = os.path.join(output_dir, f"within_rat_procrustes_2d_combined_{timestamp}.png")
+    fig.savefig(svg_2d, bbox_inches="tight")
+    fig.savefig(png_2d, dpi=300, bbox_inches="tight")
     plt.close(fig)
-    return svg_path, png_path
+
+    fig = plt.figure(figsize=(5.2 * n_cols, 4.9 * n_rows))
+    for idx, rat_id in enumerate(rats, start=1):
+        ax = fig.add_subplot(n_rows, n_cols, idx, projection="3d")
+        subset = aligned[aligned["rat_id"] == rat_id]
+        plot_one_rat_3d(ax, subset, rat_id)
+
+    fig.suptitle("Within-Rat Procrustes Alignment: B to A (3D)", y=0.98)
+    fig.tight_layout()
+    svg_3d = os.path.join(output_dir, f"within_rat_procrustes_3d_combined_{timestamp}.svg")
+    png_3d = os.path.join(output_dir, f"within_rat_procrustes_3d_combined_{timestamp}.png")
+    fig.savefig(svg_3d, bbox_inches="tight")
+    fig.savefig(png_3d, dpi=300, bbox_inches="tight")
+    plt.close(fig)
+    return {"2d": (svg_2d, png_2d), "3d": (svg_3d, png_3d)}
 
 
 def main():
@@ -280,16 +424,22 @@ def main():
     aligned.to_csv(csv_path, index=False)
     metrics.to_csv(metrics_path, index=False)
     individual_paths = save_individual_plots(aligned, args.output_dir, timestamp)
-    combined_svg, combined_png = save_combined_plot(aligned, args.output_dir, timestamp)
+    combined_paths = save_combined_plot(aligned, args.output_dir, timestamp)
 
     print(f"Aligned coordinates saved to {csv_path}")
     print(f"Procrustes disparity metrics saved to {metrics_path}")
-    print(f"Combined SVG saved to {combined_svg}")
-    print(f"Combined PNG saved to {combined_png}")
-    for svg_path, png_path, pdf_path in individual_paths:
-        print(f"Individual SVG saved to {svg_path}")
-        print(f"Individual PNG saved to {png_path}")
-        print(f"Individual PDF saved to {pdf_path}")
+    for view_name, (svg_path, png_path) in combined_paths.items():
+        print(f"Combined {view_name.upper()} SVG saved to {svg_path}")
+        print(f"Combined {view_name.upper()} PNG saved to {png_path}")
+    for path_set in individual_paths:
+        rat_id = path_set["rat_id"]
+        for view_name in ["2d", "3d"]:
+            svg_path, png_path, pdf_path = path_set[view_name]
+            if view_name == "rat_id":
+                continue
+            print(f"Individual {view_name.upper()} SVG for {rat_id} saved to {svg_path}")
+            print(f"Individual {view_name.upper()} PNG for {rat_id} saved to {png_path}")
+            print(f"Individual {view_name.upper()} PDF for {rat_id} saved to {pdf_path}")
     print("Environment A is the within-rat reference; environment B is Procrustes-aligned to A.")
 
 

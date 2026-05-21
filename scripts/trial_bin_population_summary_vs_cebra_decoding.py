@@ -76,6 +76,7 @@ class TrialBinDecodeOptions:
     cebra_decoder_summary_csv: Optional[Path] = None
     cebra_decoder_task_scheme: str = "CSUS5"
     cebra_decoder_dim: int = 3
+    cebra_decoder_comparison: Optional[str] = None
     run_within_session_cv: bool = True
 
 
@@ -431,6 +432,8 @@ def load_real_cebra_decoder_summary(
                 continue
             if int(float(row.get("dim", "nan"))) != int(opts.cebra_decoder_dim):
                 continue
+            if opts.cebra_decoder_comparison is not None and row.get("comparison") != opts.cebra_decoder_comparison:
+                continue
             if string_to_bool(row.get("is_diagonal")):
                 continue
             by_rat_pair[(row["train_rat"], row["test_rat"])] = row
@@ -472,6 +475,7 @@ def load_real_cebra_decoder_summary(
                 "cebra_decoder_source_csv": str(summary_csv),
                 "cebra_decoder_task_scheme": opts.cebra_decoder_task_scheme,
                 "cebra_decoder_dim": opts.cebra_decoder_dim,
+                "cebra_decoder_comparison": opts.cebra_decoder_comparison or "",
                 "cebra_decoder_n_real_observations": parse_float(source.get("n_real_observations")),
                 "cebra_decoder_n_shuffle_observations": parse_float(source.get("n_shuffle_observations")),
             }
@@ -486,11 +490,13 @@ def load_real_cebra_decoder_summary(
     if not rows:
         raise ValueError(
             f"No matching CEBRA decoder rows found in {summary_csv} for "
-            f"{opts.cebra_decoder_task_scheme} dim {opts.cebra_decoder_dim}."
+            f"{opts.cebra_decoder_task_scheme} dim {opts.cebra_decoder_dim}"
+            + (f" comparison {opts.cebra_decoder_comparison}." if opts.cebra_decoder_comparison else ".")
         )
     print(
         f"  Loaded real CEBRA decoder summary: {len(rows)} ordered pairs "
-        f"({opts.cebra_decoder_task_scheme}, dim={opts.cebra_decoder_dim})"
+        f"({opts.cebra_decoder_task_scheme}, dim={opts.cebra_decoder_dim}"
+        + (f", comparison={opts.cebra_decoder_comparison})" if opts.cebra_decoder_comparison else ")")
     )
     return rows
 
@@ -899,6 +905,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--cebra-decoder-task-scheme", default="CSUS5")
     parser.add_argument("--cebra-decoder-dim", type=int, default=3)
+    parser.add_argument(
+        "--cebra-decoder-comparison",
+        default=None,
+        help="Optional comparison label in combined CEBRA summaries, e.g. A_to_A, B_to_B, or A_to_B.",
+    )
     parser.add_argument("--skip-within-session-cv", action="store_true")
     return parser.parse_args()
 
@@ -921,6 +932,7 @@ def main() -> None:
         cebra_decoder_summary_csv=args.cebra_decoder_summary_csv,
         cebra_decoder_task_scheme=args.cebra_decoder_task_scheme,
         cebra_decoder_dim=args.cebra_decoder_dim,
+        cebra_decoder_comparison=args.cebra_decoder_comparison,
         run_within_session_cv=not args.skip_within_session_cv,
     )
     sessions = load_sessions_csv(args.session_csv)

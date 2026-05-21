@@ -60,8 +60,11 @@ function plot_geometry_permutation_null_violins(plotDataCsvPath, outputDir, outp
 % Notes:
 % - Each row is one rat.
 % - Gray horizontal violins show shuffled/null scores.
-% - Large black dots show mean real score.
-% - Horizontal black lines show 95% confidence intervals of real scores.
+% - Colored dots show mean real score.
+% - Light same-color horizontal lines show 95% confidence intervals of real scores.
+% - Individual real model-run scores can be overlaid for diagnostics, but
+%   are hidden by default to keep the main figure focused on the rat-level
+%   statistic used for the permutation test.
 % - One-sided empirical p-values are computed as:
 %       p = (count(shuffle_score >= mean(real_score)) + 1) / (n_shuffle + 1)
 %   because higher geometry-preservation correlations indicate stronger
@@ -86,22 +89,23 @@ outputBaseName = string(outputBaseName);
 
 % Plot controls.
 violinColor = [0.78 0.78 0.78];
-realDotColor = [0 0 0];
 zeroLineColor = [0.35 0.35 0.35];
 violinHalfHeight = 0.32;
-realDotSize = 18;
+realDotSize = 16;
 meanDotSize = 62;
-ciLineWidth = 1.6;
+ciLineWidth = 1.05;
 axisLineWidth = 1.25;
 fontName = "Arial";
 fontSize = 9;
 labelFontSize = 10;
+preferredXMax = 0.85;
+xPaddingFraction = 0.015;
 
-% Set true to overlay individual real model-run scores. The default false
-% emphasizes the rat-level statistic used for the permutation test.
+% Set true to overlay individual real model-run scores in addition to the
+% rat-level mean used for the permutation test.
 showIndividualRealRuns = false;
 jitterRealDots = true;
-jitterHalfHeight = 0.055;
+jitterHalfHeight = 0.07;
 
 %% Import data
 importOptions = detectImportOptions( ...
@@ -147,6 +151,20 @@ assert(~isempty(shuffleTable), "Plot-data CSV has no rows with score_type == 'sh
 ratNames = unique(plotData.rat, "stable");
 nRats = numel(ratNames);
 yPositions = nRats:-1:1;
+
+% Colorblind-friendly rat colors. Extra rats fall back to MATLAB's lines().
+baseRatColors = [
+    0, 114, 178
+    213, 94, 0
+    0, 158, 115
+    204, 121, 167
+    230, 159, 0
+] ./ 255;
+if nRats <= size(baseRatColors, 1)
+    ratColors = baseRatColors(1:nRats, :);
+else
+    ratColors = lines(nRats);
+end
 
 %% Compute summary statistics
 statsRows = table();
@@ -199,14 +217,26 @@ fig = figure( ...
 ax = axes(fig);
 hold(ax, "on");
 
-% Compute common x-limits across all rats and both distributions.
-allScores = plotData.score;
-allScores = allScores(isfinite(allScores));
-xPad = 0.08 * range(allScores);
+% Compute common x-limits from the null distributions and mean/CI summaries.
+% Prefer a tighter right edge near r = 0.85.
+shuffleScoresAll = shuffleTable.score;
+shuffleScoresAll = shuffleScoresAll(isfinite(shuffleScoresAll));
+summaryScores = [
+    statsRows.mean_real_score
+    statsRows.ci95_low_real_score
+    statsRows.ci95_high_real_score
+];
+summaryScores = summaryScores(isfinite(summaryScores));
+allVisibleScores = [shuffleScoresAll; summaryScores];
+xPad = xPaddingFraction * range(allVisibleScores);
 if xPad == 0
     xPad = 0.1;
 end
-xLimits = [min(allScores) - xPad, max(allScores) + xPad];
+xLimits = [min(allVisibleScores) - xPad, preferredXMax];
+requiredXMax = max(allVisibleScores) + xPad;
+if requiredXMax > preferredXMax
+    xLimits(2) = requiredXMax;
+end
 xLimits(1) = min(xLimits(1), -0.05);
 xLimits(2) = max(xLimits(2), 0.05);
 
@@ -223,14 +253,15 @@ for ratIdx = 1:nRats
     shuffleScores = shuffleTable.score(shuffleTable.rat == ratName);
     realScores = realScores(isfinite(realScores));
     shuffleScores = shuffleScores(isfinite(shuffleScores));
+    ratColor = ratColors(ratIdx, :);
+    ciColor = lightenColor(ratColor, 0.65);
 
     plottedWithBuiltin = tryBuiltinHorizontalViolin(ax, shuffleScores, y, violinColor, violinHalfHeight);
     if ~plottedWithBuiltin
         plotFallbackHorizontalViolin(ax, shuffleScores, y, violinColor, violinHalfHeight, xLimits);
     end
 
-    % Optional individual model-run scores. Hidden by default because the
-    % inferential comparison is the rat-level mean against rat-level null means.
+    % Optional individual model-run scores.
     if showIndividualRealRuns
         if jitterRealDots
             rng(ratIdx, "twister");
@@ -238,10 +269,10 @@ for ratIdx = 1:nRats
         else
             yDots = repmat(y, size(realScores));
         end
-        scatter(ax, realScores, yDots, realDotSize, realDotColor, ...
+        scatter(ax, realScores, yDots, realDotSize, ratColor, ...
             "filled", ...
-            "MarkerFaceAlpha", 0.45, ...
-            "MarkerEdgeAlpha", 0.45);
+            "MarkerFaceAlpha", 0.42, ...
+            "MarkerEdgeAlpha", 0.30);
     end
 
     % Mean and 95% CI for real scores.
@@ -251,10 +282,10 @@ for ratIdx = 1:nRats
     meanReal = statRow.mean_real_score;
     if isfinite(ciLow) && isfinite(ciHigh)
         plot(ax, [ciLow ciHigh], [y y], "-", ...
-            "Color", realDotColor, ...
+            "Color", ciColor, ...
             "LineWidth", ciLineWidth);
     end
-    scatter(ax, meanReal, y, meanDotSize, realDotColor, ...
+    scatter(ax, meanReal, y, meanDotSize, ratColor, ...
         "filled", ...
         "MarkerEdgeColor", "w", ...
         "LineWidth", 0.6);
@@ -364,4 +395,10 @@ function plotFallbackHorizontalViolin(ax, values, y, faceColor, halfHeight, xLim
     patch(ax, xPatch, yPatch, faceColor, ...
         "EdgeColor", "none", ...
         "FaceAlpha", 1);
+end
+
+function outColor = lightenColor(inColor, amount)
+%LIGHTENCOLOR Blend an RGB color toward white.
+    outColor = inColor + (1 - inColor) .* amount;
+    outColor = min(max(outColor, 0), 1);
 end

@@ -418,12 +418,14 @@ def load_graphs_from_aligned_csv(
 
 
 def latest_aligned_csv(root: Path) -> Path:
-    candidates = sorted(
-        root.glob("geometry/procrustes_disparity_outputs/cross_rat_mean_ab/cross_rat_mean_ab_procrustes_*.csv")
-    )
+    search_dir = root / "geometry" / "procrustes_disparity_outputs" / "cross_rat_mean_ab"
+    candidates = sorted(search_dir.glob("cross_rat_mean_ab_procrustes_*.csv"))
     candidates = [path for path in candidates if "pca2d" not in path.name and "disparity" not in path.name]
     if not candidates:
-        raise FileNotFoundError("No cross_rat_mean_ab_procrustes_*.csv file found under geometry/.")
+        raise FileNotFoundError(
+            "No cross_rat_mean_ab_procrustes_*.csv file found under "
+            f"{search_dir}. Pass --aligned_csv to use a file elsewhere."
+        )
     return max(candidates, key=lambda path: path.stat().st_mtime)
 
 
