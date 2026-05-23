@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0-5%3 ## number of jobs to run "in parallel", 0-9%2 would be 10 jobs 2 in parallel
+#SBATCH --array=0-2%3 ## number of jobs to run "in parallel", 0-9%2 would be 10 jobs 2 in parallel
 #SBATCH --mem=10GB
 #SBATCH --time=40:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
