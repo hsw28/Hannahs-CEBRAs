@@ -32,8 +32,10 @@ import warnings
 #b is optimal decoding
 #c is lowest loss
 parameter_sets = {
-    "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0222": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
 
+    "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307_dayb2": {"learning_rate": 0.002, "min_temperature": 2.33, "max_iterations": 80000, "distance": "cosine", "temp_mode": "constant"},
     "set0307l": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 6000, "distance": 'cosine', "temp_mode": 'constant'},
 
     "set0307b": {"learning_rate": 0.007, "min_temperature": 1.75, "max_iterations": 7000, "distance": 'cosine', "temp_mode": 'constant'},
@@ -41,6 +43,7 @@ parameter_sets = {
     "set0307f": {"learning_rate": 0.007, "min_temperature": 2, "max_iterations": 7500, "distance": 'cosine', "temp_mode": 'constant'},
     "set0307g": {"learning_rate": 0.007, "min_temperature": 1.5, "max_iterations": 6500, "distance": 'cosine', "temp_mode": 'constant'},
 
+    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": "cosine", "temp_mode": "auto"},
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": "euclidean", "temp_mode": "constant"},
     "set0314b": {"learning_rate": 0.05, "min_temperature": .66, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0314c": {"learning_rate": 0.0075, "min_temperature": .1, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'auto'},

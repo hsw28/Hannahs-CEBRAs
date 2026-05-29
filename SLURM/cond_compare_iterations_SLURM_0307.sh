@@ -5,9 +5,9 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0 ## number of jobs to run "in parallel", 0-9%2 would be 10 jobs 2 in parallel
-#SBATCH --mem=12GB
-#SBATCH --time=40:00:00
+#SBATCH --array=0-3%2 ## number of jobs to run "in parallel", 0-9%2 would be 10 jobs 2 in parallel
+#SBATCH --mem=10GB
+#SBATCH --time=48:00:00
 #SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
 #SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -25,4 +25,4 @@ export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts
 
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 2 0 --iterations 50 --parameter_set_name set0307
+python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/cond_compare_iterations_script.py ./traceA1An_An.mat ./traceAnB1_An.mat ./traceA1An_A1.mat ./traceAnB1_B1.mat ./eyeblinkAn.mat ./eyeblinkA1.mat ./eyeblinkB1.mat 2 0 --iterations 125 --parameter_set_name set0307

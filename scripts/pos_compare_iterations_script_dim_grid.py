@@ -21,14 +21,12 @@ def parse_list_argument(arg_value):
 
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000},
-    "set0307": {"learning_rate": 0.0006625, "min_temperature": 1.5, "max_iterations": 8000},
-    #"set0313": {"learning_rate": 0.001, "min_temperature": 0.4, "max_iterations": 10000},
-    #"set0313": {"learning_rate": 0.0006625, "min_temperature": 0.000000001, "max_iterations": 22500},
-    #"set0313": {"learning_rate": 0.00055, "min_temperature": 0.25, "max_iterations": 20000},
-    "set0313": {"learning_rate": 0.00055, "min_temperature": 0.1, "max_iterations": 20000},
-    "set0314": {"learning_rate": 0.001, "min_temperature": 0.000000001, "max_iterations": 30000},
-    "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000},
+    "set0222": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307_dayb2": {"learning_rate": 0.002, "min_temperature": 2.33, "max_iterations": 80000, "distance": "cosine", "temp_mode": "constant"},
+    "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": "cosine", "temp_mode": "auto"},
+    "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0816": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},
     "test": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 20},
 }
 

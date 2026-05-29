@@ -31,19 +31,9 @@ from cond_compare_iterations5 import cond_compare_iterations5
 
 # Define parameter sets
 parameter_sets = parameter_sets = {
-    ## pre may 18 2026 "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
-    "set0222b": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
-
-    ## no "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
-
-    "set0307c": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": 'euclidean', "temp_mode": 'constant'}, #yes
-
-    "set0307d": {"learning_rate": 0.0045, "min_temperature": 3.5, "max_iterations": 77000, "distance": 'euclidean', "temp_mode": 'constant'},
-
-    "set0307f": {"learning_rate": 0.006, "min_temperature": 3, "max_iterations": 60000, "distance": 'cosine', "temp_mode": 'constant'},
-
+    "set0222": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": 'euclidean', "temp_mode": 'constant'}, #yes
     "set0307_dayb2": {"learning_rate": 0.002, "min_temperature": 2.33, "max_iterations": 80000, "distance": 'cosine', "temp_mode": 'constant'},
-
     "set0313": {"learning_rate": 0.0035, "min_temperature": 1.67, "max_iterations": 20000, "distance": "cosine", "temp_mode": "auto"},
     "set0314": {"learning_rate": 0.0075, "min_temperature": 1.67, "max_iterations": 18000, "distance": "euclidean", "temp_mode": "constant"},
     "set0816": {"learning_rate": 0.0095, "min_temperature": 2.66, "max_iterations": 25000, "distance": "cosine", "temp_mode": "constant"},

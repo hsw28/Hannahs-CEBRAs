@@ -30,9 +30,10 @@ from cond_consistencyAB import cond_consistencyAB
 # Define parameter sets
 parameter_sets = {
     #0222 is pretty good and 307 are both good, in the 60s
-    "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0222": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
 
     "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307_dayb2": {"learning_rate": 0.002, "min_temperature": 2.33, "max_iterations": 80000, "distance": "cosine", "temp_mode": "constant"},
     "set0307b": {"learning_rate": 0.045, "min_temperature": 0.75, "max_iterations": 22000, "distance": 'cosine', "temp_mode": 'auto'},
     #c was very good and very bad
     "set0307c": {"learning_rate": 0.045, "min_temperature": 1, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
@@ -49,9 +50,6 @@ parameter_sets = {
     "set0816d": {"learning_rate": 5e-6, "min_temperature": .74, "max_iterations": 10000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0816e": {"learning_rate": 5e-6, "min_temperature": 1, "max_iterations": 10000, "distance": 'euclidean', "temp_mode": 'auto'},
     "set0816g": {"learning_rate": 8.6e-4, "min_temperature": .8, "max_iterations": 10000, "distance": 'euclidean', "temp_mode": 'auto'},
-    #X "set0816h": {"learning_rate": 0.05, "min_temperature": 1.67, "max_iterations": 25000, "distance": 'cosine', "temp_mode": 'auto'},
-    # XXX   "set0816d": {"learning_rate": 8.6e-4, "min_temperature": .3, "max_iterations": 20000, "distance": 'cosine', "temp_mode": 'auto'},
-    # X    "set0816e": {"learning_rate": 5e-6, "min_temperature": .5, "max_iterations": 5000, "distance": 'euclidean', "temp_mode": 'auto'},
     "set0816f": {"learning_rate": 5e-6, "min_temperature": .74, "max_iterations": 10000, "distance": 'euclidean', "temp_mode": 'auto'},
     "set0816i": {"learning_rate": 0.045, "min_temperature": .2, "max_iterations": 22000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0816j": {"learning_rate": 0.0045, "min_temperature": .2, "max_iterations": 5000, "distance": 'cosine', "temp_mode": 'auto'},

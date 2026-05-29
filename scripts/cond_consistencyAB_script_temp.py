@@ -29,8 +29,9 @@ from cond_consistencyAB_temp import cond_consistencyAB_temp
 
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.0035, "min_temperature": 2.33, "max_iterations": 50000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0222": {"learning_rate": 0.0055, "min_temperature": 1.5, "max_iterations": 77000, "distance": "euclidean", "temp_mode": "constant"},
     "set0307": {"learning_rate": 0.0025, "min_temperature": 4, "max_iterations": 70000, "distance": "euclidean", "temp_mode": "constant"},
+    "set0307_dayb2": {"learning_rate": 0.002, "min_temperature": 2.33, "max_iterations": 80000, "distance": "cosine", "temp_mode": "constant"},
 
     "set0307b": {"learning_rate": 0.045, "min_temperature": .84, "max_iterations": 17000, "distance": 'cosine', "temp_mode": 'auto'},
     "set0307c": {"learning_rate": 0.045, "min_temperature": .84, "max_iterations": 28000, "distance": 'cosine', "temp_mode": 'constant'},
