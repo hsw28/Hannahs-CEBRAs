@@ -382,6 +382,10 @@ def cross_rat_latent_decode(
     test_rat: str = "test",
     train_environment: str = "",
     test_environment: str = "",
+    train_run_mode: str = "",
+    test_run_mode: str = "",
+    train_reference_run: Optional[int] = None,
+    test_reference_run: Optional[int] = None,
     task_scheme: str = "",
     dim: Optional[int] = None,
     model_run: Optional[int] = None,
@@ -468,7 +472,8 @@ def cross_rat_latent_decode(
             warnings.warn(f"Skipping real split {split_idx} for {train_rat}->{test_rat}: {exc}")
             continue
 
-        key = f"{task_scheme}_dim{dim}_{train_rat}_to_{test_rat}_split{split_idx}_real"
+        run_key = "avg" if model_run is None else f"run{model_run}"
+        key = f"{task_scheme}_dim{dim}_{train_rat}_to_{test_rat}_{run_key}_split{split_idx}_real"
         confusions[key] = conf
         rows.append(
             {
@@ -476,6 +481,10 @@ def cross_rat_latent_decode(
                 "test_rat": test_rat,
                 "train_environment": train_environment,
                 "test_environment": test_environment,
+                "train_run_mode": train_run_mode,
+                "test_run_mode": test_run_mode,
+                "train_reference_run": train_reference_run,
+                "test_reference_run": test_reference_run,
                 "is_diagonal": train_rat == test_rat,
                 "split_number": split_idx,
                 "model_run": model_run,
@@ -523,7 +532,7 @@ def cross_rat_latent_decode(
                 warnings.warn(f"Skipping shuffle {shuffle_idx} split {split_idx} for {train_rat}->{test_rat}: {exc}")
                 continue
 
-            s_key = f"{task_scheme}_dim{dim}_{train_rat}_to_{test_rat}_split{split_idx}_shuffle{shuffle_idx}"
+            s_key = f"{task_scheme}_dim{dim}_{train_rat}_to_{test_rat}_{run_key}_split{split_idx}_shuffle{shuffle_idx}"
             confusions[s_key] = s_conf
             rows.append(
                 {
@@ -531,6 +540,10 @@ def cross_rat_latent_decode(
                     "test_rat": test_rat,
                     "train_environment": train_environment,
                     "test_environment": test_environment,
+                    "train_run_mode": train_run_mode,
+                    "test_run_mode": test_run_mode,
+                    "train_reference_run": train_reference_run,
+                    "test_reference_run": test_reference_run,
                     "is_diagonal": train_rat == test_rat,
                     "split_number": split_idx,
                     "model_run": model_run,
@@ -711,12 +724,71 @@ def _task_scheme_matches_npz(task_scheme: str, npz_data: Mapping[str, Any]) -> b
     return False
 
 
+def procrustes_align_points(source_points: np.ndarray, target_points: np.ndarray) -> np.ndarray:
+    transform = fit_procrustes_transform(source_points, target_points, allow_scale=False)
+    return apply_procrustes_transform(source_points, transform)
+
+
+def _procrustes_rmse(source_points: np.ndarray, target_points: np.ndarray) -> float:
+    aligned = procrustes_align_points(source_points, target_points)
+    return float(np.sqrt(np.mean((aligned - target_points) ** 2)))
+
+
+def choose_most_consistent_run(embedding_runs: np.ndarray) -> Tuple[int, np.ndarray]:
+    """Choose the run with the lowest mean Procrustes RMSE to all other runs."""
+    runs = np.asarray(embedding_runs, dtype=float)
+    if runs.ndim != 3:
+        raise ValueError(f"embedding_runs must be runs x samples x dims; got {runs.shape}.")
+    n_runs = runs.shape[0]
+    if n_runs == 1:
+        return 0, np.zeros((1, 1), dtype=float)
+
+    rmse = np.full((n_runs, n_runs), np.nan, dtype=float)
+    for target_idx in range(n_runs):
+        for source_idx in range(n_runs):
+            if target_idx == source_idx:
+                rmse[target_idx, source_idx] = 0.0
+            else:
+                rmse[target_idx, source_idx] = _procrustes_rmse(runs[source_idx], runs[target_idx])
+    mean_rmse = np.nanmean(rmse, axis=1)
+    return int(np.nanargmin(mean_rmse)), rmse
+
+
+def align_and_average_embedding_runs(embedding_runs: np.ndarray) -> Tuple[np.ndarray, Dict[str, Any]]:
+    """Align independent CEBRA runs to the most-consistent run and average them.
+
+    Independent CEBRA fits can be rotated or reflected relative to each other.
+    This function first selects the run with the lowest mean Procrustes RMSE to
+    all other runs, aligns every run into that reference frame, and then returns
+    a single sample-by-dimension averaged embedding for downstream decoding.
+    """
+    runs = np.asarray(embedding_runs, dtype=float)
+    reference_run, rmse = choose_most_consistent_run(runs)
+    aligned_runs = np.empty_like(runs, dtype=float)
+    for run_idx in range(runs.shape[0]):
+        if run_idx == reference_run:
+            aligned_runs[run_idx] = runs[run_idx]
+        else:
+            aligned_runs[run_idx] = procrustes_align_points(runs[run_idx], runs[reference_run])
+
+    average_embedding = np.nanmean(aligned_runs, axis=0)
+    mean_rmse = np.nanmean(rmse, axis=1) if rmse.size else np.array([0.0])
+    metadata = {
+        "run_mode": "aligned_average",
+        "reference_run": reference_run,
+        "reference_run_mean_rmse": float(mean_rmse[reference_run]),
+        "run_mean_rmse": mean_rmse,
+    }
+    return average_embedding, metadata
+
+
 def load_cross_rat_data_from_npz(
     input_dir: str,
     task_schemes: Sequence[str],
     dims: Sequence[int],
     file_pattern: str = "*.npz",
     environment: str = "A",
+    run_mode: str = "aligned_average",
 ) -> Dict[str, Dict[str, Dict[int, Dict[str, np.ndarray]]]]:
     """Load enhanced geometry-preservation .npz files for decoding.
 
@@ -729,6 +801,8 @@ def load_cross_rat_data_from_npz(
     env = environment.upper()
     if env not in {"A", "B"}:
         raise ValueError("--npz_environment must be A or B.")
+    if run_mode not in {"aligned_average", "all_runs"}:
+        raise ValueError("run_mode must be 'aligned_average' or 'all_runs'.")
 
     paths = sorted(glob(os.path.join(input_dir, file_pattern)))
     if not paths:
@@ -775,10 +849,22 @@ def load_cross_rat_data_from_npz(
             for dim in dims:
                 if embedding_runs.shape[2] < dim:
                     continue
-                entry = {
-                    "embedding_runs": embedding_runs[:, :, :dim],
-                    "labels": labels,
-                }
+                dim_runs = embedding_runs[:, :, :dim]
+                if run_mode == "aligned_average":
+                    average_embedding, average_metadata = align_and_average_embedding_runs(dim_runs)
+                    entry = {
+                        "embedding": average_embedding,
+                        "labels": labels,
+                        "run_mode": "aligned_average",
+                        "reference_run": average_metadata["reference_run"],
+                        "reference_run_mean_rmse": average_metadata["reference_run_mean_rmse"],
+                    }
+                else:
+                    entry = {
+                        "embedding_runs": dim_runs,
+                        "labels": labels,
+                        "run_mode": "all_runs",
+                    }
                 if trial_ids is not None:
                     entry["trial_ids"] = trial_ids
                 data.setdefault(rat_id, {}).setdefault(task_scheme, {})[dim] = entry
@@ -802,6 +888,9 @@ def summarize_results(results: pd.DataFrame) -> pd.DataFrame:
     if "test_environment" in results.columns:
         insert_at = 3 if "train_environment" in group_cols else 2
         group_cols.insert(insert_at, "test_environment")
+    for optional_col in ["train_run_mode", "test_run_mode", "train_reference_run", "test_reference_run"]:
+        if optional_col in results.columns:
+            group_cols.append(optional_col)
     real = results[results["performance_type"] == "real"]
     shuffle = results[results["performance_type"] != "real"]
     real_pair = real.groupby(group_cols, dropna=False).agg(
@@ -1083,11 +1172,20 @@ def run_all_cross_rat_decoding(
                         test_runs = np.asarray(test_entry["embedding"])[np.newaxis, :, :]
                     n_model_runs = min(len(train_runs), len(test_runs))
                     for model_run in range(n_model_runs):
+                        model_run_label = model_run
+                        if train_entry.get("run_mode") == "aligned_average" or test_entry.get("run_mode") == "aligned_average":
+                            model_run_label = None
                         pair_seed = int(rng.integers(0, np.iinfo(np.int32).max))
-                        print(
-                            f"Running {task_scheme} dim {dim}: train {train_rat} -> test {test_rat}, "
-                            f"model_run {model_run}"
-                        )
+                        if model_run_label is None:
+                            print(
+                                f"Running {task_scheme} dim {dim}: train {train_rat} -> test {test_rat}, "
+                                "aligned-average embedding"
+                            )
+                        else:
+                            print(
+                                f"Running {task_scheme} dim {dim}: train {train_rat} -> test {test_rat}, "
+                                f"model_run {model_run}"
+                            )
                         pair_results, pair_confusions = cross_rat_latent_decode(
                             train_runs[model_run],
                             train_entry["labels"],
@@ -1103,9 +1201,13 @@ def run_all_cross_rat_decoding(
                             test_rat=test_rat,
                             train_environment=train_environment,
                             test_environment=test_environment,
+                            train_run_mode=train_entry.get("run_mode", "all_runs"),
+                            test_run_mode=test_entry.get("run_mode", "all_runs"),
+                            train_reference_run=train_entry.get("reference_run"),
+                            test_reference_run=test_entry.get("reference_run"),
                             task_scheme=task_scheme,
                             dim=dim,
-                            model_run=model_run,
+                            model_run=model_run_label,
                             shuffle_test_labels=shuffle_test_labels,
                             allow_scale=allow_scale,
                         )
@@ -1177,6 +1279,7 @@ def run_npz_comparison_set(
     dims: Sequence[int],
     comparisons: Sequence[str],
     file_pattern: str = "*.npz",
+    npz_run_mode: str = "aligned_average",
     **run_kwargs: Any,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     all_results = []
@@ -1195,6 +1298,7 @@ def run_npz_comparison_set(
             dims=dims,
             file_pattern=file_pattern,
             environment=train_env,
+            run_mode=npz_run_mode,
         )
         if test_env == train_env:
             test_data = train_data
@@ -1205,6 +1309,7 @@ def run_npz_comparison_set(
                 dims=dims,
                 file_pattern=file_pattern,
                 environment=test_env,
+                run_mode=npz_run_mode,
             )
 
         results, summary = run_all_cross_rat_decoding(
@@ -1261,6 +1366,16 @@ def main() -> None:
     parser.add_argument("--train_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, train decoder from this environment.")
     parser.add_argument("--test_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, test decoder on this environment.")
     parser.add_argument("--npz_comparisons", default=None, help="Comma-separated NPZ environment comparisons, e.g. A-A,B-B,A-B. Writes one subdirectory per comparison.")
+    parser.add_argument(
+        "--npz_run_mode",
+        choices=["aligned_average", "all_runs"],
+        default="aligned_average",
+        help=(
+            "How to use multiple CEBRA runs in enhanced .npz files. "
+            "aligned_average aligns all runs to the most-consistent reference run and averages them; "
+            "all_runs preserves the old behavior of decoding each run separately."
+        ),
+    )
     parser.add_argument("--shuffle_test_labels", action="store_true", help="Also shuffle test labels before scoring shuffle controls.")
     parser.add_argument("--allow_scale", action="store_true", help="Allow isotropic scaling after orthogonal Procrustes rotation.")
     parser.add_argument("--include_diagonal", action="store_true", help="Also run train rat == test rat within-rat control entries.")
@@ -1285,6 +1400,7 @@ def main() -> None:
             dims=dims,
             comparisons=comparisons,
             file_pattern=args.file_pattern or "*.npz",
+            npz_run_mode=args.npz_run_mode,
             decoder=args.decoder,
             n_splits=args.n_splits,
             n_shuffles=args.n_shuffles,
@@ -1308,6 +1424,7 @@ def main() -> None:
             dims=dims,
             file_pattern=args.file_pattern or "*.npz",
             environment=train_env,
+            run_mode=args.npz_run_mode,
         )
         if test_env == train_env:
             test_data = data
@@ -1318,6 +1435,7 @@ def main() -> None:
                 dims=dims,
                 file_pattern=args.file_pattern or "*.npz",
                 environment=test_env,
+                run_mode=args.npz_run_mode,
             )
     else:
         train_env = ""

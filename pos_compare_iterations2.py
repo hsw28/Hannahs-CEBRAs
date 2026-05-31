@@ -25,11 +25,15 @@ from hold_out import hold_out
 
 
 
-def train_and_evaluate(cebra_model, trace_train, trace_test, test_trace, pos_train, pos_test, test_pos):
+def fit_and_transform(cebra_model, trace_train, trace_test, test_trace, pos_train):
     cebra_model.fit(trace_train, pos_train)
     train_transformed = cebra_model.transform(trace_train)
     test_transformed = cebra_model.transform(trace_test)
     test_external_transformed = cebra_model.transform(test_trace)
+    return train_transformed, test_transformed, test_external_transformed
+
+
+def evaluate_transformed(train_transformed, test_transformed, test_external_transformed, pos_train, pos_test, test_pos):
     return pos_score(train_transformed, test_transformed, pos_train, pos_test), pos_score(train_transformed, test_external_transformed, pos_train, test_pos)
 
 def generate_headers():
@@ -82,10 +86,13 @@ def pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
             posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
 
 
-            regular_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train, posAn_test, posA1)
-            shuffled_A1 = train_and_evaluate(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train_shuffled, posAn_test_shuffled, posA1)
-            regular_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train, posAn_test, posB1)
-            shuffled_B1 = train_and_evaluate(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train_shuffled, posAn_test_shuffled, posB1)
+            A1_transformed = fit_and_transform(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train)
+            regular_A1 = evaluate_transformed(*A1_transformed, posAn_train, posAn_test, posA1)
+            shuffled_A1 = evaluate_transformed(*A1_transformed, posAn_train_shuffled, posAn_test_shuffled, posA1)
+
+            B1_transformed = fit_and_transform(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train)
+            regular_B1 = evaluate_transformed(*B1_transformed, posAn_train, posAn_test, posB1)
+            shuffled_B1 = evaluate_transformed(*B1_transformed, posAn_train_shuffled, posAn_test_shuffled, posB1)
 
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))
