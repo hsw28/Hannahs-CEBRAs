@@ -49,6 +49,13 @@ EMBEDDING_KEY_CANDIDATES = ("embedding", "embeddings", "z", "latent", "output", 
 LABEL_KEY_CANDIDATES = ("labels", "label", "CSUS2", "CSUS5", "training", "y")
 TRIAL_KEY_CANDIDATES = ("trial_ids", "trial_id", "trials", "trial")
 
+NPZ_ENVIRONMENT_KEYS = {
+    "A": ("embeddingA_runs", "labelsA", "trial_idsA"),
+    "B": ("embeddingB_runs", "labelsB", "trial_idsB"),
+    "ANA": ("embeddingAnA_runs", "labelsAn", "trial_idsAn"),
+    "ANB": ("embeddingAnB_runs", "labelsAn", "trial_idsAn"),
+}
+
 
 @dataclass
 class ZScoreTransform:
@@ -233,20 +240,41 @@ def apply_zscore_transform(points: np.ndarray, transform: ZScoreTransform) -> np
     return (np.asarray(points, dtype=float) - transform.mean) / transform.std
 
 
-def compute_task_bin_means(embeddings: Any, labels: Any) -> Tuple[np.ndarray, np.ndarray]:
-    """Return one mean latent point for each sorted task label."""
+def compute_task_bin_centroids(
+    embeddings: Any,
+    labels: Any,
+    method: str = "mean",
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Return one latent centroid for each sorted task label.
+
+    The centroid is used only to estimate the held-out Procrustes alignment.
+    `method="mean"` preserves the original analysis behavior. `method="median"`
+    uses the coordinate-wise median within each task bin, which can make the
+    alignment anchors less sensitive to outlier latent samples.
+    """
+    method = method.lower()
+    if method not in {"mean", "median"}:
+        raise ValueError(f"Unknown task-bin centroid method '{method}'. Choose 'mean' or 'median'.")
     emb = _as_2d_embedding(embeddings)
     labels_arr = np.asarray(labels).squeeze()
     if len(labels_arr) != emb.shape[0]:
-        raise ValueError("Embedding and label lengths do not match for task-bin means.")
+        raise ValueError("Embedding and label lengths do not match for task-bin centroids.")
     sorted_labels = np.array(sorted(np.unique(labels_arr)))
-    means = []
+    centroids = []
     for label in sorted_labels:
         class_points = emb[labels_arr == label]
         if len(class_points) == 0:
             continue
-        means.append(np.mean(class_points, axis=0))
-    return np.asarray(means, dtype=float), sorted_labels
+        if method == "median":
+            centroids.append(np.median(class_points, axis=0))
+        else:
+            centroids.append(np.mean(class_points, axis=0))
+    return np.asarray(centroids, dtype=float), sorted_labels
+
+
+def compute_task_bin_means(embeddings: Any, labels: Any) -> Tuple[np.ndarray, np.ndarray]:
+    """Return one mean latent point for each sorted task label."""
+    return compute_task_bin_centroids(embeddings, labels, method="mean")
 
 
 def _matched_task_bin_means(
@@ -254,9 +282,10 @@ def _matched_task_bin_means(
     source_labels: np.ndarray,
     target_embeddings: np.ndarray,
     target_labels: np.ndarray,
+    method: str = "mean",
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    source_means, source_unique = compute_task_bin_means(source_embeddings, source_labels)
-    target_means, target_unique = compute_task_bin_means(target_embeddings, target_labels)
+    source_means, source_unique = compute_task_bin_centroids(source_embeddings, source_labels, method=method)
+    target_means, target_unique = compute_task_bin_centroids(target_embeddings, target_labels, method=method)
     common = np.array([label for label in target_unique if label in set(source_unique)])
     if len(common) < 2:
         raise ValueError(f"At least two shared task labels are required for Procrustes alignment; got {common}.")
@@ -324,10 +353,10 @@ def apply_procrustes_transform(points: Any, transform: ProcrustesTransform) -> n
     return aligned + transform.target_center
 
 
-def _make_decoder(name: str, random_state: Optional[int] = None):
+def _make_decoder(name: str, random_state: Optional[int] = None, logreg_c: float = 1.0):
     name = name.lower()
     if name == "logreg":
-        return LogisticRegression(max_iter=1000, class_weight="balanced", random_state=random_state)
+        return LogisticRegression(C=logreg_c, max_iter=1000, class_weight="balanced", random_state=random_state)
     if name == "lda":
         return LinearDiscriminantAnalysis()
     if name == "knn":
@@ -343,10 +372,11 @@ def _score_decoder(
     test_y: np.ndarray,
     labels_order: np.ndarray,
     random_state: Optional[int] = None,
+    logreg_c: float = 1.0,
 ) -> Tuple[float, float, np.ndarray]:
     if len(np.unique(train_y)) < 2:
         raise ValueError("Decoder training labels contain fewer than two classes.")
-    model = _make_decoder(decoder_name, random_state=random_state)
+    model = _make_decoder(decoder_name, random_state=random_state, logreg_c=logreg_c)
     model.fit(train_x, train_y)
     pred = model.predict(test_x)
     acc = accuracy_score(test_y, pred)
@@ -375,6 +405,7 @@ def cross_rat_latent_decode(
     train_trial_ids: Optional[Any] = None,
     test_trial_ids: Optional[Any] = None,
     decoder: str = "logreg",
+    logreg_c: float = 1.0,
     n_splits: int = 20,
     n_shuffles: int = 100,
     random_state: int = 0,
@@ -392,6 +423,7 @@ def cross_rat_latent_decode(
     shuffle_test_labels: bool = False,
     test_size: float = 0.5,
     allow_scale: bool = False,
+    alignment_stat: str = "mean",
 ) -> Tuple[pd.DataFrame, Dict[str, np.ndarray]]:
     """Decode task epochs across rats after safe held-out latent alignment.
 
@@ -406,6 +438,9 @@ def cross_rat_latent_decode(
         dim = train_x.shape[1]
     if train_x.shape[1] != test_x.shape[1]:
         raise ValueError(f"Train/test latent dimensions differ: {train_x.shape[1]} vs {test_x.shape[1]}.")
+    alignment_stat = alignment_stat.lower()
+    if alignment_stat not in {"mean", "median"}:
+        raise ValueError(f"alignment_stat must be 'mean' or 'median'; got '{alignment_stat}'.")
 
     rng = np.random.default_rng(random_state)
     rows: List[Dict[str, Any]] = []
@@ -414,7 +449,7 @@ def cross_rat_latent_decode(
     warning_text = ""
     if split_strategy == "sample_fallback":
         warning_text = (
-            "Trial IDs unavailable for at least one rat; alignment uses task-label means "
+            "Trial IDs unavailable for at least one rat; alignment uses task-label centroids "
             "from sample-level alignment splits, and decoding is evaluated on held-out samples."
         )
 
@@ -448,6 +483,7 @@ def cross_rat_latent_decode(
             test_y[test_align_idx],
             train_z[train_align_idx],
             train_y[train_align_idx],
+            method=alignment_stat,
         )
         transform = fit_procrustes_transform(source_points, target_points, allow_scale=allow_scale)
         aligned_test_decode = apply_procrustes_transform(test_z[test_decode_idx], transform)
@@ -459,14 +495,21 @@ def cross_rat_latent_decode(
         alignment_warning = warning_text
         if len(alignment_labels) <= train_z.shape[1]:
             rank_note = (
-                f"Only {len(alignment_labels)} task-label means were available to align "
+                f"Only {len(alignment_labels)} task-label {alignment_stat} centroids were available to align "
                 f"{train_z.shape[1]}D latent spaces; the rotation may be underdetermined."
             )
             alignment_warning = f"{alignment_warning} {rank_note}".strip()
 
         try:
             acc, bal_acc, conf = _score_decoder(
-                decoder, train_decode_x, train_decode_y, aligned_test_decode, test_decode_y, labels_order, split_seed_train
+                decoder,
+                train_decode_x,
+                train_decode_y,
+                aligned_test_decode,
+                test_decode_y,
+                labels_order,
+                split_seed_train,
+                logreg_c=logreg_c,
             )
         except ValueError as exc:
             warnings.warn(f"Skipping real split {split_idx} for {train_rat}->{test_rat}: {exc}")
@@ -493,12 +536,14 @@ def cross_rat_latent_decode(
                 "task_scheme": task_scheme,
                 "dim": dim,
                 "decoder": decoder,
+                "logreg_c": logreg_c if decoder.lower() == "logreg" else np.nan,
                 "split_strategy": split_strategy,
                 "n_train_samples": len(train_decode_idx),
                 "n_test_samples": len(test_decode_idx),
                 "n_alignment_train_samples": len(train_align_idx),
                 "n_alignment_test_samples": len(test_align_idx),
                 "n_alignment_labels": len(alignment_labels),
+                "alignment_stat": alignment_stat,
                 "alignment_labels": json.dumps([str(x) for x in alignment_labels]),
                 "chance_level": chance_level,
                 "accuracy": acc,
@@ -527,6 +572,7 @@ def cross_rat_latent_decode(
                     scoring_y,
                     labels_order,
                     shuffle_seed,
+                    logreg_c=logreg_c,
                 )
             except ValueError as exc:
                 warnings.warn(f"Skipping shuffle {shuffle_idx} split {split_idx} for {train_rat}->{test_rat}: {exc}")
@@ -552,12 +598,14 @@ def cross_rat_latent_decode(
                     "task_scheme": task_scheme,
                     "dim": dim,
                     "decoder": decoder,
+                    "logreg_c": logreg_c if decoder.lower() == "logreg" else np.nan,
                     "split_strategy": split_strategy,
                     "n_train_samples": len(train_decode_idx),
                     "n_test_samples": len(test_decode_idx),
                     "n_alignment_train_samples": len(train_align_idx),
                     "n_alignment_test_samples": len(test_align_idx),
                     "n_alignment_labels": len(alignment_labels),
+                    "alignment_stat": alignment_stat,
                     "alignment_labels": json.dumps([str(x) for x in alignment_labels]),
                     "chance_level": chance_level,
                     "accuracy": s_acc,
@@ -792,15 +840,17 @@ def load_cross_rat_data_from_npz(
 ) -> Dict[str, Dict[str, Dict[int, Dict[str, np.ndarray]]]]:
     """Load enhanced geometry-preservation .npz files for decoding.
 
-    Expected keys are written by `run_geometry_preservation`: `embeddingA_runs`
-    or `embeddingB_runs`, matching `labelsA`/`labelsB`, and optional
-    `trial_idsA`/`trial_idsB`. Existing older geometry files that only contain
+    Expected keys are written by `run_geometry_preservation`. Environment `A`
+    loads A1 embeddings, `B` loads B1 embeddings, `ANA` loads An embeddings
+    from the A1-An tracked-neuron/model branch, and `ANB` loads An embeddings
+    from the An-B1 branch. Existing older geometry files that only contain
     `zA_runs`/`zB_runs` are skipped because they contain task-bin means rather
     than per-sample embeddings.
     """
     env = environment.upper()
-    if env not in {"A", "B"}:
-        raise ValueError("--npz_environment must be A or B.")
+    if env not in NPZ_ENVIRONMENT_KEYS:
+        allowed = ", ".join(sorted(NPZ_ENVIRONMENT_KEYS))
+        raise ValueError(f"--npz_environment must be one of: {allowed}.")
     if run_mode not in {"aligned_average", "all_runs"}:
         raise ValueError("run_mode must be 'aligned_average' or 'all_runs'.")
 
@@ -808,9 +858,7 @@ def load_cross_rat_data_from_npz(
     if not paths:
         raise FileNotFoundError(f"No files matched {os.path.join(input_dir, file_pattern)}")
 
-    embedding_key = f"embedding{env}_runs"
-    label_key = f"labels{env}"
-    trial_key = f"trial_ids{env}"
+    embedding_key, label_key, trial_key = NPZ_ENVIRONMENT_KEYS[env]
     data: Dict[str, Dict[str, Dict[int, Dict[str, np.ndarray]]]] = {}
 
     for path in paths:
@@ -818,7 +866,7 @@ def load_cross_rat_data_from_npz(
         if embedding_key not in npz_data or label_key not in npz_data:
             print(
                 f"WARNING: Skipping {path}; missing {embedding_key}/{label_key}. "
-                "Re-run scripts/cond_geometry_preservation_script.py after the per-sample embedding-save update."
+                "Re-run scripts/cond_geometry_preservation_script.py after the An embedding-save update."
             )
             continue
 
@@ -888,7 +936,14 @@ def summarize_results(results: pd.DataFrame) -> pd.DataFrame:
     if "test_environment" in results.columns:
         insert_at = 3 if "train_environment" in group_cols else 2
         group_cols.insert(insert_at, "test_environment")
-    for optional_col in ["train_run_mode", "test_run_mode", "train_reference_run", "test_reference_run"]:
+    for optional_col in [
+        "logreg_c",
+        "alignment_stat",
+        "train_run_mode",
+        "test_run_mode",
+        "train_reference_run",
+        "test_reference_run",
+    ]:
         if optional_col in results.columns:
             group_cols.append(optional_col)
     real = results[results["performance_type"] == "real"]
@@ -1122,11 +1177,13 @@ def run_all_cross_rat_decoding(
     dims: Sequence[int],
     test_data: Optional[Mapping[str, Mapping[str, Mapping[int, Mapping[str, Any]]]]] = None,
     decoder: str = "logreg",
+    logreg_c: float = 1.0,
     n_splits: int = 20,
     n_shuffles: int = 100,
     random_state: int = 0,
     shuffle_test_labels: bool = False,
     allow_scale: bool = False,
+    alignment_stat: str = "mean",
     include_diagonal: bool = False,
     checkpoint: bool = True,
     save_mat: bool = True,
@@ -1194,6 +1251,7 @@ def run_all_cross_rat_decoding(
                             train_trial_ids=train_entry.get("trial_ids"),
                             test_trial_ids=test_entry.get("trial_ids"),
                             decoder=decoder,
+                            logreg_c=logreg_c,
                             n_splits=n_splits,
                             n_shuffles=n_shuffles,
                             random_state=pair_seed,
@@ -1210,6 +1268,7 @@ def run_all_cross_rat_decoding(
                             model_run=model_run_label,
                             shuffle_test_labels=shuffle_test_labels,
                             allow_scale=allow_scale,
+                            alignment_stat=alignment_stat,
                         )
                         all_results.append(pair_results)
                         all_confusions.update(pair_confusions)
@@ -1286,10 +1345,11 @@ def run_npz_comparison_set(
     all_summaries = []
     for comparison in comparisons:
         if "-" not in comparison:
-            raise ValueError(f"NPZ comparison must look like A-A, B-B, or A-B; got {comparison}.")
+            raise ValueError(f"NPZ comparison must look like A-A, B-B, A-B, ANA-ANA, or ANA-B; got {comparison}.")
         train_env, test_env = [part.strip().upper() for part in comparison.split("-", 1)]
-        if train_env not in {"A", "B"} or test_env not in {"A", "B"}:
-            raise ValueError(f"NPZ comparison must use A/B environments; got {comparison}.")
+        if train_env not in NPZ_ENVIRONMENT_KEYS or test_env not in NPZ_ENVIRONMENT_KEYS:
+            allowed = ", ".join(sorted(NPZ_ENVIRONMENT_KEYS))
+            raise ValueError(f"NPZ comparison must use one of {allowed}; got {comparison}.")
 
         comparison_output_dir = os.path.join(output_dir, f"{train_env}_to_{test_env}")
         train_data = load_cross_rat_data_from_npz(
@@ -1357,15 +1417,21 @@ def main() -> None:
     parser.add_argument("--n_splits", type=int, default=20, help="Number of alignment/decoding splits per ordered rat pair.")
     parser.add_argument("--n_shuffles", type=int, default=100, help="Number of shuffle controls per split.")
     parser.add_argument("--decoder", choices=["logreg", "lda", "knn"], default="logreg", help="Decoder type.")
+    parser.add_argument("--logreg_C", type=float, default=1.0, help="Inverse regularization strength for --decoder logreg. Smaller values are more regularized.")
     parser.add_argument("--random_state", type=int, default=0, help="Random seed.")
     parser.add_argument("--embedding_key", default="embedding", help="Preferred .mat key for latent embeddings.")
     parser.add_argument("--label_key", default="labels", help="Preferred .mat key for task labels.")
     parser.add_argument("--trial_key", default="trial_ids", help="Preferred .mat key for trial IDs.")
     parser.add_argument("--file_pattern", default=None, help="Glob pattern inside input_dir. Defaults to *.mat or *.npz.")
-    parser.add_argument("--npz_environment", choices=["A", "B"], default="A", help="For enhanced geometry .npz files, use A or B per-sample embeddings for both train and test.")
-    parser.add_argument("--train_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, train decoder from this environment.")
-    parser.add_argument("--test_npz_environment", choices=["A", "B"], default=None, help="For enhanced geometry .npz files, test decoder on this environment.")
-    parser.add_argument("--npz_comparisons", default=None, help="Comma-separated NPZ environment comparisons, e.g. A-A,B-B,A-B. Writes one subdirectory per comparison.")
+    parser.add_argument(
+        "--npz_environment",
+        choices=sorted(NPZ_ENVIRONMENT_KEYS),
+        default="A",
+        help="For enhanced geometry .npz files, use this environment for both train and test. A=A1, B=B1, ANA=An via A1-An branch, ANB=An via An-B1 branch.",
+    )
+    parser.add_argument("--train_npz_environment", choices=sorted(NPZ_ENVIRONMENT_KEYS), default=None, help="For enhanced geometry .npz files, train decoder from this environment.")
+    parser.add_argument("--test_npz_environment", choices=sorted(NPZ_ENVIRONMENT_KEYS), default=None, help="For enhanced geometry .npz files, test decoder on this environment.")
+    parser.add_argument("--npz_comparisons", default=None, help="Comma-separated NPZ environment comparisons, e.g. A-A,B-B,A-B,ANA-ANA,ANA-B. Writes one subdirectory per comparison.")
     parser.add_argument(
         "--npz_run_mode",
         choices=["aligned_average", "all_runs"],
@@ -1378,6 +1444,12 @@ def main() -> None:
     )
     parser.add_argument("--shuffle_test_labels", action="store_true", help="Also shuffle test labels before scoring shuffle controls.")
     parser.add_argument("--allow_scale", action="store_true", help="Allow isotropic scaling after orthogonal Procrustes rotation.")
+    parser.add_argument(
+        "--alignment_stat",
+        choices=["mean", "median"],
+        default="mean",
+        help="Task-bin centroid used to estimate Procrustes alignment from held-out alignment samples.",
+    )
     parser.add_argument("--include_diagonal", action="store_true", help="Also run train rat == test rat within-rat control entries.")
     parser.add_argument("--no_checkpoint", action="store_true", help="Only write CSV/NPZ/MAT outputs after the full run completes.")
     parser.add_argument("--no_mat", action="store_true", help="Skip MAT-compatible output.")
@@ -1402,11 +1474,13 @@ def main() -> None:
             file_pattern=args.file_pattern or "*.npz",
             npz_run_mode=args.npz_run_mode,
             decoder=args.decoder,
+            logreg_c=args.logreg_C,
             n_splits=args.n_splits,
             n_shuffles=args.n_shuffles,
             random_state=args.random_state,
             shuffle_test_labels=args.shuffle_test_labels,
             allow_scale=args.allow_scale,
+            alignment_stat=args.alignment_stat,
             include_diagonal=args.include_diagonal,
             checkpoint=not args.no_checkpoint,
             save_mat=not args.no_mat,
@@ -1457,11 +1531,13 @@ def main() -> None:
         dims=dims,
         test_data=test_data,
         decoder=args.decoder,
+        logreg_c=args.logreg_C,
         n_splits=args.n_splits,
         n_shuffles=args.n_shuffles,
         random_state=args.random_state,
         shuffle_test_labels=args.shuffle_test_labels,
         allow_scale=args.allow_scale,
+        alignment_stat=args.alignment_stat,
         include_diagonal=args.include_diagonal,
         checkpoint=not args.no_checkpoint,
         save_mat=not args.no_mat,

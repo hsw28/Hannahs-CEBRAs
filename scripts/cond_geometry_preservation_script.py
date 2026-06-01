@@ -87,13 +87,14 @@ parser.add_argument("CSUSB1", type=str, help="Path to the CSUSB1 data file.")
 parser.add_argument("how_many_divisions", type=int, help="Number of task bins: 2, 5, or 10.")
 parser.add_argument("pretrial_y_or_n", type=int, choices=[0, 1], help="Pretrial flag (0 or 1).")
 parser.add_argument("--iterations", type=int, default=20, help="Number of independent CEBRA model runs.")
-parser.add_argument("--shuffles", type=int, default=1, help="Number of task-bin order shuffles per model run. If >1, their mean is the one rShuff for that run.")
+parser.add_argument("--shuffles", type=int, default=1, help="Number of task-bin order shuffles per model run. Use 0 to skip geometry shuffle controls and only save embeddings.")
 parser.add_argument("--output_dimension", type=int, default=3, help="CEBRA embedding dimensionality.")
 parser.add_argument("--parameter_set_name", type=str, default="set0222", help="Name of the parameter set to use.")
 parser.add_argument("--output_dir", type=str, default="geometry_preservation_outputs", help="Directory for CSV, NPZ, and PNG outputs.")
 parser.add_argument("--rat_id", type=str, default=None, help="Optional rat/session label for saved outputs and plots.")
 parser.add_argument("--session_id", type=str, default=None, help="Optional session label for saved outputs.")
 parser.add_argument("--random_seed", type=int, default=None, help="Optional random seed for shuffle controls.")
+parser.add_argument("--save_branch", choices=["both", "A", "B"], default="both", help="Which CEBRA branch to fit/save. Use A to save only A1 and AnA embeddings, B to save only B1 and AnB embeddings, or both for the original full geometry run.")
 parser.add_argument("--trial_ids_A1", type=str, default=None, help="Optional trial IDs for traceA1An_A1 samples.")
 parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional trial IDs for traceAnB1_B1 samples.")
 args = parser.parse_args()
@@ -154,6 +155,7 @@ run_geometry_preservation(
     rat_id=args.rat_id,
     session_id=args.session_id,
     random_seed=args.random_seed,
+    save_branch=args.save_branch,
     CSUSA1_trial_ids=trial_ids_A1,
     CSUSB1_trial_ids=trial_ids_B1,
 )

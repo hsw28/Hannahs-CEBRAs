@@ -109,18 +109,19 @@ def compute_geometry_preservation_run(z_a, z_b, n_shuff=1, rng=None):
     if rng is None:
         rng = np.random.default_rng()
 
-    if n_shuff < 1:
-        raise ValueError("n_shuff must be at least 1.")
+    if n_shuff < 0:
+        raise ValueError("n_shuff must be non-negative.")
 
     r_real = geometry_preservation_score(z_a, z_b)
     r_shuff_all = np.zeros(n_shuff)
     for shuffle_idx in range(n_shuff):
         permutation = rng.permutation(z_b.shape[0])
         r_shuff_all[shuffle_idx] = geometry_preservation_score(z_a, z_b[permutation])
+    r_shuff = np.nan if n_shuff == 0 else np.nanmean(r_shuff_all)
 
     return {
         "rReal": r_real,
-        "rShuff": np.nanmean(r_shuff_all),
+        "rShuff": r_shuff,
         "rShuffAll": r_shuff_all,
     }
 
@@ -309,9 +310,16 @@ def run_geometry_preservation(
     random_seed=None,
     CSUSA1_trial_ids=None,
     CSUSB1_trial_ids=None,
+    save_branch="both",
 ):
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_seed)
+    save_branch = str(save_branch).lower()
+    if save_branch not in {"both", "a", "b"}:
+        raise ValueError("save_branch must be one of: both, A, B.")
+    save_a_branch = save_branch in {"both", "a"}
+    save_b_branch = save_branch in {"both", "b"}
+    compute_ab_geometry = save_branch == "both"
 
     if len(CSUSAn) % 10 == 9:
         CSUSAn = CSUSAn[9:]
@@ -324,48 +332,77 @@ def run_geometry_preservation(
     if CSUSB1_trial_ids is not None and len(CSUSB1_trial_ids) != len(CSUSB1):
         raise ValueError("CSUSB1_trial_ids must match CSUSB1 length after trimming/filtering.")
 
-    bins = common_bins(CSUSA1, CSUSB1)
-    real_scores = np.zeros(iterations)
-    shuffle_scores = np.zeros(iterations)
+    if compute_ab_geometry:
+        bins = common_bins(CSUSA1, CSUSB1)
+    elif save_a_branch:
+        bins = common_bins(CSUSA1, CSUSAn)
+    else:
+        bins = common_bins(CSUSB1, CSUSAn)
+    real_scores = np.full(iterations, np.nan)
+    shuffle_scores = np.full(iterations, np.nan)
     shuffle_scores_all = np.zeros((iterations, shuffles))
     z_a_runs = None
     z_b_runs = None
+    z_an_a_runs = None
+    z_an_b_runs = None
     embedding_a_runs = None
     embedding_b_runs = None
+    embedding_an_a_runs = None
+    embedding_an_b_runs = None
     summary_rows = []
     shuffle_rows = []
 
     for run_idx in range(iterations):
         print(f"Geometry run {run_idx + 1}/{iterations}")
 
-        model_a = make_cebra_model(parameter_set, output_dimension)
-        model_b = make_cebra_model(parameter_set, output_dimension)
+        z_a = None
+        z_b = None
+        if save_a_branch:
+            model_a = make_cebra_model(parameter_set, output_dimension)
+            model_a.fit(traceA1An_An, CSUSAn)
+            embedding_an_a = model_a.transform(traceA1An_An)
+            embedding_a = model_a.transform(traceA1An_A1)
+            z_an_a = bin_mean_embedding(embedding_an_a, CSUSAn, bins)
+            z_a = bin_mean_embedding(embedding_a, CSUSA1, bins)
+            if z_a_runs is None:
+                z_a_runs = np.zeros((iterations, z_a.shape[0], z_a.shape[1]))
+                z_an_a_runs = np.zeros((iterations, z_an_a.shape[0], z_an_a.shape[1]))
+                embedding_a_runs = np.zeros((iterations, embedding_a.shape[0], embedding_a.shape[1]))
+                embedding_an_a_runs = np.zeros((iterations, embedding_an_a.shape[0], embedding_an_a.shape[1]))
+            z_a_runs[run_idx] = z_a
+            z_an_a_runs[run_idx] = z_an_a
+            embedding_a_runs[run_idx] = embedding_a
+            embedding_an_a_runs[run_idx] = embedding_an_a
 
-        model_a.fit(traceA1An_An, CSUSAn)
-        model_b.fit(traceAnB1_An, CSUSAn)
+        if save_b_branch:
+            model_b = make_cebra_model(parameter_set, output_dimension)
+            model_b.fit(traceAnB1_An, CSUSAn)
+            embedding_an_b = model_b.transform(traceAnB1_An)
+            embedding_b = model_b.transform(traceAnB1_B1)
+            z_an_b = bin_mean_embedding(embedding_an_b, CSUSAn, bins)
+            z_b = bin_mean_embedding(embedding_b, CSUSB1, bins)
+            if z_b_runs is None:
+                z_b_runs = np.zeros((iterations, z_b.shape[0], z_b.shape[1]))
+                z_an_b_runs = np.zeros((iterations, z_an_b.shape[0], z_an_b.shape[1]))
+                embedding_b_runs = np.zeros((iterations, embedding_b.shape[0], embedding_b.shape[1]))
+                embedding_an_b_runs = np.zeros((iterations, embedding_an_b.shape[0], embedding_an_b.shape[1]))
+            z_b_runs[run_idx] = z_b
+            z_an_b_runs[run_idx] = z_an_b
+            embedding_b_runs[run_idx] = embedding_b
+            embedding_an_b_runs[run_idx] = embedding_an_b
 
-        embedding_a = model_a.transform(traceA1An_A1)
-        embedding_b = model_b.transform(traceAnB1_B1)
-
-        z_a = bin_mean_embedding(embedding_a, CSUSA1, bins)
-        z_b = bin_mean_embedding(embedding_b, CSUSB1, bins)
-        if z_a_runs is None:
-            z_a_runs = np.zeros((iterations, z_a.shape[0], z_a.shape[1]))
-            z_b_runs = np.zeros((iterations, z_b.shape[0], z_b.shape[1]))
-            embedding_a_runs = np.zeros((iterations, embedding_a.shape[0], embedding_a.shape[1]))
-            embedding_b_runs = np.zeros((iterations, embedding_b.shape[0], embedding_b.shape[1]))
-        z_a_runs[run_idx] = z_a
-        z_b_runs[run_idx] = z_b
-        embedding_a_runs[run_idx] = embedding_a
-        embedding_b_runs[run_idx] = embedding_b
-
-        run_geometry = compute_geometry_preservation_run(z_a, z_b, n_shuff=shuffles, rng=rng)
-        real_score = run_geometry["rReal"]
-        shuff_score = run_geometry["rShuff"]
-        run_shuff_scores = run_geometry["rShuffAll"]
-        real_scores[run_idx] = real_score
-        shuffle_scores[run_idx] = shuff_score
-        shuffle_scores_all[run_idx] = run_shuff_scores
+        run_shuff_scores = np.zeros(shuffles)
+        if compute_ab_geometry:
+            run_geometry = compute_geometry_preservation_run(z_a, z_b, n_shuff=shuffles, rng=rng)
+            real_score = run_geometry["rReal"]
+            shuff_score = run_geometry["rShuff"]
+            run_shuff_scores = run_geometry["rShuffAll"]
+            real_scores[run_idx] = real_score
+            shuffle_scores[run_idx] = shuff_score
+            shuffle_scores_all[run_idx] = run_shuff_scores
+        else:
+            real_score = np.nan
+            shuff_score = np.nan
 
         summary_rows.append(
             {
@@ -375,6 +412,7 @@ def run_geometry_preservation(
                 "dimensions_argument": dimensions,
                 "output_dimension": output_dimension,
                 "model_run": run_idx,
+                "save_branch": save_branch,
                 "n_bins": len(bins),
                 "n_shuff": shuffles,
                 "rReal": real_score,
@@ -399,13 +437,33 @@ def run_geometry_preservation(
             )
 
     stats = paired_geometry_stats(real_scores, shuffle_scores, rng=rng)
-    stats_rows = [{"rat_id": rat_id, "session_id": session_id, "parameter_set_name": parameter_set_name, **stats}]
+    if shuffles == 0 or not compute_ab_geometry:
+        stats.update(
+            {
+                "n_runs": iterations,
+                "real_mean": np.nan if not compute_ab_geometry else (np.nanmean(real_scores) if len(real_scores) else np.nan),
+                "real_sem": np.nan if not compute_ab_geometry else sem(real_scores),
+                "shuff_mean": np.nan,
+                "shuff_sem": np.nan,
+                "diff_mean": np.nan,
+                "diff_sem": np.nan,
+                "sign_flip_p_two_sided": np.nan,
+                "sign_flip_n_permutations": 0,
+                "sign_flip_exact": False,
+                "paired_t_stat": np.nan,
+                "paired_t_p_two_sided": np.nan,
+            }
+        )
+    stats_rows = [
+        {"rat_id": rat_id, "session_id": session_id, "parameter_set_name": parameter_set_name, "save_branch": save_branch, **stats}
+    ]
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     rat_part = f"_{rat_id}" if rat_id else ""
+    branch_part = "" if save_branch == "both" else f"_{save_branch}branch"
     base = (
         f"geometry_preservation{rat_part}_{parameter_set_name}"
-        f"_dim{output_dimension}_bins{dimensions}_{timestamp}"
+        f"_dim{output_dimension}_bins{dimensions}{branch_part}_{timestamp}"
     )
     summary_path = os.path.join(output_dir, f"{base}_summary.csv")
     shuffle_path = os.path.join(output_dir, f"{base}_shuffles.csv")
@@ -416,34 +474,53 @@ def run_geometry_preservation(
     pd.DataFrame(summary_rows).to_csv(summary_path, index=False)
     pd.DataFrame(shuffle_rows).to_csv(shuffle_path, index=False)
     pd.DataFrame(stats_rows).to_csv(stats_path, index=False)
-    np.savez(
-        npz_path,
-        rReal=real_scores,
-        rShuff=shuffle_scores,
-        rShuffAll=shuffle_scores_all,
-        zA_runs=z_a_runs,
-        zB_runs=z_b_runs,
-        # Per-sample CEBRA latent coordinates for downstream decoding.
-        # These preserve the no-shared-neuron setup: each environment/rat is
-        # transformed by its own fitted CEBRA model, and cross-animal transfer
-        # should happen only after latent-space alignment.
-        embeddingA_runs=embedding_a_runs,
-        embeddingB_runs=embedding_b_runs,
-        labelsA=CSUSA1,
-        labelsB=CSUSB1,
-        sample_indicesA=np.arange(len(CSUSA1)),
-        sample_indicesB=np.arange(len(CSUSB1)),
-        trial_idsA=CSUSA1_trial_ids if CSUSA1_trial_ids is not None else np.array([]),
-        trial_idsB=CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),
-        bins=bins,
-        parameter_set_name=parameter_set_name,
-        output_dimension=output_dimension,
-        dimensions=dimensions,
-        rat_id=rat_id if rat_id else "",
-        session_id=session_id if session_id else "",
-    )
+    save_dict = {
+        "rReal": real_scores,
+        "rShuff": shuffle_scores,
+        "rShuffAll": shuffle_scores_all,
+        "labelsAn": CSUSAn,
+        "sample_indicesAn": np.arange(len(CSUSAn)),
+        "trial_idsAn": np.array([]),
+        "bins": bins,
+        "parameter_set_name": parameter_set_name,
+        "output_dimension": output_dimension,
+        "dimensions": dimensions,
+        "rat_id": rat_id if rat_id else "",
+        "session_id": session_id if session_id else "",
+        "save_branch": save_branch,
+    }
+    if save_a_branch:
+        save_dict.update(
+            {
+                "zA_runs": z_a_runs,
+                "zAnA_runs": z_an_a_runs,
+                "embeddingA_runs": embedding_a_runs,
+                "embeddingAnA_runs": embedding_an_a_runs,
+                "labelsA": CSUSA1,
+                "sample_indicesA": np.arange(len(CSUSA1)),
+                "trial_idsA": CSUSA1_trial_ids if CSUSA1_trial_ids is not None else np.array([]),
+            }
+        )
+    if save_b_branch:
+        save_dict.update(
+            {
+                "zB_runs": z_b_runs,
+                "zAnB_runs": z_an_b_runs,
+                "embeddingB_runs": embedding_b_runs,
+                "embeddingAnB_runs": embedding_an_b_runs,
+                "labelsB": CSUSB1,
+                "sample_indicesB": np.arange(len(CSUSB1)),
+                "trial_idsB": CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),
+            }
+        )
+    np.savez(npz_path, **save_dict)
     try:
-        plot_paired_geometry_scores(real_scores, shuffle_scores, plot_path, rat_id=rat_id)
+        if shuffles == 0 or not compute_ab_geometry:
+            plot_path = None
+            reason = "--shuffles 0 was requested" if shuffles == 0 else f"--save_branch {save_branch} skips A-vs-B geometry"
+            print(f"Skipping rat geometry shuffle plot because {reason}.")
+        else:
+            plot_paired_geometry_scores(real_scores, shuffle_scores, plot_path, rat_id=rat_id)
     except ImportError as exc:
         plot_path = None
         print(f"Skipping rat plot because matplotlib is unavailable: {exc}")
@@ -455,16 +532,22 @@ def run_geometry_preservation(
     if plot_path:
         print(f"Rat plot saved to {plot_path}")
     print("Run-level paired stats:")
-    print(f"  n_runs: {stats['n_runs']}")
-    print(f"  rReal mean +/- SEM: {stats['real_mean']:.6f} +/- {stats['real_sem']:.6f}")
-    print(f"  rShuff mean +/- SEM: {stats['shuff_mean']:.6f} +/- {stats['shuff_sem']:.6f}")
-    print(f"  rReal - rShuff mean +/- SEM: {stats['diff_mean']:.6f} +/- {stats['diff_sem']:.6f}")
-    print(
-        "  paired sign-flip p(two-sided): "
-        f"{stats['sign_flip_p_two_sided']:.6g} "
-        f"(n_perm={stats['sign_flip_n_permutations']}, exact={stats['sign_flip_exact']})"
-    )
-    print(f"  paired t-test: t={stats['paired_t_stat']:.6f}, p(two-sided)={stats['paired_t_p_two_sided']:.6g}")
+    print(f"  n_runs: {iterations}")
+    if not compute_ab_geometry:
+        print(f"  A-vs-B geometry stats skipped (--save_branch {save_branch}).")
+    else:
+        print(f"  rReal mean +/- SEM: {stats['real_mean']:.6f} +/- {stats['real_sem']:.6f}")
+    if shuffles == 0:
+        print("  geometry shuffle controls skipped (--shuffles 0).")
+    elif compute_ab_geometry:
+        print(f"  rShuff mean +/- SEM: {stats['shuff_mean']:.6f} +/- {stats['shuff_sem']:.6f}")
+        print(f"  rReal - rShuff mean +/- SEM: {stats['diff_mean']:.6f} +/- {stats['diff_sem']:.6f}")
+        print(
+            "  paired sign-flip p(two-sided): "
+            f"{stats['sign_flip_p_two_sided']:.6g} "
+            f"(n_perm={stats['sign_flip_n_permutations']}, exact={stats['sign_flip_exact']})"
+        )
+        print(f"  paired t-test: t={stats['paired_t_stat']:.6f}, p(two-sided)={stats['paired_t_p_two_sided']:.6g}")
 
     return {
         "summary_path": summary_path,
