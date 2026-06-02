@@ -207,6 +207,30 @@ def normalize_run_embeddings(embeddings):
     return list(embeddings)
 
 
+def extract_cebra_loss_history(model):
+    """Return a CEBRA training-loss history if this CEBRA version exposes one."""
+    state = getattr(model, "state_dict_", None)
+    if isinstance(state, dict) and "loss" in state:
+        loss = np.asarray(state["loss"], dtype=float).reshape(-1)
+        return loss
+    for attr in ("loss_", "loss_history_", "training_loss_", "history_"):
+        if hasattr(model, attr):
+            value = getattr(model, attr)
+            if isinstance(value, dict) and "loss" in value:
+                value = value["loss"]
+            try:
+                return np.asarray(value, dtype=float).reshape(-1)
+            except (TypeError, ValueError):
+                continue
+    return np.array([], dtype=float)
+
+
+def final_loss_from_history(loss_history):
+    loss_history = np.asarray(loss_history, dtype=float).reshape(-1)
+    finite = loss_history[np.isfinite(loss_history)]
+    return float(finite[-1]) if finite.size else np.nan
+
+
 def compute_geometry_preservation_group(
     z_a_runs,
     z_b_runs,
@@ -349,6 +373,10 @@ def run_geometry_preservation(
     embedding_b_runs = None
     embedding_an_a_runs = None
     embedding_an_b_runs = None
+    loss_a_runs = np.full(iterations, np.nan)
+    loss_b_runs = np.full(iterations, np.nan)
+    loss_a_history_runs = []
+    loss_b_history_runs = []
     summary_rows = []
     shuffle_rows = []
 
@@ -360,6 +388,9 @@ def run_geometry_preservation(
         if save_a_branch:
             model_a = make_cebra_model(parameter_set, output_dimension)
             model_a.fit(traceA1An_An, CSUSAn)
+            loss_a_history = extract_cebra_loss_history(model_a)
+            loss_a_runs[run_idx] = final_loss_from_history(loss_a_history)
+            loss_a_history_runs.append(loss_a_history)
             embedding_an_a = model_a.transform(traceA1An_An)
             embedding_a = model_a.transform(traceA1An_A1)
             z_an_a = bin_mean_embedding(embedding_an_a, CSUSAn, bins)
@@ -377,6 +408,9 @@ def run_geometry_preservation(
         if save_b_branch:
             model_b = make_cebra_model(parameter_set, output_dimension)
             model_b.fit(traceAnB1_An, CSUSAn)
+            loss_b_history = extract_cebra_loss_history(model_b)
+            loss_b_runs[run_idx] = final_loss_from_history(loss_b_history)
+            loss_b_history_runs.append(loss_b_history)
             embedding_an_b = model_b.transform(traceAnB1_An)
             embedding_b = model_b.transform(traceAnB1_B1)
             z_an_b = bin_mean_embedding(embedding_an_b, CSUSAn, bins)
@@ -420,6 +454,8 @@ def run_geometry_preservation(
                 "rDiff": real_score - shuff_score,
                 "real_score": real_score,
                 "shuffle_score": shuff_score,
+                "lossA": loss_a_runs[run_idx],
+                "lossB": loss_b_runs[run_idx],
             }
         )
         for shuffle_idx, shuffle_score in enumerate(run_shuff_scores):
@@ -496,6 +532,8 @@ def run_geometry_preservation(
                 "zAnA_runs": z_an_a_runs,
                 "embeddingA_runs": embedding_a_runs,
                 "embeddingAnA_runs": embedding_an_a_runs,
+                "lossA_runs": loss_a_runs,
+                "lossA_history_runs": np.asarray(loss_a_history_runs, dtype=object),
                 "labelsA": CSUSA1,
                 "sample_indicesA": np.arange(len(CSUSA1)),
                 "trial_idsA": CSUSA1_trial_ids if CSUSA1_trial_ids is not None else np.array([]),
@@ -508,6 +546,8 @@ def run_geometry_preservation(
                 "zAnB_runs": z_an_b_runs,
                 "embeddingB_runs": embedding_b_runs,
                 "embeddingAnB_runs": embedding_an_b_runs,
+                "lossB_runs": loss_b_runs,
+                "lossB_history_runs": np.asarray(loss_b_history_runs, dtype=object),
                 "labelsB": CSUSB1,
                 "sample_indicesB": np.arange(len(CSUSB1)),
                 "trial_idsB": CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),

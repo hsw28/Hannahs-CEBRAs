@@ -5,7 +5,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=20GB
-#SBATCH --time=6:00:00
+#SBATCH --time=15:00:00
 #SBATCH --job-name="geom_0314_${SLURM_ARRAY_TASK_ID}"
 #SBATCH --output=geometry_preservation_0314.%A_%a.out
 #SBATCH --mail-type=BEGIN,END,FAIL
