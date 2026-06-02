@@ -99,6 +99,7 @@ parser.add_argument("--trial_ids_A1", type=str, default=None, help="Optional tri
 parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional trial IDs for traceAnB1_B1 samples.")
 parser.add_argument("--traceAn_full", type=str, default=None, help="Optional full-population A(n) trace file. When provided, this replaces traceAnB1_An for geometry preservation.")
 parser.add_argument("--traceB1_full", type=str, default=None, help="Optional full-population B(1) trace file. When provided, this replaces traceAnB1_B1 for geometry preservation.")
+parser.add_argument("--resume_checkpoint", type=str, default=None, help="Optional *_checkpoint.npz file from a timed-out run. Completed runs are loaded and remaining runs are appended.")
 args = parser.parse_args()
 
 
@@ -160,6 +161,7 @@ run_geometry_preservation(
     random_seed=args.random_seed,
     save_branch=args.save_branch,
     comparison_mode="An_vs_B1_separately_trained_full_population" if (args.traceAn_full or args.traceB1_full) else "An_vs_B1_separately_trained_matched_population",
+    resume_checkpoint=args.resume_checkpoint,
     CSUSA1_trial_ids=trial_ids_A1,
     CSUSB1_trial_ids=trial_ids_B1,
 )

@@ -336,6 +336,7 @@ def run_geometry_preservation(
     CSUSB1_trial_ids=None,
     save_branch="both",
     comparison_mode="An_vs_B1_separately_trained_full_population",
+    resume_checkpoint=None,
 ):
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_seed)
@@ -380,8 +381,204 @@ def run_geometry_preservation(
     loss_b_history_runs = []
     summary_rows = []
     shuffle_rows = []
+    start_run_idx = 0
 
-    for run_idx in range(iterations):
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    rat_part = f"_{rat_id}" if rat_id else ""
+    branch_part = "" if save_branch == "both" else f"_{save_branch}branch"
+    base = (
+        f"geometry_preservation{rat_part}_{parameter_set_name}"
+        f"_dim{output_dimension}_bins{dimensions}{branch_part}_{timestamp}"
+    )
+    summary_path = os.path.join(output_dir, f"{base}_summary.csv")
+    shuffle_path = os.path.join(output_dir, f"{base}_shuffles.csv")
+    stats_path = os.path.join(output_dir, f"{base}_stats.csv")
+    npz_path = os.path.join(output_dir, f"{base}.npz")
+    plot_path = os.path.join(output_dir, f"{base}.png")
+    checkpoint_npz_path = os.path.join(output_dir, f"{base}_checkpoint.npz")
+    checkpoint_summary_path = os.path.join(output_dir, f"{base}_checkpoint_summary.csv")
+    checkpoint_shuffle_path = os.path.join(output_dir, f"{base}_checkpoint_shuffles.csv")
+
+    def slice_runs(values, completed_runs):
+        if values is None:
+            return None
+        return values[:completed_runs]
+
+    def build_save_dict(completed_runs=None):
+        n_completed = iterations if completed_runs is None else int(completed_runs)
+        save_dict = {
+            "completed_runs": n_completed,
+            "expected_runs": iterations,
+            "rReal": real_scores[:n_completed],
+            "rShuff": shuffle_scores[:n_completed],
+            "rShuffAll": shuffle_scores_all[:n_completed],
+            "labelsAn": CSUSAn,
+            "sample_indicesAn": np.arange(len(CSUSAn)),
+            "trial_idsAn": np.array([]),
+            "bins": bins,
+            "parameter_set_name": parameter_set_name,
+            "comparison_mode": comparison_mode,
+            "output_dimension": output_dimension,
+            "dimensions": dimensions,
+            "rat_id": rat_id if rat_id else "",
+            "session_id": session_id if session_id else "",
+            "save_branch": save_branch,
+        }
+        if save_a_branch:
+            save_dict.update(
+                {
+                    "zA_runs": slice_runs(z_a_runs, n_completed),
+                    "zAnA_runs": slice_runs(z_an_a_runs, n_completed),
+                    "embeddingA_runs": slice_runs(embedding_a_runs, n_completed),
+                    "embeddingAnA_runs": slice_runs(embedding_an_a_runs, n_completed),
+                    "lossA_runs": loss_a_runs[:n_completed],
+                    "lossA_history_runs": np.asarray(loss_a_history_runs[:n_completed], dtype=object),
+                    "labelsA": CSUSAn,
+                    "sample_indicesA": np.arange(len(CSUSAn)),
+                    "trial_idsA": np.array([]),
+                }
+            )
+        if save_b_branch:
+            save_dict.update(
+                {
+                    "zB_runs": slice_runs(z_b_runs, n_completed),
+                    "zAnB_runs": slice_runs(z_an_b_runs, n_completed),
+                    "embeddingB_runs": slice_runs(embedding_b_runs, n_completed),
+                    "embeddingAnB_runs": slice_runs(embedding_an_b_runs, n_completed),
+                    "lossB_runs": loss_b_runs[:n_completed],
+                    "lossB_history_runs": np.asarray(loss_b_history_runs[:n_completed], dtype=object),
+                    "labelsB": CSUSB1,
+                    "sample_indicesB": np.arange(len(CSUSB1)),
+                    "trial_idsB": CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),
+                }
+            )
+        return {key: value for key, value in save_dict.items() if value is not None}
+
+    def write_checkpoint(completed_runs):
+        np.savez(checkpoint_npz_path, **build_save_dict(completed_runs=completed_runs))
+        pd.DataFrame(summary_rows).to_csv(checkpoint_summary_path, index=False)
+        pd.DataFrame(shuffle_rows).to_csv(checkpoint_shuffle_path, index=False)
+        print(
+            f"Checkpoint saved after {completed_runs}/{iterations} runs: "
+            f"{checkpoint_npz_path}"
+        )
+
+    if resume_checkpoint:
+        resume_checkpoint = os.path.abspath(resume_checkpoint)
+        resume_data = np.load(resume_checkpoint, allow_pickle=True)
+        if "completed_runs" in resume_data:
+            start_run_idx = int(np.asarray(resume_data["completed_runs"]).reshape(-1)[0])
+        else:
+            start_run_idx = len(resume_data["rReal"])
+        if start_run_idx > iterations:
+            raise ValueError(
+                f"Checkpoint has {start_run_idx} completed runs, which exceeds requested iterations={iterations}."
+            )
+        if "expected_runs" in resume_data and int(np.asarray(resume_data["expected_runs"]).reshape(-1)[0]) != iterations:
+            print(
+                f"Warning: checkpoint expected_runs={int(np.asarray(resume_data['expected_runs']).reshape(-1)[0])} "
+                f"but requested iterations={iterations}; continuing to {iterations}."
+            )
+        if "output_dimension" in resume_data and int(np.asarray(resume_data["output_dimension"]).reshape(-1)[0]) != output_dimension:
+            raise ValueError("Checkpoint output_dimension does not match requested output_dimension.")
+        if "dimensions" in resume_data and int(np.asarray(resume_data["dimensions"]).reshape(-1)[0]) != dimensions:
+            raise ValueError("Checkpoint dimensions does not match requested dimensions.")
+        if "bins" in resume_data and not np.array_equal(np.asarray(resume_data["bins"]), bins):
+            raise ValueError("Checkpoint bins do not match current bins.")
+
+        real_scores[:start_run_idx] = np.asarray(resume_data["rReal"], dtype=float)[:start_run_idx]
+        if "rShuff" in resume_data:
+            shuffle_scores[:start_run_idx] = np.asarray(resume_data["rShuff"], dtype=float)[:start_run_idx]
+        if "rShuffAll" in resume_data:
+            loaded_shuffles = np.asarray(resume_data["rShuffAll"], dtype=float)
+            if loaded_shuffles.shape[1:] != shuffle_scores_all.shape[1:] or loaded_shuffles.ndim != shuffle_scores_all.ndim:
+                raise ValueError(
+                    f"Checkpoint rShuffAll shape {loaded_shuffles.shape} does not match requested shuffles={shuffles}."
+                )
+            shuffle_scores_all[:start_run_idx] = loaded_shuffles[:start_run_idx]
+
+        if save_a_branch and "zA_runs" in resume_data:
+            loaded = np.asarray(resume_data["zA_runs"], dtype=float)
+            z_a_runs = np.zeros((iterations, *loaded.shape[1:]))
+            z_a_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["zAnA_runs"], dtype=float)
+            z_an_a_runs = np.zeros((iterations, *loaded.shape[1:]))
+            z_an_a_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["embeddingA_runs"], dtype=float)
+            embedding_a_runs = np.zeros((iterations, *loaded.shape[1:]))
+            embedding_a_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["embeddingAnA_runs"], dtype=float)
+            embedding_an_a_runs = np.zeros((iterations, *loaded.shape[1:]))
+            embedding_an_a_runs[:start_run_idx] = loaded[:start_run_idx]
+            loss_a_runs[:start_run_idx] = np.asarray(resume_data["lossA_runs"], dtype=float)[:start_run_idx]
+            if "lossA_history_runs" in resume_data:
+                loss_a_history_runs = list(resume_data["lossA_history_runs"][:start_run_idx])
+
+        if save_b_branch and "zB_runs" in resume_data:
+            loaded = np.asarray(resume_data["zB_runs"], dtype=float)
+            z_b_runs = np.zeros((iterations, *loaded.shape[1:]))
+            z_b_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["zAnB_runs"], dtype=float)
+            z_an_b_runs = np.zeros((iterations, *loaded.shape[1:]))
+            z_an_b_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["embeddingB_runs"], dtype=float)
+            embedding_b_runs = np.zeros((iterations, *loaded.shape[1:]))
+            embedding_b_runs[:start_run_idx] = loaded[:start_run_idx]
+            loaded = np.asarray(resume_data["embeddingAnB_runs"], dtype=float)
+            embedding_an_b_runs = np.zeros((iterations, *loaded.shape[1:]))
+            embedding_an_b_runs[:start_run_idx] = loaded[:start_run_idx]
+            loss_b_runs[:start_run_idx] = np.asarray(resume_data["lossB_runs"], dtype=float)[:start_run_idx]
+            if "lossB_history_runs" in resume_data:
+                loss_b_history_runs = list(resume_data["lossB_history_runs"][:start_run_idx])
+
+        checkpoint_summary_candidate = resume_checkpoint.replace("_checkpoint.npz", "_checkpoint_summary.csv")
+        checkpoint_shuffle_candidate = resume_checkpoint.replace("_checkpoint.npz", "_checkpoint_shuffles.csv")
+        if os.path.exists(checkpoint_summary_candidate):
+            summary_rows = pd.read_csv(checkpoint_summary_candidate).to_dict("records")
+        else:
+            summary_rows = [
+                {
+                    "rat_id": rat_id,
+                    "session_id": session_id,
+                    "parameter_set_name": parameter_set_name,
+                    "comparison_mode": comparison_mode,
+                    "dimensions_argument": dimensions,
+                    "output_dimension": output_dimension,
+                    "model_run": run_idx,
+                    "save_branch": save_branch,
+                    "n_bins": len(bins),
+                    "n_shuff": shuffles,
+                    "rReal": real_scores[run_idx],
+                    "rShuff": shuffle_scores[run_idx],
+                    "rDiff": real_scores[run_idx] - shuffle_scores[run_idx],
+                    "real_score": real_scores[run_idx],
+                    "shuffle_score": shuffle_scores[run_idx],
+                    "lossA": loss_a_runs[run_idx],
+                    "lossB": loss_b_runs[run_idx],
+                }
+                for run_idx in range(start_run_idx)
+            ]
+        if os.path.exists(checkpoint_shuffle_candidate):
+            shuffle_rows = pd.read_csv(checkpoint_shuffle_candidate).to_dict("records")
+        else:
+            shuffle_rows = [
+                {
+                    "rat_id": rat_id,
+                    "session_id": session_id,
+                    "parameter_set_name": parameter_set_name,
+                    "comparison_mode": comparison_mode,
+                    "dimensions_argument": dimensions,
+                    "output_dimension": output_dimension,
+                    "model_run": run_idx,
+                    "shuffle_id": shuffle_idx,
+                    "shuffle_score": shuffle_scores_all[run_idx, shuffle_idx],
+                }
+                for run_idx in range(start_run_idx)
+                for shuffle_idx in range(shuffles)
+            ]
+        print(f"Resuming from {resume_checkpoint}: {start_run_idx}/{iterations} runs already complete.")
+
+    for run_idx in range(start_run_idx, iterations):
         print(f"Geometry run {run_idx + 1}/{iterations}")
 
         z_a = None
@@ -478,6 +675,7 @@ def run_geometry_preservation(
                     "shuffle_score": shuffle_score,
                 }
             )
+        write_checkpoint(run_idx + 1)
 
     stats = paired_geometry_stats(real_scores, shuffle_scores, rng=rng)
     if shuffles == 0 or not compute_ab_geometry:
@@ -508,67 +706,10 @@ def run_geometry_preservation(
         }
     ]
 
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    rat_part = f"_{rat_id}" if rat_id else ""
-    branch_part = "" if save_branch == "both" else f"_{save_branch}branch"
-    base = (
-        f"geometry_preservation{rat_part}_{parameter_set_name}"
-        f"_dim{output_dimension}_bins{dimensions}{branch_part}_{timestamp}"
-    )
-    summary_path = os.path.join(output_dir, f"{base}_summary.csv")
-    shuffle_path = os.path.join(output_dir, f"{base}_shuffles.csv")
-    stats_path = os.path.join(output_dir, f"{base}_stats.csv")
-    npz_path = os.path.join(output_dir, f"{base}.npz")
-    plot_path = os.path.join(output_dir, f"{base}.png")
-
     pd.DataFrame(summary_rows).to_csv(summary_path, index=False)
     pd.DataFrame(shuffle_rows).to_csv(shuffle_path, index=False)
     pd.DataFrame(stats_rows).to_csv(stats_path, index=False)
-    save_dict = {
-        "rReal": real_scores,
-        "rShuff": shuffle_scores,
-        "rShuffAll": shuffle_scores_all,
-        "labelsAn": CSUSAn,
-        "sample_indicesAn": np.arange(len(CSUSAn)),
-        "trial_idsAn": np.array([]),
-        "bins": bins,
-        "parameter_set_name": parameter_set_name,
-        "comparison_mode": comparison_mode,
-        "output_dimension": output_dimension,
-        "dimensions": dimensions,
-        "rat_id": rat_id if rat_id else "",
-        "session_id": session_id if session_id else "",
-        "save_branch": save_branch,
-    }
-    if save_a_branch:
-        save_dict.update(
-            {
-                "zA_runs": z_a_runs,
-                "zAnA_runs": z_an_a_runs,
-                "embeddingA_runs": embedding_a_runs,
-                "embeddingAnA_runs": embedding_an_a_runs,
-                "lossA_runs": loss_a_runs,
-                "lossA_history_runs": np.asarray(loss_a_history_runs, dtype=object),
-                "labelsA": CSUSAn,
-                "sample_indicesA": np.arange(len(CSUSAn)),
-                "trial_idsA": np.array([]),
-            }
-        )
-    if save_b_branch:
-        save_dict.update(
-            {
-                "zB_runs": z_b_runs,
-                "zAnB_runs": z_an_b_runs,
-                "embeddingB_runs": embedding_b_runs,
-                "embeddingAnB_runs": embedding_an_b_runs,
-                "lossB_runs": loss_b_runs,
-                "lossB_history_runs": np.asarray(loss_b_history_runs, dtype=object),
-                "labelsB": CSUSB1,
-                "sample_indicesB": np.arange(len(CSUSB1)),
-                "trial_idsB": CSUSB1_trial_ids if CSUSB1_trial_ids is not None else np.array([]),
-            }
-        )
-    np.savez(npz_path, **save_dict)
+    np.savez(npz_path, **build_save_dict())
     try:
         if shuffles == 0 or not compute_ab_geometry:
             plot_path = None
