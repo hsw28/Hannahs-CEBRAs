@@ -335,8 +335,8 @@ def run_geometry_preservation(
     CSUSA1_trial_ids=None,
     CSUSB1_trial_ids=None,
     save_branch="both",
+    comparison_mode="An_vs_B1_separately_trained_full_population",
 ):
-    comparison_mode = "An_vs_B1_separately_trained"
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_seed)
     save_branch = str(save_branch).lower()
@@ -412,9 +412,13 @@ def run_geometry_preservation(
             loss_b_history = extract_cebra_loss_history(model_b)
             loss_b_runs[run_idx] = final_loss_from_history(loss_b_history)
             loss_b_history_runs.append(loss_b_history)
-            embedding_an_b = model_b.transform(traceAnB1_An)
             embedding_b = model_b.transform(traceAnB1_B1)
-            z_an_b = bin_mean_embedding(embedding_an_b, CSUSAn, bins)
+            if traceAnB1_An.shape[1] == traceAnB1_B1.shape[1]:
+                embedding_an_b = model_b.transform(traceAnB1_An)
+                z_an_b = bin_mean_embedding(embedding_an_b, CSUSAn, bins)
+            else:
+                embedding_an_b = np.full((traceAnB1_An.shape[0], output_dimension), np.nan, dtype=float)
+                z_an_b = np.full((len(bins), output_dimension), np.nan, dtype=float)
             z_b = bin_mean_embedding(embedding_b, CSUSB1, bins)
             if z_b_runs is None:
                 z_b_runs = np.zeros((iterations, z_b.shape[0], z_b.shape[1]))

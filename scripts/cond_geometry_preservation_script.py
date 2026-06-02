@@ -97,6 +97,8 @@ parser.add_argument("--random_seed", type=int, default=None, help="Optional rand
 parser.add_argument("--save_branch", choices=["both", "A", "B"], default="both", help="Which CEBRA branch to fit/save. Use A to save only A(n)-trained embeddings, B to save only B(1)-trained embeddings, or both to compare A(n) and B(1) geometry.")
 parser.add_argument("--trial_ids_A1", type=str, default=None, help="Optional trial IDs for traceA1An_A1 samples.")
 parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional trial IDs for traceAnB1_B1 samples.")
+parser.add_argument("--traceAn_full", type=str, default=None, help="Optional full-population A(n) trace file. When provided, this replaces traceAnB1_An for geometry preservation.")
+parser.add_argument("--traceB1_full", type=str, default=None, help="Optional full-population B(1) trace file. When provided, this replaces traceAnB1_B1 for geometry preservation.")
 args = parser.parse_args()
 
 
@@ -104,6 +106,8 @@ traceA1An_An = np.transpose(cebra.load_data(file=args.traceA1An_An))
 traceAnB1_An = np.transpose(cebra.load_data(file=args.traceAnB1_An))
 traceA1An_A1 = np.transpose(cebra.load_data(file=args.traceA1An_A1))
 traceAnB1_B1 = np.transpose(cebra.load_data(file=args.traceAnB1_B1))
+traceAn_geometry = np.transpose(cebra.load_data(file=args.traceAn_full)) if args.traceAn_full else traceAnB1_An
+traceB1_geometry = np.transpose(cebra.load_data(file=args.traceB1_full)) if args.traceB1_full else traceAnB1_B1
 
 CSUSAn = cebra.load_data(file=args.CSUSAn)[0, :].flatten()
 CSUSA1 = cebra.load_data(file=args.CSUSA1)[0, :].flatten()
@@ -111,9 +115,8 @@ CSUSB1 = cebra.load_data(file=args.CSUSB1)[0, :].flatten()
 trial_ids_A1 = cebra.load_data(file=args.trial_ids_A1).flatten() if args.trial_ids_A1 else None
 trial_ids_B1 = cebra.load_data(file=args.trial_ids_B1).flatten() if args.trial_ids_B1 else None
 
-traceA1An_An, traceAnB1_An, CSUSAn = filter_paired_training_traces(
-    traceA1An_An,
-    traceAnB1_An,
+traceAn_geometry, CSUSAn = filter_pretrial(
+    traceAn_geometry,
     CSUSAn,
     args.pretrial_y_or_n,
 )
@@ -123,8 +126,8 @@ traceA1An_A1, CSUSA1, trial_ids_A1 = filter_pretrial_optional_ids(
     trial_ids_A1,
     args.pretrial_y_or_n,
 )
-traceAnB1_B1, CSUSB1, trial_ids_B1 = filter_pretrial_optional_ids(
-    traceAnB1_B1,
+traceB1_geometry, CSUSB1, trial_ids_B1 = filter_pretrial_optional_ids(
+    traceB1_geometry,
     CSUSB1,
     trial_ids_B1,
     args.pretrial_y_or_n,
@@ -138,10 +141,10 @@ dimensions = args.how_many_divisions + args.pretrial_y_or_n
 parameter_set = parameter_sets[args.parameter_set_name]
 
 run_geometry_preservation(
-    traceA1An_An,
-    traceAnB1_An,
+    traceAn_geometry,
+    traceAn_geometry,
     traceA1An_A1,
-    traceAnB1_B1,
+    traceB1_geometry,
     CSUSAn,
     CSUSA1,
     CSUSB1,
@@ -156,6 +159,7 @@ run_geometry_preservation(
     session_id=args.session_id,
     random_seed=args.random_seed,
     save_branch=args.save_branch,
+    comparison_mode="An_vs_B1_separately_trained_full_population" if (args.traceAn_full or args.traceB1_full) else "An_vs_B1_separately_trained_matched_population",
     CSUSA1_trial_ids=trial_ids_A1,
     CSUSB1_trial_ids=trial_ids_B1,
 )
