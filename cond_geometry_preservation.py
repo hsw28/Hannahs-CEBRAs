@@ -336,6 +336,7 @@ def run_geometry_preservation(
     CSUSB1_trial_ids=None,
     save_branch="both",
 ):
+    comparison_mode = "An_vs_B1_separately_trained"
     os.makedirs(output_dir, exist_ok=True)
     rng = np.random.default_rng(random_seed)
     save_branch = str(save_branch).lower()
@@ -357,9 +358,9 @@ def run_geometry_preservation(
         raise ValueError("CSUSB1_trial_ids must match CSUSB1 length after trimming/filtering.")
 
     if compute_ab_geometry:
-        bins = common_bins(CSUSA1, CSUSB1)
+        bins = common_bins(CSUSAn, CSUSB1)
     elif save_a_branch:
-        bins = common_bins(CSUSA1, CSUSAn)
+        bins = common_bins(CSUSAn, CSUSAn)
     else:
         bins = common_bins(CSUSB1, CSUSAn)
     real_scores = np.full(iterations, np.nan)
@@ -387,14 +388,14 @@ def run_geometry_preservation(
         z_b = None
         if save_a_branch:
             model_a = make_cebra_model(parameter_set, output_dimension)
-            model_a.fit(traceA1An_An, CSUSAn)
+            model_a.fit(traceAnB1_An, CSUSAn)
             loss_a_history = extract_cebra_loss_history(model_a)
             loss_a_runs[run_idx] = final_loss_from_history(loss_a_history)
             loss_a_history_runs.append(loss_a_history)
-            embedding_an_a = model_a.transform(traceA1An_An)
-            embedding_a = model_a.transform(traceA1An_A1)
+            embedding_an_a = model_a.transform(traceAnB1_An)
+            embedding_a = embedding_an_a
             z_an_a = bin_mean_embedding(embedding_an_a, CSUSAn, bins)
-            z_a = bin_mean_embedding(embedding_a, CSUSA1, bins)
+            z_a = z_an_a
             if z_a_runs is None:
                 z_a_runs = np.zeros((iterations, z_a.shape[0], z_a.shape[1]))
                 z_an_a_runs = np.zeros((iterations, z_an_a.shape[0], z_an_a.shape[1]))
@@ -407,7 +408,7 @@ def run_geometry_preservation(
 
         if save_b_branch:
             model_b = make_cebra_model(parameter_set, output_dimension)
-            model_b.fit(traceAnB1_An, CSUSAn)
+            model_b.fit(traceAnB1_B1, CSUSB1)
             loss_b_history = extract_cebra_loss_history(model_b)
             loss_b_runs[run_idx] = final_loss_from_history(loss_b_history)
             loss_b_history_runs.append(loss_b_history)
@@ -443,6 +444,7 @@ def run_geometry_preservation(
                 "rat_id": rat_id,
                 "session_id": session_id,
                 "parameter_set_name": parameter_set_name,
+                "comparison_mode": comparison_mode,
                 "dimensions_argument": dimensions,
                 "output_dimension": output_dimension,
                 "model_run": run_idx,
@@ -464,6 +466,7 @@ def run_geometry_preservation(
                     "rat_id": rat_id,
                     "session_id": session_id,
                     "parameter_set_name": parameter_set_name,
+                    "comparison_mode": comparison_mode,
                     "dimensions_argument": dimensions,
                     "output_dimension": output_dimension,
                     "model_run": run_idx,
@@ -491,7 +494,14 @@ def run_geometry_preservation(
             }
         )
     stats_rows = [
-        {"rat_id": rat_id, "session_id": session_id, "parameter_set_name": parameter_set_name, "save_branch": save_branch, **stats}
+        {
+            "rat_id": rat_id,
+            "session_id": session_id,
+            "parameter_set_name": parameter_set_name,
+            "comparison_mode": comparison_mode,
+            "save_branch": save_branch,
+            **stats,
+        }
     ]
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -519,6 +529,7 @@ def run_geometry_preservation(
         "trial_idsAn": np.array([]),
         "bins": bins,
         "parameter_set_name": parameter_set_name,
+        "comparison_mode": comparison_mode,
         "output_dimension": output_dimension,
         "dimensions": dimensions,
         "rat_id": rat_id if rat_id else "",
@@ -534,9 +545,9 @@ def run_geometry_preservation(
                 "embeddingAnA_runs": embedding_an_a_runs,
                 "lossA_runs": loss_a_runs,
                 "lossA_history_runs": np.asarray(loss_a_history_runs, dtype=object),
-                "labelsA": CSUSA1,
-                "sample_indicesA": np.arange(len(CSUSA1)),
-                "trial_idsA": CSUSA1_trial_ids if CSUSA1_trial_ids is not None else np.array([]),
+                "labelsA": CSUSAn,
+                "sample_indicesA": np.arange(len(CSUSAn)),
+                "trial_idsA": np.array([]),
             }
         )
     if save_b_branch:

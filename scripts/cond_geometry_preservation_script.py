@@ -76,7 +76,7 @@ def filter_paired_training_traces(trace_a, trace_b, labels, pretrial_y_or_n):
     return trace_a[mask], trace_b[mask], labels[mask]
 
 
-parser = argparse.ArgumentParser(description="Quantify CEBRA task-geometry preservation across A and B environments.")
+parser = argparse.ArgumentParser(description="Quantify CEBRA task-geometry preservation between separately trained A(n) and B(1) embeddings.")
 parser.add_argument("traceA1An_An", type=str, help="Path to the traceA1An_An data file.")
 parser.add_argument("traceAnB1_An", type=str, help="Path to the traceAnB1_An data file.")
 parser.add_argument("traceA1An_A1", type=str, help="Path to the traceA1An_A1 data file.")
@@ -94,7 +94,7 @@ parser.add_argument("--output_dir", type=str, default="geometry_preservation_out
 parser.add_argument("--rat_id", type=str, default=None, help="Optional rat/session label for saved outputs and plots.")
 parser.add_argument("--session_id", type=str, default=None, help="Optional session label for saved outputs.")
 parser.add_argument("--random_seed", type=int, default=None, help="Optional random seed for shuffle controls.")
-parser.add_argument("--save_branch", choices=["both", "A", "B"], default="both", help="Which CEBRA branch to fit/save. Use A to save only A1 and AnA embeddings, B to save only B1 and AnB embeddings, or both for the original full geometry run.")
+parser.add_argument("--save_branch", choices=["both", "A", "B"], default="both", help="Which CEBRA branch to fit/save. Use A to save only A(n)-trained embeddings, B to save only B(1)-trained embeddings, or both to compare A(n) and B(1) geometry.")
 parser.add_argument("--trial_ids_A1", type=str, default=None, help="Optional trial IDs for traceA1An_A1 samples.")
 parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional trial IDs for traceAnB1_B1 samples.")
 args = parser.parse_args()
