@@ -1,6 +1,9 @@
 import argparse
+import glob
 import os
+import re
 import sys
+from datetime import datetime
 from itertools import combinations, permutations
 
 sys.path.append('/Users/Hannah/Programming/Hannahs-CEBRAs/')
@@ -20,6 +23,75 @@ COMPARISONS = [
     ("B_vs_A", "A_vs_B", "zB_runs", "zA_runs"),
     ("B_vs_B", "B_vs_B", "zB_runs", "zB_runs"),
 ]
+FULL_POP_COMPARISON_MODE = "An_vs_B1_separately_trained_full_population"
+GEOMETRY_NPZ_RE = re.compile(
+    r"^geometry_preservation_(rat[^_]+)_.+_(\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2})\.npz$"
+)
+
+
+def load_scalar_string(data, key):
+    if key not in data:
+        return ""
+    value = np.asarray(data[key])
+    if value.shape == ():
+        return str(value.item())
+    if value.size == 0:
+        return ""
+    return str(value.reshape(-1)[0])
+
+
+def load_rat_id(data, npz_path):
+    if "rat_id" in data:
+        rat_id = str(data["rat_id"])
+        if rat_id:
+            return rat_id
+    return os.path.basename(npz_path).split("_")[2] if "_" in os.path.basename(npz_path) else os.path.basename(npz_path)
+
+
+def geometry_npz_sort_key(npz_path):
+    basename = os.path.basename(npz_path)
+    match = GEOMETRY_NPZ_RE.match(basename)
+    if match:
+        return match.group(2)
+    return f"mtime_{os.path.getmtime(npz_path):.6f}"
+
+
+def discover_latest_rat_npzs(input_dir, required_comparison_mode):
+    candidates = sorted(glob.glob(os.path.join(input_dir, "geometry_preservation_rat*.npz")))
+    by_rat = {}
+    skipped = []
+
+    for path in candidates:
+        basename = os.path.basename(path)
+        if basename.endswith("_checkpoint.npz"):
+            skipped.append((path, "checkpoint"))
+            continue
+        try:
+            with np.load(path, allow_pickle=True) as data:
+                if "zA_runs" not in data or "zB_runs" not in data:
+                    skipped.append((path, "missing zA_runs/zB_runs"))
+                    continue
+                comparison_mode = load_scalar_string(data, "comparison_mode")
+                if required_comparison_mode and comparison_mode != required_comparison_mode:
+                    skipped.append((path, f"comparison_mode={comparison_mode or '<missing>'}"))
+                    continue
+                rat_id = load_rat_id(data, path)
+        except Exception as exc:
+            skipped.append((path, f"could not read: {exc}"))
+            continue
+
+        current = by_rat.get(rat_id)
+        if current is None or geometry_npz_sort_key(path) > geometry_npz_sort_key(current):
+            by_rat[rat_id] = path
+
+    if not by_rat:
+        details = "\n".join(f"  skipped {path}: {reason}" for path, reason in skipped[:20])
+        raise ValueError(
+            f"No usable final geometry NPZ files found in {input_dir}."
+            + (f"\n{details}" if details else "")
+        )
+
+    return [by_rat[rat_id] for rat_id in sorted(by_rat)], skipped
 
 
 def load_rat_embeddings(npz_path):
@@ -27,13 +99,9 @@ def load_rat_embeddings(npz_path):
     if "zA_runs" not in data or "zB_runs" not in data:
         raise ValueError(f"{npz_path} does not contain zA_runs/zB_runs.")
 
-    rat_id = str(data["rat_id"]) if "rat_id" in data else ""
-    if not rat_id:
-        rat_id = os.path.basename(npz_path).split("_")[2] if "_" in os.path.basename(npz_path) else os.path.basename(npz_path)
-
     return {
         "path": npz_path,
-        "rat_id": rat_id,
+        "rat_id": load_rat_id(data, npz_path),
         "zA_runs": np.asarray(data["zA_runs"], dtype=float),
         "zB_runs": np.asarray(data["zB_runs"], dtype=float),
     }
@@ -254,19 +322,58 @@ def main():
             "scores within each rat pair, then averages across rat pairs."
         )
     )
-    parser.add_argument("rat_npz", nargs="+", help="Per-rat geometry_preservation .npz files containing zA_runs/zB_runs.")
+    parser.add_argument("rat_npz", nargs="*", help="Per-rat geometry_preservation .npz files containing zA_runs/zB_runs.")
+    parser.add_argument(
+        "--input_dir",
+        default=None,
+        help=(
+            "Directory containing geometry_preservation_rat*.npz files. When provided, "
+            "the newest non-checkpoint NPZ is selected for each rat."
+        ),
+    )
     parser.add_argument("--n_null", type=int, default=500, help="Number of cross-rat mean null samples per comparison family.")
     parser.add_argument("--random_seed", type=int, default=20260508)
     parser.add_argument("--output_dir", default="cross_rat_geometry_shuffle_null_outputs")
+    parser.add_argument(
+        "--require_comparison_mode",
+        default="any",
+        help=(
+            "Optional required comparison_mode in each NPZ. Defaults to 'any'. "
+            f"Use '{FULL_POP_COMPARISON_MODE}' to require the full-population A(n)-vs-B(1) mode."
+        ),
+    )
     args = parser.parse_args()
 
     if args.n_null < 1:
         raise ValueError("--n_null must be at least 1.")
+    required_comparison_mode = None if args.require_comparison_mode == "any" else args.require_comparison_mode
+    if bool(args.input_dir) == bool(args.rat_npz):
+        raise ValueError("Provide either --input_dir or explicit rat_npz paths, but not both.")
 
     os.makedirs(args.output_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     rng = np.random.default_rng(args.random_seed)
+    if args.input_dir:
+        rat_npz_paths, skipped = discover_latest_rat_npzs(args.input_dir, required_comparison_mode)
+        print("Selected latest geometry NPZ per rat:")
+        for path in rat_npz_paths:
+            print(f"  {path}")
+        if skipped:
+            print(f"Skipped {len(skipped)} non-selected/unusable NPZ file(s); checkpoints and mismatched modes are ignored.")
+    else:
+        rat_npz_paths = args.rat_npz
 
-    observations = build_cross_rat_observations(args.rat_npz)
+    if required_comparison_mode:
+        for path in rat_npz_paths:
+            with np.load(path, allow_pickle=True) as data:
+                comparison_mode = load_scalar_string(data, "comparison_mode")
+            if comparison_mode != required_comparison_mode:
+                raise ValueError(
+                    f"{path} has comparison_mode={comparison_mode or '<missing>'}; "
+                    f"expected {required_comparison_mode}. Use --require_comparison_mode any to override."
+                )
+
+    observations = build_cross_rat_observations(rat_npz_paths)
     real_scores = compute_observation_scores(observations)
     shuffle_scores, permutations_by_bin = compute_shuffle_score_matrix(observations)
     pair_means = pair_mean_table(real_scores)
@@ -274,11 +381,11 @@ def main():
     stats = summarize_with_null(pair_means, null_means)
     plot_data = build_plot_data(pair_means, null_means)
 
-    real_scores_path = os.path.join(args.output_dir, "cross_rat_geometry_run_scores.csv")
-    pair_means_path = os.path.join(args.output_dir, "cross_rat_geometry_actual_rat_pair_means.csv")
-    null_means_path = os.path.join(args.output_dir, "cross_rat_geometry_shuffle_null_means.csv")
-    stats_path = os.path.join(args.output_dir, "cross_rat_geometry_shuffle_null_stats.csv")
-    plot_data_path = os.path.join(args.output_dir, "cross_rat_geometry_shuffle_null_plot_data.csv")
+    real_scores_path = os.path.join(args.output_dir, f"cross_rat_geometry_run_scores_{timestamp}.csv")
+    pair_means_path = os.path.join(args.output_dir, f"cross_rat_geometry_actual_rat_pair_means_{timestamp}.csv")
+    null_means_path = os.path.join(args.output_dir, f"cross_rat_geometry_shuffle_null_means_{timestamp}.csv")
+    stats_path = os.path.join(args.output_dir, f"cross_rat_geometry_shuffle_null_stats_{timestamp}.csv")
+    plot_data_path = os.path.join(args.output_dir, f"cross_rat_geometry_shuffle_null_plot_data_{timestamp}.csv")
 
     real_scores.to_csv(real_scores_path, index=False)
     pair_means.to_csv(pair_means_path, index=False)
