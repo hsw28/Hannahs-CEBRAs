@@ -77,15 +77,15 @@ def filter_paired_training_traces(trace_a, trace_b, labels, pretrial_y_or_n):
 
 
 parser = argparse.ArgumentParser(description="Quantify CEBRA task-geometry preservation between separately trained A(n) and B(1) embeddings.")
-parser.add_argument("traceA1An_An", type=str, help="Path to the traceA1An_An data file.")
-parser.add_argument("traceAnB1_An", type=str, help="Path to the traceAnB1_An data file.")
-parser.add_argument("traceA1An_A1", type=str, help="Path to the traceA1An_A1 data file.")
-parser.add_argument("traceAnB1_B1", type=str, help="Path to the traceAnB1_B1 data file.")
-parser.add_argument("CSUSAn", type=str, help="Path to the CSUSAn data file.")
-parser.add_argument("CSUSA1", type=str, help="Path to the CSUSA1 data file.")
-parser.add_argument("CSUSB1", type=str, help="Path to the CSUSB1 data file.")
-parser.add_argument("how_many_divisions", type=int, help="Number of task bins: 2, 5, or 10.")
-parser.add_argument("pretrial_y_or_n", type=int, choices=[0, 1], help="Pretrial flag (0 or 1).")
+parser.add_argument("traceA1An_An", nargs="?", type=str, help="Legacy path to the traceA1An_An data file.")
+parser.add_argument("traceAnB1_An", nargs="?", type=str, help="Legacy path to the traceAnB1_An data file.")
+parser.add_argument("traceA1An_A1", nargs="?", type=str, help="Legacy path to the traceA1An_A1 data file.")
+parser.add_argument("traceAnB1_B1", nargs="?", type=str, help="Legacy path to the traceAnB1_B1 data file.")
+parser.add_argument("CSUSAn", nargs="?", type=str, help="Legacy path to the CSUSAn data file.")
+parser.add_argument("CSUSA1", nargs="?", type=str, help="Legacy path to the CSUSA1 data file.")
+parser.add_argument("CSUSB1", nargs="?", type=str, help="Legacy path to the CSUSB1 data file.")
+parser.add_argument("how_many_divisions", nargs="?", type=int, help="Number of task bins: 2, 5, or 10.")
+parser.add_argument("pretrial_y_or_n", nargs="?", type=int, choices=[0, 1], help="Pretrial flag (0 or 1).")
 parser.add_argument("--iterations", type=int, default=20, help="Number of independent CEBRA model runs.")
 parser.add_argument("--shuffles", type=int, default=1, help="Number of task-bin order shuffles per model run. Use 0 to skip geometry shuffle controls and only save embeddings.")
 parser.add_argument("--output_dimension", type=int, default=3, help="CEBRA embedding dimensionality.")
@@ -100,45 +100,90 @@ parser.add_argument("--trial_ids_B1", type=str, default=None, help="Optional tri
 parser.add_argument("--traceAn_full", type=str, default=None, help="Optional full-population A(n) trace file. When provided, this replaces traceAnB1_An for geometry preservation.")
 parser.add_argument("--traceB1_full", type=str, default=None, help="Optional full-population B(1) trace file. When provided, this replaces traceAnB1_B1 for geometry preservation.")
 parser.add_argument("--resume_checkpoint", type=str, default=None, help="Optional *_checkpoint.npz file from a timed-out run. Completed runs are loaded and remaining runs are appended.")
+parser.add_argument("--labelsAn", type=str, default=None, help="Full-population mode path to the A(n) CS-US label file.")
+parser.add_argument("--labelsB1", type=str, default=None, help="Full-population mode path to the B(1) CS-US label file.")
+parser.add_argument("--labelsA1", type=str, default=None, help="Optional legacy A(1) CS-US label file. Not used for full-population geometry.")
+parser.add_argument("--task_bins", type=int, choices=[2, 5, 10], default=None, help="Number of task bins for clean full-population CLI mode.")
+parser.add_argument("--pretrial", type=int, choices=[0, 1], default=None, help="Pretrial flag for clean full-population CLI mode.")
 args = parser.parse_args()
 
 
-traceA1An_An = np.transpose(cebra.load_data(file=args.traceA1An_An))
-traceAnB1_An = np.transpose(cebra.load_data(file=args.traceAnB1_An))
-traceA1An_A1 = np.transpose(cebra.load_data(file=args.traceA1An_A1))
-traceAnB1_B1 = np.transpose(cebra.load_data(file=args.traceAnB1_B1))
-traceAn_geometry = np.transpose(cebra.load_data(file=args.traceAn_full)) if args.traceAn_full else traceAnB1_An
-traceB1_geometry = np.transpose(cebra.load_data(file=args.traceB1_full)) if args.traceB1_full else traceAnB1_B1
+how_many_divisions = args.how_many_divisions if args.how_many_divisions is not None else args.task_bins
+pretrial_y_or_n = args.pretrial_y_or_n if args.pretrial_y_or_n is not None else args.pretrial
+if how_many_divisions is None:
+    raise ValueError("Provide the task-bin count either positionally or with --task_bins.")
+if pretrial_y_or_n is None:
+    raise ValueError("Provide the pretrial flag either positionally or with --pretrial.")
 
-CSUSAn = cebra.load_data(file=args.CSUSAn)[0, :].flatten()
-CSUSA1 = cebra.load_data(file=args.CSUSA1)[0, :].flatten()
-CSUSB1 = cebra.load_data(file=args.CSUSB1)[0, :].flatten()
+labels_an_path = args.labelsAn or args.CSUSAn
+labels_a1_path = args.labelsA1 or args.CSUSA1
+labels_b1_path = args.labelsB1 or args.CSUSB1
+if labels_an_path is None:
+    raise ValueError("Provide the A(n) label file either positionally or with --labelsAn.")
+if labels_b1_path is None:
+    raise ValueError("Provide the B(1) label file either positionally or with --labelsB1.")
+if bool(args.traceAn_full) != bool(args.traceB1_full):
+    raise ValueError("Provide both --traceAn_full and --traceB1_full for full-population mode.")
+
+full_population_mode = bool(args.traceAn_full and args.traceB1_full)
+if full_population_mode:
+    traceAn_geometry = np.transpose(cebra.load_data(file=args.traceAn_full))
+    traceB1_geometry = np.transpose(cebra.load_data(file=args.traceB1_full))
+    traceA1An_A1 = np.empty((0, traceAn_geometry.shape[1]), dtype=traceAn_geometry.dtype)
+else:
+    missing_legacy = [
+        name
+        for name, value in {
+            "traceA1An_An": args.traceA1An_An,
+            "traceAnB1_An": args.traceAnB1_An,
+            "traceA1An_A1": args.traceA1An_A1,
+            "traceAnB1_B1": args.traceAnB1_B1,
+            "CSUSA1": labels_a1_path,
+        }.items()
+        if value is None
+    ]
+    if missing_legacy:
+        raise ValueError(
+            "Matched-population legacy mode requires: "
+            + ", ".join(missing_legacy)
+            + ". For full-population mode, provide both --traceAn_full and --traceB1_full."
+        )
+    traceA1An_An = np.transpose(cebra.load_data(file=args.traceA1An_An))
+    traceAnB1_An = np.transpose(cebra.load_data(file=args.traceAnB1_An))
+    traceA1An_A1 = np.transpose(cebra.load_data(file=args.traceA1An_A1))
+    traceAnB1_B1 = np.transpose(cebra.load_data(file=args.traceAnB1_B1))
+    traceAn_geometry = traceAnB1_An
+    traceB1_geometry = traceAnB1_B1
+
+CSUSAn = cebra.load_data(file=labels_an_path)[0, :].flatten()
+CSUSA1 = cebra.load_data(file=labels_a1_path)[0, :].flatten() if labels_a1_path else np.array([])
+CSUSB1 = cebra.load_data(file=labels_b1_path)[0, :].flatten()
 trial_ids_A1 = cebra.load_data(file=args.trial_ids_A1).flatten() if args.trial_ids_A1 else None
 trial_ids_B1 = cebra.load_data(file=args.trial_ids_B1).flatten() if args.trial_ids_B1 else None
 
 traceAn_geometry, CSUSAn = filter_pretrial(
     traceAn_geometry,
     CSUSAn,
-    args.pretrial_y_or_n,
+    pretrial_y_or_n,
 )
 traceA1An_A1, CSUSA1, trial_ids_A1 = filter_pretrial_optional_ids(
     traceA1An_A1,
     CSUSA1,
     trial_ids_A1,
-    args.pretrial_y_or_n,
+    pretrial_y_or_n,
 )
 traceB1_geometry, CSUSB1, trial_ids_B1 = filter_pretrial_optional_ids(
     traceB1_geometry,
     CSUSB1,
     trial_ids_B1,
-    args.pretrial_y_or_n,
+    pretrial_y_or_n,
 )
 
-CSUSAn = bin_csus(CSUSAn, args.how_many_divisions)
-CSUSA1 = bin_csus(CSUSA1, args.how_many_divisions)
-CSUSB1 = bin_csus(CSUSB1, args.how_many_divisions)
+CSUSAn = bin_csus(CSUSAn, how_many_divisions)
+CSUSA1 = bin_csus(CSUSA1, how_many_divisions) if len(CSUSA1) else CSUSA1
+CSUSB1 = bin_csus(CSUSB1, how_many_divisions)
 
-dimensions = args.how_many_divisions + args.pretrial_y_or_n
+dimensions = how_many_divisions + pretrial_y_or_n
 parameter_set = parameter_sets[args.parameter_set_name]
 
 run_geometry_preservation(
@@ -160,7 +205,7 @@ run_geometry_preservation(
     session_id=args.session_id,
     random_seed=args.random_seed,
     save_branch=args.save_branch,
-    comparison_mode="An_vs_B1_separately_trained_full_population" if (args.traceAn_full or args.traceB1_full) else "An_vs_B1_separately_trained_matched_population",
+    comparison_mode="An_vs_B1_separately_trained_full_population" if full_population_mode else "An_vs_B1_separately_trained_matched_population",
     resume_checkpoint=args.resume_checkpoint,
     CSUSA1_trial_ids=trial_ids_A1,
     CSUSB1_trial_ids=trial_ids_B1,
