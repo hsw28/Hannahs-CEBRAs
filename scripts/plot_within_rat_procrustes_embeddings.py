@@ -12,6 +12,7 @@ sys.path.append('/home/hsw967/Programming/Hannahs-CEBRAs/scripts')
 import matplotlib
 
 matplotlib.use("Agg")
+matplotlib.rcParams["svg.fonttype"] = "none"
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -208,7 +209,7 @@ def set_equal_2d_limits(ax, points):
     ax.set_xlim(centers[0] - radius, centers[0] + radius)
     ax.set_ylim(centers[1] - radius, centers[1] + radius)
     ax.set_aspect("equal", adjustable="box")
-    ax.grid(True, color="#dddddd", linewidth=0.7, alpha=0.65)
+    ax.grid(False)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
 
@@ -224,7 +225,7 @@ def set_equal_3d_limits(ax, points):
     ax.set_ylim(centers[1] - radius, centers[1] + radius)
     ax.set_zlim(centers[2] - radius, centers[2] + radius)
     ax.set_box_aspect((1, 1, 1))
-    ax.grid(True, color="#dddddd", linewidth=0.6, alpha=0.55)
+    ax.grid(False)
     for axis in [ax.xaxis, ax.yaxis, ax.zaxis]:
         axis.pane.set_facecolor((1, 1, 1, 0.0))
         axis.pane.set_edgecolor("#eeeeee")

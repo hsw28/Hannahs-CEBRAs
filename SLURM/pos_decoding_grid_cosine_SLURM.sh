@@ -1,27 +1,48 @@
 #!/bin/bash
-#SBATCH --account=p32472
+#SBATCH --account=p32072
 #SBATCH --partition=gengpu
 #SBATCH --gres=gpu:a100:1
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --array=0 ## number of jobs to run "in parallel"
-#SBATCH --mem=40GB
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=15G
 #SBATCH --time=48:00:00
-#SBATCH --job-name="sample_job_\${SLURM_ARRAY_TASK_ID}" ## use the task id in the name of the job
-#SBATCH --output=AM_SLURM_out.%A_%a.out ## use the jobid (A) and the specific job index (a) to name your log file
+#SBATCH --job-name=cebra_grid
+#SBATCH --output=AM_SLURM_out.%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
-#SBATCH --mail-user=hsw@northwestern.edu  ## your email
+#SBATCH --mail-user=hsw@northwestern.edu
 
+set -eo pipefail
 
 module purge
 eval "$(conda shell.bash hook)"
-source activate ratinabox
-#i have cebra installed in ratinabox
+conda activate ratinabox
 
-export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs"
-export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts"
+set -u
 
+PROJECT=/home/hsw967/Programming/Hannahs-CEBRAs
 
-# Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
+export PYTHONPATH="${PROJECT}:${PROJECT}/scripts${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONUNBUFFERED=1
+export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export OPENBLAS_NUM_THREADS="$SLURM_CPUS_PER_TASK"
 
-python /home/hsw967/Programming/Hannahs-CEBRAs/scripts/pos_decoding_AvsB_grid.py ./traceA1An_An.mat ./traceA1An_A1.mat ./posAn.mat ./posA1.mat --learning_rate 0.001,0.000811,0.000622,0.000433,0.000244,.000055 --min_temperature 0.0000000010,.33,.66,1,1.33  --max_iterations 13000,17000,21000,25000,30000
+# Submit from the directory containing your four .mat files.
+cd "$SLURM_SUBMIT_DIR"
+
+echo "Started: $(date)"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Working directory: $PWD"
+nvidia-smi
+
+srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
+    ./traceA1An_An.mat \
+    ./traceA1An_A1.mat \
+    ./posAn.mat \
+    ./posA1.mat \
+    --learning_rate .0001,.00005,.00001,.000005,.000001 \
+    --min_temperature 0.0000000010,.5,1,1.5 \
+    --max_iterations 20000,40000,60000,80000
+
+echo "Finished: $(date)"
