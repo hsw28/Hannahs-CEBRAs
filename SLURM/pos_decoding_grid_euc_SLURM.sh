@@ -12,14 +12,29 @@
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=hsw@northwestern.edu
 
+set -eo pipefail
+
 module purge
 eval "$(conda shell.bash hook)"
-source activate ratinabox
-#i have cebra installed in ratinabox
+conda activate ratinabox
 
-export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs"
-export PYTHONPATH="${PYTHONPATH}:/home/hsw967/Programming/Hannahs-CEBRAs/scripts"
+set -u
 
+PROJECT=/home/hsw967/Programming/Hannahs-CEBRAs
+
+export PYTHONPATH="${PROJECT}:${PROJECT}/scripts${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONUNBUFFERED=1
+export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export OPENBLAS_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+
+# Submit from the directory containing your four .mat files.
+cd "$SLURM_SUBMIT_DIR"
+
+echo "Started: $(date)"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Working directory: $PWD"
+nvidia-smi
 
 # Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
 
