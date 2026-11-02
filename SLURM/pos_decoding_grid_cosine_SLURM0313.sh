@@ -41,27 +41,8 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
     ./traceA1An_A1.mat \
     ./posAn.mat \
     ./posA1.mat \
-    --learning_rate 0.00001,0.00005,0.0001 \
+    --learning_rate 0.000005,0.00001,0.00005,0.0001 \
     --min_temperature 0.000000001,1.5 \
-    --max_iterations 120000,160000,240000
-#    --learning_rate 0.000001,0.00001,0.00005,0.0001,0.0002,0.001 \
-#    --min_temperature 0.000000001,1.5 \
-#    --max_iterations 40000,80000,160000
-
-#    --learning_rate 0.00005,0.0002 \
-#    --min_temperature 0.000000001 \
-#    --max_iterations 40000,80000,160000
-
-#    --learning_rate .0002,.0005,.001 \
-#    --min_temperature 0.000000001,1.5 \
-#    --max_iterations 20000,40000,80000
-
-#    --learning_rate .0001,.00005 \
-#    --min_temperature 0.000000001,1.5 \
-#    --max_iterations 120000,160000,240000
-
-  #  --learning_rate .0001,.00005,.00001,.000005,.000001 \
-  #  --min_temperature 0.0000000010,.5,1,1.5 \
-  #  --max_iterations 20000,40000,60000,80000
+    --max_iterations 40000,80000,240000
 
 echo "Finished: $(date)"
