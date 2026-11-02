@@ -6,7 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=12G
-#SBATCH --time=36:00:00
+#SBATCH --time=48:00:00
 #SBATCH --job-name=cebra_grid
 #SBATCH --output=AM_SLURM_out.%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -36,16 +36,32 @@ echo "Job ID: $SLURM_JOB_ID"
 echo "Working directory: $PWD"
 nvidia-smi
 
-# Run the Python script with hardcoded arguments as sbatch ~/Programming/Hannahs-CEBRAs/SLURM/pos_compare_iterations_SLURM.sh
-
-srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid2.py" \
+srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
     ./traceA1An_An.mat \
     ./traceA1An_A1.mat \
     ./posAn.mat \
     ./posA1.mat \
-    --learning_rate 0.00005,0.0001,0.0002 \
-    --min_temperature 0.000000001 \
-    --max_iterations 80000,140000,200000,240000
-#    --learning_rate 0.00005,0.0001 \
+    --learning_rate 0.00001,0.00005,0.0001 \
+    --min_temperature 0.000000001,1.5 \
+    --max_iterations 120000,160000,240000
+#    --learning_rate 0.000001,0.00001,0.00005,0.0001,0.0002,0.001 \
 #    --min_temperature 0.000000001,1.5 \
-#    --max_iterations 80000,140000,200000
+#    --max_iterations 40000,80000,160000
+
+#    --learning_rate 0.00005,0.0002 \
+#    --min_temperature 0.000000001 \
+#    --max_iterations 40000,80000,160000
+
+#    --learning_rate .0002,.0005,.001 \
+#    --min_temperature 0.000000001,1.5 \
+#    --max_iterations 20000,40000,80000
+
+#    --learning_rate .0001,.00005 \
+#    --min_temperature 0.000000001,1.5 \
+#    --max_iterations 120000,160000,240000
+
+  #  --learning_rate .0001,.00005,.00001,.000005,.000001 \
+  #  --min_temperature 0.0000000010,.5,1,1.5 \
+  #  --max_iterations 20000,40000,60000,80000
+
+echo "Finished: $(date)"
