@@ -41,6 +41,7 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
     ./traceA1An_A1.mat \
     ./posAn.mat \
     ./posA1.mat \
+    --distance cosine \
     --learning_rate 0.0000001,0.0000005,0.000001,0.000005 \
     --min_temperature 0.000000001,1.5 \
     --max_iterations 20000,40000,80000

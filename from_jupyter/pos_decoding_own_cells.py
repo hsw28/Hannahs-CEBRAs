@@ -1,3 +1,4 @@
+from pos_score import pos_score, shuffle_positions
 #POSITION DECODING USING OWN CELLS
 
 from sklearn.neighbors import KNeighborsRegressor
@@ -64,22 +65,10 @@ shuff_model = CEBRA(model_architecture='offset10-model',
                         verbose=True)
 
 def decoding_pos_dir(emb_train, emb_test, label_train, label_test, n_neighbors=32):
-    pos_decoder = KNeighborsRegressor(n_neighbors, metric = 'cosine')
-    pos_decoder.fit(emb_train, label_train)
-    pos_pred = pos_decoder.predict(emb_test)
-    prediction = pos_pred
-    test_score = r2_score(label_test, prediction)
-    pos_test_err = np.median(abs(prediction - label_test))
-    pos_test_score = r2_score(label_test, prediction)
-    # Compute the squared differences for each dimension
-    squared_diffs = (prediction - label_test) ** 2
-    # Sum the squared differences across columns (axis=1) and take the square root
-    distances = np.sqrt(np.sum(squared_diffs, axis=1))
-    dis_mean = (np.mean(distances))
-    dis_median = (np.median(distances))
-
-
-    return test_score, pos_test_err, pos_test_score, dis_mean, dis_median
+    # Preserve the notebook's five-value API and cosine decoder geometry.
+    score, error, mean_distance, median_distance = pos_score(
+        emb_train, emb_test, label_train, label_test, n_neighbors, metric="cosine")
+    return score, error, score, mean_distance, median_distance
 
 ########################
 

@@ -12,7 +12,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from mpl_toolkits.mplot3d import Axes3D
 from scipy import stats
-from pos_score import pos_score
+from pos_score import pos_score, shuffle_positions
 from plot_hippocampus3d import plot_hippocampus3d
 import datetime
 from hold_out import hold_out
@@ -253,19 +253,16 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
 
-    # Convert to numpy array if not already
-    pos = np.array(posAn)
-    # Create a new array to hold the shuffled data
-    pos_shuff = pos.copy()
-    # Shuffle each column independently
-    for column in range(pos_shuff.shape[1]):
-        np.random.shuffle(pos_shuff[:, column])
+    # Split before shuffling; keep held-out positions in their original order.
+    posAn_train, posAn_test = hold_out(posAn, .75)
+    pos_shuff_train = shuffle_positions(posAn_train)
+    pos_shuff_test = posAn_test.copy()
 
 
     '''
     # Fit the model with the shuffled data
     traceA1An_An_train, traceA1An_An_test = hold_out(traceA1An_An, .75)
-    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .75)
+    # Reuse the training-only permutation above.
 
     cebra_loc_model.fit(traceA1An_An_train, pos_shuff_train)
     trainA_train = cebra_loc_model.transform(traceA1An_An_train)
@@ -332,7 +329,7 @@ def pos_compare(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_B1, posAn, p
 
 
     traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, .75)
-    pos_shuff_train, pos_shuff_test = hold_out(pos_shuff, .75)
+    # Reuse the training-only permutation above.
 
     cebra_loc_model.fit(traceAnB1_An_train, pos_shuff_train)
 

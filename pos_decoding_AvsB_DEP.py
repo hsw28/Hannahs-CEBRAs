@@ -14,7 +14,7 @@ import sys
 import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
-from pos_score import pos_score
+from pos_score import pos_score, shuffle_positions
 import gc
 
 ###THIS MIGHT BE DEPRECATED WITH POS_COMPARE
@@ -88,23 +88,20 @@ def pos_decoding_AvsB_dep(cell_traceA, posA, cell_traceB, posB, percent_to_train
         ########################
         #SHUFFLED
 
-        # Create a new array to hold the shuffled data
-        pos_train_shuffA = pos_trainA.copy()
-        # Shuffle each column independently
-        for column in range(pos_train_shuffA.shape[1]):
-            np.random.shuffle(pos_train_shuffA[:, column])
+        # Preserve observed x/y pairs and training occupancy.
+        pos_train_shuffA = shuffle_positions(pos_trainA)
 
         # Fit the model with the shuffled data
-        shuff_modelA = cebra_loc_model.fit(cell_trainA, pos_train_shuffA) #training on shuffled A
+        shuff_modelA = shuff_model.fit(cell_trainA, pos_train_shuffA) #training on shuffled A
         cebra_loc_train_shuffA = shuff_modelA.transform(cell_trainA) #training on A
         cebra_loc_test_shuffA = shuff_modelA.transform(cell_testA) #testing on A
 
-        pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffA, pos_trainA, pos_testA)
+        pos_test_score_shuffA, pos_test_err_shuffA, dis_mean_shuffA, dis_median_shuffA = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffA, pos_train_shuffA, pos_testA)
 
 
 
         cebra_loc_test_shuffB = shuff_modelA.transform(cell_traceB) #testing on A
-        pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffB, pos_trainA, posB)
+        pos_test_score_shuffB, pos_test_err_shuffB, dis_mean_shuffB, dis_median_shuffB = pos_score(cebra_loc_train_shuffA, cebra_loc_test_shuffB, pos_train_shuffA, posB)
 
 
         #then sanity check use B to decode B

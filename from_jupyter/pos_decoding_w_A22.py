@@ -1,3 +1,4 @@
+from pos_score import pos_score, shuffle_positions
 #POSITION DECODING BASED ON AN (A22)
 
 from sklearn.neighbors import KNeighborsRegressor
@@ -71,22 +72,10 @@ cebra_loc_train22 = cebra_loc_model.transform(cell_train)
 
 
 def decoding_pos_dir(emb_train, emb_test, label_train, label_test, n_neighbors=32):
-    pos_decoder = KNeighborsRegressor(n_neighbors, metric = 'cosine')
-    pos_decoder.fit(emb_train, label_train)
-    pos_pred = pos_decoder.predict(emb_test)
-    prediction = pos_pred
-    test_score = r2_score(label_test, prediction)
-    pos_test_err = np.median(abs(prediction - label_test))
-    pos_test_score = r2_score(label_test, prediction)
-    # Compute the squared differences for each dimension
-    squared_diffs = (prediction - label_test) ** 2
-    # Sum the squared differences across columns (axis=1) and take the square root
-    distances = np.sqrt(np.sum(squared_diffs, axis=1))
-    dis_mean = (np.mean(distances))
-    dis_median = (np.median(distances))
-
-
-    return test_score, pos_test_err, pos_test_score, dis_mean, dis_median
+    # Preserve the notebook's five-value API and cosine decoder geometry.
+    score, error, mean_distance, median_distance = pos_score(
+        emb_train, emb_test, label_train, label_test, n_neighbors, metric="cosine")
+    return score, error, score, mean_distance, median_distance
 
 
 #test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(cebra_loc_train21, cebra_loc_test21, pos22[:,1:], pos21[:,1:])
@@ -95,21 +84,18 @@ def decoding_pos_dir(emb_train, emb_test, label_train, label_test, n_neighbors=3
 #print(dis_mean)
 #test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(cebra_loc_train25, cebra_loc_test25, pos22[:,1:], pos25[:,1:])
 #print(dis_mean)
-test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(cebra_loc_train22, cebra_loc_test22, pos22[0:5500,1:], pos22[5500:,1:])
+test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(cebra_loc_train22, cebra_loc_test22, pos22[0:8000,1:], pos22[8000:,1:])
 print(pos_test_err)
 
 # Assuming eyeblink_train is a numpy array of shape (4225, 2)
 eyeblink_train = np.array(eyeblink_train)
-# Create a new array to hold the shuffled data
-eyeblink_shuff = eyeblink_train.copy()
-# Shuffle each column independently
-for column in range(eyeblink_shuff.shape[1]):
-    np.random.shuffle(eyeblink_shuff[:, column])
+# Permute training rows together, preserving observed positions.
+eyeblink_shuff = shuffle_positions(eyeblink_train)
 
 shuff_model.fit(cell_train, eyeblink_shuff)
 train22_shuff = shuff_model.transform(cell_train)
-train22_shuff_test = cebra_loc_model.transform(cell_test)
-test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train22_shuff, train22_shuff_test, pos22[0:5500,1:], pos22[5500:,1:])
+train22_shuff_test = shuff_model.transform(cell_test)
+test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train22_shuff, train22_shuff_test, eyeblink_shuff[:,1:], pos22[8000:,1:])
 print(pos_test_err)
 
 ###########
@@ -118,11 +104,8 @@ cell_train = traceA21A22_22
 
 # Assuming eyeblink_train is a numpy array of shape (4225, 2)
 eyeblink_train = np.array(eyeblink_train)
-# Create a new array to hold the shuffled data
-eyeblink_shuff = eyeblink_train.copy()
-# Shuffle each column independently
-for column in range(eyeblink_shuff.shape[1]):
-    np.random.shuffle(eyeblink_shuff[:, column])
+# Permute training rows together, preserving observed positions.
+eyeblink_shuff = shuffle_positions(eyeblink_train)
 
 
 cebra_loc_model.fit(cell_train, eyeblink_train)
@@ -138,8 +121,8 @@ print(pos_test_err)
 
 shuff_model.fit(cell_train, eyeblink_shuff)
 train21_shuff = shuff_model.transform(cell_train)
-train21_shuff_test = cebra_loc_model.transform(trace21)
-test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train21_shuff, train21_shuff_test, pos22[:,1:], pos21[:,1:])
+train21_shuff_test = shuff_model.transform(trace21)
+test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train21_shuff, train21_shuff_test, eyeblink_shuff[:,1:], pos21[:,1:])
 print(pos_test_err)
 
 #############
@@ -156,8 +139,8 @@ print(pos_test_err)
 
 shuff_model.fit(cell_train, eyeblink_shuff)
 train24_shuff = shuff_model.transform(cell_train)
-train24_shuff_test = cebra_loc_model.transform(trace24)
-test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train24_shuff, train24_shuff_test, pos22[:,1:], pos24[:,1:])
+train24_shuff_test = shuff_model.transform(trace24)
+test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train24_shuff, train24_shuff_test, eyeblink_shuff[:,1:], pos24[:,1:])
 print(pos_test_err)
 
 ##############
@@ -173,6 +156,6 @@ print(pos_test_err)
 
 shuff_model.fit(cell_train, eyeblink_shuff)
 train25_shuff = shuff_model.transform(cell_train)
-train25_shuff_test = cebra_loc_model.transform(trace25)
-test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train25_shuff, train25_shuff_test, pos22[:,1:], pos25[:,1:])
+train25_shuff_test = shuff_model.transform(trace25)
+test_score, pos_test_err, pos_test_score, dis_mean, dis_median = decoding_pos_dir(train25_shuff, train25_shuff_test, eyeblink_shuff[:,1:], pos25[:,1:])
 print(pos_test_err)

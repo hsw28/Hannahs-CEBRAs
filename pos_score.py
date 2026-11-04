@@ -1,47 +1,87 @@
-from sklearn.neighbors import KNeighborsRegressor, KNeighborsClassifier
-from sklearn.metrics import r2_score
-import sklearn.metrics
-import sklearn
+"""Shared continuous-position decoder and metrics.
+
+The four-value return order is retained for existing CSV consumers. The fourth
+value (median Euclidean distance per frame) is the primary spatial error.
+"""
+
+import numbers
 import numpy as np
-import torch
-import random
-import seaborn as sns
-import matplotlib.pyplot as plt
-import shutil
-import cebra
-from cebra import CEBRA
-import sys
-import pandas as pd
-import joblib as jl
-from matplotlib.collections import LineCollection
+from sklearn.metrics import r2_score
+from sklearn.neighbors import KNeighborsRegressor
 
 
-#scores closeness of position decoding
-import sklearn.metrics
-
-# Define decoding function with kNN decoder. For a simple demo, we will use the fixed number of neighbors 36.
-
-def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36):
-    pos_decoder = cebra.KNNDecoder(n_neighbors, metric = 'euclidean')
-    pos_decoder.fit(emb_train, label_train)
-    prediction = pos_decoder.predict(emb_test)
+def _matrix(value, name):
+    value = np.asarray(value, dtype=float)
+    if value.ndim != 2 or not all(value.shape):
+        raise ValueError(f"{name} must be a nonempty 2D array")
+    if not np.isfinite(value).all():
+        raise ValueError(f"{name} must contain only finite values")
+    return value
 
 
-    #pos_test_score: The R² score for both position predictions
-    #It represents the proportion of variance in the dependent variable that is predictable from the independent variables.
-    pos_test_score = sklearn.metrics.r2_score(label_test, prediction)
+def shuffle_positions(label_train, rng=None):
+    """Permute complete position rows AFTER splitting; never pass test labels.
 
-    #pos_test_err: The median absolute error between the predicted positions and the true positions.
-    #This provides a robust measure of the error magnitude.
-    pos_test_err = np.median(abs(prediction - label_test))
-
-    # Compute the squared differences for each dimension
-    squared_diffs = (prediction - label_test) ** 2
-    # Sum the squared differences across columns (axis=1) and take the square root
-    distances = np.sqrt(np.sum(squared_diffs, axis=1))
-
-    dis_mean = (np.mean(distances))
-    dis_median = (np.median(distances))
+    Preserves the joint coordinate distribution. Uses NumPy's global seed by
+    default, or accepts a Generator/RandomState for reproducible local shuffles.
+    """
+    labels = _matrix(label_train, "label_train")
+    rng = np.random if rng is None else rng
+    return labels[rng.permutation(len(labels))].copy()
 
 
-    return pos_test_score, pos_test_err, dis_mean, dis_median
+def position_metrics(label_test, prediction):
+    """Return R², pooled coordinate median AE, mean distance, median distance.
+
+    Distances are Euclidean per frame (2D for x/y inputs), in the input position
+    units. Pooled coordinate median AE is retained only as a legacy metric; it
+    is not a spatial distance. Test labels must always be the true positions.
+    """
+    labels = _matrix(label_test, "label_test")
+    prediction = _matrix(prediction, "prediction")
+    if labels.shape != prediction.shape:
+        raise ValueError("prediction and label_test must have matching shapes")
+    residual = prediction - labels
+    distances = np.linalg.norm(residual, axis=1)
+    score = r2_score(labels, prediction) if len(labels) >= 2 else float("nan")
+    return (float(score), float(np.median(np.abs(residual))),
+            float(np.mean(distances)), float(np.median(distances)))
+
+
+def position_center_score(label_train, label_test):
+    """Score a constant training-mean position, using no test information.
+
+    This diagnostic exposes how well occupancy alone can explain low errors.
+    A shuffled kNN regressor can approach this predictor by averaging labels;
+    that is expected behavior, not a reason to change k for the shuffled arm.
+    """
+    train = _matrix(label_train, "label_train")
+    test = _matrix(label_test, "label_test")
+    if train.shape[1] != test.shape[1]:
+        raise ValueError("training and test positions must have matching dimensions")
+    return position_metrics(test, np.broadcast_to(train.mean(axis=0), test.shape))
+
+
+def pos_score(emb_train, emb_test, label_train, label_test, n_neighbors=36,
+              metric="euclidean"):
+    """Fit continuous kNN regression and score true test positions.
+
+    Always regress, including integer-valued coordinates (CEBRA's automatic
+    decoder chooses classification for integer labels). Use identical k and
+    distance for real and shuffled fits. Reject undersized training sets rather
+    than silently changing the requested decoder.
+    """
+    train = _matrix(emb_train, "emb_train")
+    test = _matrix(emb_test, "emb_test")
+    labels = _matrix(label_train, "label_train")
+    targets = _matrix(label_test, "label_test")
+    if len(train) != len(labels) or len(test) != len(targets):
+        raise ValueError("embedding and position sample counts must match")
+    if train.shape[1] != test.shape[1] or labels.shape[1] != targets.shape[1]:
+        raise ValueError("training and test dimensions must match")
+    if (isinstance(n_neighbors, bool) or not isinstance(n_neighbors, numbers.Integral)
+            or not 1 <= n_neighbors <= len(train)):
+        raise ValueError("n_neighbors must be an integer between 1 and the training sample count")
+    decoder = KNeighborsRegressor(n_neighbors=n_neighbors, metric=metric)
+    decoder.fit(train, labels)
+    return position_metrics(targets, decoder.predict(test))

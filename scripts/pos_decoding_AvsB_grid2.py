@@ -22,7 +22,7 @@ import sys
 import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
-from pos_score import pos_score
+from pos_score import pos_score, shuffle_positions, position_center_score
 from hold_out import hold_out
 import gc
 from smoothpos import smoothpos
@@ -48,7 +48,7 @@ from ca_velocity import ca_velocity
 def parse_list_argument(arg_value):
     """Converts a comma-separated string to a list of floats or integers."""
     try:
-        return [float(item) if '.' in item else int(item) for item in arg_value.split(',')]
+        return [float(item) if any(c in item.lower() for c in '.e') else int(item) for item in arg_value.split(',')]
     except ValueError:
         raise argparse.ArgumentTypeError(f"Value \"{arg_value}\" is not a valid list of numbers.")
 
@@ -61,6 +61,7 @@ def main():
     parser.add_argument("--learning_rate", type=parse_list_argument, default=[8.6e-4], help="Comma-separated learning rates.")
     parser.add_argument("--min_temperature", type=parse_list_argument, default=[0.2], help="Comma-separated minimum temperatures.")
     parser.add_argument("--max_iterations", type=parse_list_argument, default=[8000], help="Comma-separated max iterations.")
+    parser.add_argument("--distance", choices=["cosine", "euclidean"], default="cosine", help="CEBRA embedding distance; kNN uses Euclidean distance.")
     args = parser.parse_args()
 
     traceA = cebra.load_data(file=args.traceA)  # Adjust 'your_key_here' as necessary
@@ -107,13 +108,14 @@ def main():
         args.learning_rate,
         args.min_temperature,
         args.max_iterations,
+        distance=args.distance,
     )
 
 
     #print(results)
 
 
-def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, learning_rates, min_temperatures, max_iterations_list):
+def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, learning_rates, min_temperatures, max_iterations_list, distance="cosine"):
     results = []
     for lr, temp, max_iter in product(learning_rates, min_temperatures, max_iterations_list):
         #print({'learning_rate': lr, 'min_temperature': temp, 'max_iterations': max_iter})
@@ -127,7 +129,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             #min_temperature=temp,
             temperature=temp,
             output_dimension=3,
-            distance='cosine',
+            distance=distance,
             conditional='time_delta',
             device='cuda_if_available',
             num_hidden_units=32,
@@ -184,11 +186,8 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
 
               #now shuffled
-              indices = np.random.permutation(PosA.shape[0])  # Get a permutation of the row indices
-              posAn_shuffled = PosA[indices, :] #apply and shuffle
-
-              eyeblink_train_control, eyeblink_test_control = hold_out(posAn_shuffled, .75)
-              cell_train_control, cell_test_control  = hold_out(envA_cell_train, .75)
+              # Only training labels are permuted; x/y pairs stay together.
+              eyeblink_train_control = shuffle_positions(eyeblink_train_control)
 
               cell_test = envB_cell_train
               eyeblink_test_control = PosB
@@ -234,7 +233,7 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
         med_test_all = np.array(med_test_all)
 
         shuff_dif_all = np.mean(Pos_err_shuff_all - Pos_err_test_all) #knn error of shuffled - knn error of test
-        shuff_med_all = np.mean(med_shuff_all-med_test_all) #median error distance of test minus median distance of shuffle -- think this is subtracted wrong
+        shuff_med_all = np.mean(med_shuff_all-med_test_all) # shuffled minus real median 2D distance; positive favors real
 
         Pos_err_train_all = np.mean(Pos_err_train_all)
         Pos_err_test_all = np.mean(Pos_err_test_all)
@@ -251,6 +250,12 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
 
         # Append the correctly calculated means to the results
         results.append({
+            'distance': distance,
+            'shuffle_type': 'training_label_pipeline',
+            'primary_metric': 'median_distance_test',
+            'median_distance_test': med_test_all,
+            'median_distance_shuffle': float(np.mean(med_shuff_all)),
+            'center_median_distance_test': position_center_score(hold_out(PosA, .75)[0], PosB)[3],
             'learn_rate': lr,
             'min_temp': temp,
             'max_it': max_iter,
@@ -259,9 +264,9 @@ def pos_decoding_AvsB_grid_cebra(envA_cell_train, PosA, envB_cell_train, PosB, l
             'train_r2': Pos_r2_score_train_all, #r2 train
             'test_r2': Pos_r2_score_test_all, #r2 test
             'med_control': med_control_all,  # distance median control
-            'mead_test': med_test_all,       # distance median test
+            'mead_test': med_test_all,       # legacy alias of median_distance_test (primary spatial error)
             'shuff_minus_not': shuff_dif_all, #knn error of shuffled - knn error of test
-            'shuf_med': shuff_med_all #median error distance of test minus median distance of shuffle
+            'shuf_med': shuff_med_all # shuffled minus real median 2D distance
 
         })
 

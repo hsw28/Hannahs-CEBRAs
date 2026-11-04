@@ -11,7 +11,7 @@ import random
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import r2_score
 from scipy import stats
-from pos_score import pos_score
+from pos_score import pos_score, shuffle_positions
 from datetime import datetime
 from hold_out import hold_out
 
@@ -80,19 +80,17 @@ def pos_compare_iterations2(traceA1An_An, traceAnB1_An, traceA1An_A1, traceAnB1_
             traceAnB1_An_train, traceAnB1_An_test = hold_out(traceAnB1_An, 75)
             posAnB1_train, posAnB1_test = hold_out(posAn, 75)
 
-            indices = np.random.permutation(posAn.shape[0])  # Get a permutation of the row indices
-            posAn_shuffled = posAn[indices, :] #apply and shuffle
-
-            posAn_train_shuffled, posAn_test_shuffled = hold_out(posAn_shuffled, 75)
+            # Decoder-only null: permute training rows, preserve true test labels.
+            posAn_train_shuffled = shuffle_positions(posAn_train)
 
 
             A1_transformed = fit_and_transform(cebra_model, traceA1An_An_train, traceA1An_An_test, traceA1An_A1, posAn_train)
             regular_A1 = evaluate_transformed(*A1_transformed, posAn_train, posAn_test, posA1)
-            shuffled_A1 = evaluate_transformed(*A1_transformed, posAn_train_shuffled, posAn_test_shuffled, posA1)
+            shuffled_A1 = evaluate_transformed(*A1_transformed, posAn_train_shuffled, posAn_test, posA1)
 
             B1_transformed = fit_and_transform(cebra_model, traceAnB1_An_train, traceAnB1_An_test, traceAnB1_B1, posAn_train)
             regular_B1 = evaluate_transformed(*B1_transformed, posAn_train, posAn_test, posB1)
-            shuffled_B1 = evaluate_transformed(*B1_transformed, posAn_train_shuffled, posAn_test_shuffled, posB1)
+            shuffled_B1 = evaluate_transformed(*B1_transformed, posAn_train_shuffled, posAn_test, posB1)
 
             # Flatten results into a single row per iteration
             results[i] = np.concatenate((np.ravel(regular_A1), np.ravel(regular_B1), np.ravel(shuffled_A1), np.ravel(shuffled_B1)))

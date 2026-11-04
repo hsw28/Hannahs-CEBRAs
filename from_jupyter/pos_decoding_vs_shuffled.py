@@ -1,3 +1,4 @@
+from pos_score import pos_score, shuffle_positions
 from torch.nn.modules import AdaptiveMaxPool2d
 #plotting versus shuffled
 #SHUFFLING POS DECODING
@@ -64,21 +65,10 @@ shuff_model = CEBRA(model_architecture='offset10-model',
 
 
 def decoding_pos_dir(emb_train, emb_test, label_train, label_test, n_neighbors=32):
-    pos_decoder = KNeighborsRegressor(n_neighbors, metric = 'cosine')
-    pos_decoder.fit(emb_train, label_train)
-    pos_pred = pos_decoder.predict(emb_test)
-    prediction = pos_pred
-    test_score = r2_score(label_test, prediction)
-    pos_test_err = np.median(abs(prediction - label_test))
-    pos_test_score = r2_score(label_test, prediction)
-    # Compute the squared differences for each dimension
-    squared_diffs = (prediction - label_test) ** 2
-    # Sum the squared differences across columns (axis=1) and take the square root
-    distances = np.sqrt(np.sum(squared_diffs, axis=1))
-    dis_mean = (np.mean(distances))
-    dis_median = (np.median(distances))
-
-    return test_score, pos_test_err, pos_test_score, dis_mean, dis_median
+    # Preserve the notebook's five-value API and cosine decoder geometry.
+    score, error, mean_distance, median_distance = pos_score(
+        emb_train, emb_test, label_train, label_test, n_neighbors, metric="cosine")
+    return score, error, score, mean_distance, median_distance
 
 '''
 # Create a figure and a 2x3 grid of subplots
@@ -207,11 +197,8 @@ p1.set_clim(0.05, 0.85)
 
 # Convert to numpy array if not already
 eyeblink_train = np.array(eyeblink_train)
-# Create a new array to hold the shuffled data
-eyeblink_shuff = eyeblink_train.copy()
-# Shuffle each column independently
-for column in range(eyeblink_shuff.shape[1]):
-    np.random.shuffle(eyeblink_shuff[:, column])
+# Permute training rows together, preserving observed positions.
+eyeblink_shuff = shuffle_positions(eyeblink_train)
 
 # Fit the model with the shuffled data
 cebra_loc_model.fit(cell_train21, eyeblink_shuff)

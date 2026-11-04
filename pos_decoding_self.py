@@ -14,7 +14,7 @@ import sys
 import pandas as pd
 import joblib as jl
 from matplotlib.collections import LineCollection
-from pos_score import pos_score
+from pos_score import pos_score, shuffle_positions
 
 #decodes own position using held out data and compares to shuffled
 
@@ -78,11 +78,8 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
         ########################
         #SHUFFLED
 
-        # Create a new array to hold the shuffled data
-        pos_train_shuff = pos_train.copy()
-        # Shuffle each column independently
-        for column in range(pos_train_shuff.shape[1]):
-            np.random.shuffle(pos_train_shuff[:, column])
+        # Preserve observed x/y pairs and training occupancy.
+        pos_train_shuff = shuffle_positions(pos_train)
 
         # Fit the model with the shuffled data
         shuff_model.fit(cell_train, pos_train_shuff)
@@ -90,7 +87,7 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
         cebra_loc_train_shuff = shuff_model.transform(cell_train)
         cebra_loc_test_shuff = shuff_model.transform(cell_test)
 
-        pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train, pos_test)
+        pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff = pos_score(cebra_loc_train_shuff, cebra_loc_test_shuff, pos_train_shuff, pos_test)
 
         err_all.append(dis_median)
         err_all_shuff.append(dis_median_shuff)
@@ -98,4 +95,4 @@ def pos_decoding_self(cell_trace, pos, percent_to_train):
     #print(np.mean(err_all))
     #print(np.mean(err_all_shuff))
 
-    return os_test_score, pos_test_err, dis_mean, dis_median, pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff
+    return pos_test_score, pos_test_err, dis_mean, dis_median, pos_test_score_shuff, pos_test_err_shuff, dis_mean_shuff, dis_median_shuff
