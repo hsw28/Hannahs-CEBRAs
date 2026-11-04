@@ -18,7 +18,7 @@ module purge
 eval "$(conda shell.bash hook)"
 conda activate ratinabox
 
-set -u 
+set -u
 
 PROJECT=/home/hsw967/Programming/Hannahs-CEBRAs
 
@@ -44,9 +44,9 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid2.py" \
     ./posAn.mat \
     ./posA1.mat \
     --distance euclidean \
-    --learning_rate 0.00005,0.0001,0.0002 \
-    --min_temperature 0.000000001 \
-    --max_iterations 80000,140000,200000,240000
+    --learning_rate 0.000001,0.00005,0.0002,0.001 \
+    --min_temperature 0.000000001,1.5 \
+    --max_iterations 40000,80000
 #    --learning_rate 0.00005,0.0001 \
 #    --min_temperature 0.000000001,1.5 \
 #    --max_iterations 80000,140000,200000
