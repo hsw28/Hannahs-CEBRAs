@@ -7,7 +7,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=12G
 #SBATCH --time=7:00:00
-#SBATCH --job-name=cebra_grid
+#SBATCH --job-name=cebra_grid_0314cosineb
 #SBATCH --output=AM_SLURM_out.%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=hsw@northwestern.edu
