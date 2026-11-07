@@ -5,9 +5,9 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem=12G
-#SBATCH --time=36:00:00
-#SBATCH --job-name=cebra_grid
+#SBATCH --mem=10G
+#SBATCH --time=22:00:00
+#SBATCH --job-name=cebra_grid_0222euc
 #SBATCH --output=AM_SLURM_out.%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=hsw@northwestern.edu
@@ -44,9 +44,9 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid2.py" \
     ./posAn.mat \
     ./posA1.mat \
     --distance euclidean \
-    --learning_rate 0.000001,0.00005,0.0002,0.001 \
-    --min_temperature 0.000000001,1.5 \
-    --max_iterations 40000,80000
+    --learning_rate 0.0000005,0.000001,0.000002 \
+    --min_temperature 0.000000001 \
+    --max_iterations 20000,40000,60000,80000,120000
 #    --learning_rate 0.00005,0.0001 \
 #    --min_temperature 0.000000001,1.5 \
 #    --max_iterations 80000,140000,200000

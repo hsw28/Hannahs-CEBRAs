@@ -1,0 +1,49 @@
+#!/bin/bash
+#SBATCH --account=p32072
+#SBATCH --partition=gengpu
+#SBATCH --gres=gpu:a100:1
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=10G
+#SBATCH --time=30:00:00
+#SBATCH --job-name=cebra_grid_0313cosineb
+#SBATCH --output=AM_SLURM_out.%j.out
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --mail-user=hsw@northwestern.edu
+
+set -eo pipefail
+
+module purge
+eval "$(conda shell.bash hook)"
+conda activate ratinabox
+
+set -u
+
+PROJECT=/home/hsw967/Programming/Hannahs-CEBRAs
+
+export PYTHONPATH="${PROJECT}:${PROJECT}/scripts${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONUNBUFFERED=1
+export OMP_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export MKL_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+export OPENBLAS_NUM_THREADS="$SLURM_CPUS_PER_TASK"
+
+# Submit from the directory containing your four .mat files.
+cd "$SLURM_SUBMIT_DIR"
+
+echo "Started: $(date)"
+echo "Job ID: $SLURM_JOB_ID"
+echo "Working directory: $PWD"
+nvidia-smi
+
+srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
+    ./traceA1An_An.mat \
+    ./traceA1An_A1.mat \
+    ./posAn.mat \
+    ./posA1.mat \
+    --distance cosine \
+    --learning_rate 0.000075 \
+    --min_temperature 1.5,3.0,4.5 \
+    --max_iterations 200000,240000,280000
+
+echo "Finished: $(date)"

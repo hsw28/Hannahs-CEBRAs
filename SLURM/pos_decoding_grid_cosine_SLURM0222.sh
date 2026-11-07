@@ -6,7 +6,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=10G
-#SBATCH --time=38:00:00
+#SBATCH --time=32:00:00
 #SBATCH --job-name=cebra_grid_0222cosine
 #SBATCH --output=AM_SLURM_out.%j.out
 #SBATCH --mail-type=BEGIN,END,FAIL
@@ -43,6 +43,6 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
     ./posA1.mat \
     --distance cosine \
     --learning_rate 0.000005,0.00001,0.00002 \
-    --min_temperature 1.0,1.5,2.0,3.0 \
-    --max_iterations 40000,60000,80000
+    --min_temperature 1.5,3.0,4.5 \
+    --max_iterations 60000,80000,120000
 echo "Finished: $(date)"
