@@ -42,8 +42,8 @@ srun python -u "${PROJECT}/scripts/pos_decoding_AvsB_grid.py" \
     ./posAn.mat \
     ./posA1.mat \
     --distance cosine \
-    --learning_rate 0.0000005,0.00000075,0.000001 \
+    --learning_rate 0.00000025,0.0000005,0.00000075,0.000001 \
     --min_temperature 0.000000001,1.5,2.0 \
-    --max_iterations 80000,120000,160000
+    --max_iterations 40000,60000,80000,120000
 
 echo "Finished: $(date)"
