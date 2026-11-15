@@ -17,11 +17,17 @@ from ca_velocity import ca_velocity
 
 # Define parameter sets
 parameter_sets = {
-    "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000, "distance": "cosine", "temp_mode": "auto"},
-    "set0307": {"learning_rate": 0.000622, "min_temperature": 1.33, "max_iterations": 21000, "distance": "cosine", "temp_mode": "auto"},
-    "set0313": {"learning_rate": 0.00055, "min_temperature": 0.95, "max_iterations": 26500, "distance": "cosine", "temp_mode": "auto"},
-    "set0314": {"learning_rate": 0.001, "min_temperature": 0.000000001, "max_iterations": 30000, "distance": "cosine", "temp_mode": "auto"},
-    "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000, "distance": "cosine", "temp_mode": "auto"}
+        "set0222": {"learning_rate": 0.0000005, "min_temperature": 0.000000001, "max_iterations": 60000, "distance": "euclidean", "temp_mode": "auto"},
+        "set0307": {"learning_rate": 0.000001, "min_temperature": 2, "max_iterations": 80000, "distance": "cosine", "temp_mode": "auto"},
+        "set0313": {"learning_rate": 0.000075, "min_temperature": 1.5, "max_iterations": 200000, "distance": "cosine", "temp_mode": "auto"},
+        "set0314": {"learning_rate": 0.0002, "min_temperature": 0.000000001, "max_iterations": 200000, "distance": "cosine", "temp_mode": "auto"},
+        "set0816": {"learning_rate": 0.00075, "min_temperature": 0.000000001, "max_iterations": 240000, "distance": "cosine", "temp_mode": "auto"}
+
+##OG    "set0222": {"learning_rate": 0.000055, "min_temperature": 0.000000001, "max_iterations": 25000, "distance": "cosine", "temp_mode": "auto"},
+##OG       "set0307": {"learning_rate": 0.000622, "min_temperature": 1.33, "max_iterations": 21000, "distance": "cosine", "temp_mode": "auto"},
+##OG       "set0313": {"learning_rate": 0.00055, "min_temperature": 0.95, "max_iterations": 26500, "distance": "cosine", "temp_mode": "auto"},
+##OG       "set0314": {"learning_rate": 0.001, "min_temperature": 0.000000001, "max_iterations": 30000, "distance": "cosine", "temp_mode": "auto"},
+##OG       "set0816": {"learning_rate": 0.001, "min_temperature": 0.15, "max_iterations": 18000, "distance": "cosine", "temp_mode": "auto"}
 }
 
 
