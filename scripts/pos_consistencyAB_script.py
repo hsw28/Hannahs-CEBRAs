@@ -20,6 +20,7 @@ the conditioning pipeline's rowwise comparison, not CEBRA's built-in 1D alignmen
 
 Each group/dimension gets its own timestamped output directory: four selected
 models, full embeddings with positions, training permutations, all final losses,
+all 20 run embeddings per session/control under all_runs/{model}/run_000.npz etc.,
 selected-run metadata, matching indices/distances, configuration manifest,
 directional R2 CSVs, and a four-model heatmap (An/B1 and shuffled controls).
 Scores are fitted/evaluated on the same matched rows, as in built-in CEBRA;
@@ -27,6 +28,9 @@ these are descriptive consistency scores, not held-out prediction accuracy.
 The shuffled models are trained on permuted neural rows with fixed position labels
 and evaluated on original neural rows, matching the conditioning control.
 The heatmap colors cover 0-100%; exact values remain in CSV and annotations.
+Each all_runs archive contains embedding, position, run, seed, final_loss, model,
+and shuffled status. Pair An/B1 by zero-based run index for geometry analysis.
+All runs are saved immediately, while only the best model weights are retained.
 """
 import argparse
 from datetime import datetime

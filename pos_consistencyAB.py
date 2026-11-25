@@ -74,6 +74,8 @@ def fit_best(x, y, config, repeats, seed, path, name, shuffled):
     permutation = np.random.default_rng(seed).permutation(len(x)) if shuffled else np.arange(len(x))
     training_x = x[permutation]
     np.save(path / (name + '_training_permutation.npy'), permutation)
+    runs_path = path / 'all_runs' / name
+    runs_path.mkdir(parents=True, exist_ok=False)
     for run in range(repeats):
         run_seed = seed + run
         random.seed(run_seed)
@@ -87,11 +89,18 @@ def fit_best(x, y, config, repeats, seed, path, name, shuffled):
         if not np.isfinite(loss):
             raise ValueError('%s run %d produced nonfinite loss.' % (name, run))
         records.append(dict(model=name, run=run, seed=run_seed, final_loss=loss))
+        # Save every fit before selection; rows correspond to original neural data
+        # and positions, including for models trained on shuffled neural rows.
+        embedding = model.transform(x)
+        np.savez_compressed(runs_path / ('run_%03d.npz' % run),
+                            embedding=embedding, position=y, run=run,
+                            seed=run_seed, final_loss=loss, model=name,
+                            shuffled=shuffled)
         if loss < best_loss:
             best_loss = loss
             model.save(str(path / (name + '.pt')))
             # Transform original neural rows, as in the conditioning shuffled-model control.
-            best_embedding = model.transform(x)
+            best_embedding = embedding
             (path / (name + '_selected.json')).write_text(json.dumps(records[-1], indent=2))
         print('%s run %d/%d: loss %.6g; best %.6g' % (name, run + 1, repeats, loss, best_loss), flush=True)
         del model
@@ -120,6 +129,8 @@ def run_analysis(sessions, config, output, repeats=20, seed=42, max_distance=2.,
                     matched_samples=len(ia), matching='mutual nearest x/y; common coordinate system required',
                     score='CEBRA linear regression R2 on position-matched individual samples; in-sample',
                     control='fixed neural-row permutation for training; transform original neural rows',
+                    all_run_embeddings='all_runs/{model}/run_{run:03d}.npz; zero-based run indices',
+                    geometry_pairing='Pair An and B1 by run index, likewise shuffled controls; independent seeds',
                     metadata=metadata)
     (output / 'manifest.json').write_text(json.dumps(manifest, indent=2))
     np.savez_compressed(output / 'position_matches.npz', index_An=ia, index_B1=ib,

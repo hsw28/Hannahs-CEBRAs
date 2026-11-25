@@ -20,6 +20,7 @@
 # Valid animals: set0222, set0307, set0313, set0314, set0816.
 # Array task 1 runs parameter group 1; task 2 runs group 2 (no duplicate runs).
 # Each task: 20 fits each for An, B1, An_shuffled, B1_shuffled; default dimension 3.
+# Saves all 80 run embeddings for later geometry analysis, plus the four best models.
 # Additional Python options can follow the animal, e.g. --dimensions 2 3 5 7 10.
 # A dimension sweep runs sequentially within each task and may need more walltime.
 # To run one parameter group only, submit with sbatch --array=1 (or --array=2).
